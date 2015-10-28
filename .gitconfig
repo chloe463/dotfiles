@@ -1,0 +1,23 @@
+[color]
+	diff = auto
+	status = auto
+	branch = auto
+	grep = auto
+[core]
+	excludesfile = /home/vagrant/.gitignore
+[push]
+	default = current
+[alias]
+	st = status
+	co = checkout
+	ci = commit -v
+	di = diff
+	br = branch
+	puhs = push
+	psuh = push
+	pus = push
+	puh = push
+	pl = !git pull && git submodule update --init
+[user]
+	name = TsuyoshiHara
+	email = chloe463@gmail.com
