@@ -31,5 +31,7 @@ set wrapscan
 " バックスペースでインデントや改行を削除できるようにする
 set backspace=indent,eol,start
 
-" INSERTモード時に jj と押すと Esc
+" INSERTモード時に jj, kk or jk と押すと Esc
 inoremap <silent> jj <ESC>
+inoremap <silent> kk <ESC>
+inoremap <silent> jk <ESC>
