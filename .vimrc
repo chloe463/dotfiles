@@ -56,10 +56,16 @@ if has('vim_starting')
 endif
 
 call plug#begin('~/.vim/plugged')
+    " 
+    Plug 'junegunn/seoul256.vim'
+
     Plug 'junegunn/vim-plug',
                 \ {'dir': '~/.vim/plugged/vim-plug/autoload'}
     " status line
     Plug 'itchyny/lightline.vim'
+
+    " fugitive
+    Plug 'tpope/vim-fugitive'
 
     " tree
     Plug 'scrooloose/nerdtree'
@@ -72,3 +78,27 @@ call plug#begin('~/.vim/plugged')
 call plug#end()
 
 set laststatus=2
+
+colo seoul256
+set background=dark
+
+" set light line colorscheme
+"let g:lightline = {'colorscheme': 'solarized'}
+let g:lightline = {
+      \ 'colorscheme': 'wombat',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'fugitive', 'readonly', 'filename', 'modified' ] ]
+      \ },
+      \ 'component': {
+      \   'readonly': '%{&filetype=="help"?"":&readonly?"⭤":""}',
+      \   'modified': '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
+      \   'fugitive': '%{exists("*fugitive#head")?fugitive#head():""}'
+      \ },
+      \ 'component_visible_condition': {
+      \   'readonly': '(&filetype!="help"&& &readonly)',
+      \   'modified': '(&filetype!="help"&&(&modified||!&modifiable))',
+      \   'fugitive': '(exists("*fugitive#head") && ""!=fugitive#head())'
+      \ },
+      \}
+
