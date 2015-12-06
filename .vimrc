@@ -102,3 +102,5 @@ let g:lightline = {
       \ },
       \}
 
+" set keymap nerdtree
+    nnoremap <silent><C-e> :NERDTreeToggle<CR>
