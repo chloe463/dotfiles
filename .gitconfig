@@ -5,6 +5,7 @@
 	grep = auto
 [core]
 	excludesfile = /home/vagrant/.gitignore
+	editor = /usr/bin/vim
 [push]
 	default = current
 [alias]
