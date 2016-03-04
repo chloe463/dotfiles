@@ -81,6 +81,7 @@ set laststatus=2
 
 colo seoul256
 set background=dark
+let g:seoul256_background = 236
 
 " set light line colorscheme
 "let g:lightline = {'colorscheme': 'solarized'}
