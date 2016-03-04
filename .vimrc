@@ -36,12 +36,6 @@ inoremap <silent> jj <ESC>
 inoremap <silent> kk <ESC>
 inoremap <silent> jk <ESC>
 
-" カッコの自動入力
-imap [ []<left>
-imap ( ()<left>
-imap { {}<left>
-imap < <><left>
-
 " 2回連続でESCを押したら検索のハイライトをやめる
 nmap <Esc><Esc> :nohlsearch<CR><Esc>
 
