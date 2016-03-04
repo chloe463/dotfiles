@@ -19,6 +19,7 @@
 	pus = push
 	puh = push
 	pl = !git pull && git submodule update --init
+    graph = log --oneline --graph --decorate=full
 [user]
 	name = TsuyoshiHara
 	email = chloe463@gmail.com
