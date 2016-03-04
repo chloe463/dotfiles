@@ -69,6 +69,9 @@ call plug#begin('~/.vim/plugged')
 
     " gitgutter
     Plug 'airblade/vim-gitgutter'
+
+    " easy-align
+    Plug 'junegunn/vim-easy-align'
 call plug#end()
 
 set laststatus=2
@@ -98,3 +101,9 @@ let g:lightline = {
 
 " set keymap nerdtree
     nnoremap <silent><C-e> :NERDTreeToggle<CR>
+
+" Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
+vmap <Enter> <Plug>(EasyAlign)
+" Start interactive EasyAlign for a motion/text object (e.g. gaip)
+nmap ga <Plug>(EasyAlign)
+
