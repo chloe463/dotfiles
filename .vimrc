@@ -72,6 +72,9 @@ call plug#begin('~/.vim/plugged')
 
     " easy-align
     Plug 'junegunn/vim-easy-align'
+
+    " Typescript syntax
+    Plug 'leafgarland/typescript-vim'
 call plug#end()
 
 set laststatus=2
