@@ -75,13 +75,17 @@ call plug#begin('~/.vim/plugged')
 
     " Typescript syntax
     Plug 'leafgarland/typescript-vim'
+
+    " Hybrid color scheme
+    Plug 'w0ng/vim-hybrid'
 call plug#end()
 
 set laststatus=2
 
-colo seoul256
+"colo seoul256
+colo hybrid
 set background=dark
-let g:seoul256_background = 236
+"let g:seoul256_background = 236
 
 " set light line colorscheme
 "let g:lightline = {'colorscheme': 'solarized'}
@@ -116,3 +120,4 @@ vmap <Enter> <Plug>(EasyAlign)
 " Start interactive EasyAlign for a motion/text object (e.g. gaip)
 nmap ga <Plug>(EasyAlign)
 
+let g:indentLine_char = 'c'
