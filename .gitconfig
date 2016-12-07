@@ -11,15 +11,18 @@
 [alias]
 	st = status
 	co = checkout
+	cb = checkout -b
 	ci = commit -v
 	di = diff
 	br = branch
+	bra = branch -a
 	puhs = push
 	psuh = push
 	pus = push
 	puh = push
 	pl = !git pull && git submodule update --init
-    graph = log --oneline --graph --decorate=full
+	graph = log --oneline --graph --decorate=full
+	push-f = push --force-with-lease
 [user]
 	name = TsuyoshiHara
 	email = chloe463@gmail.com
