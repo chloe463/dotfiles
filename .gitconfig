@@ -24,5 +24,5 @@
 	graph = log --oneline --graph --decorate=full
 	push-f = push --force-with-lease
 [user]
-	name = TsuyoshiHara
+	name = Tsuyoshi HARA
 	email = chloe463+git@gmail.com
