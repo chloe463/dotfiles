@@ -8,6 +8,7 @@ do
     [ "$f" == ".."   ] && continue
     [ "$f" == "."    ] && continue
     [ "$f" == ".DS_Store" ] && continue
+    [ "$f" == ".zshrc" ] && continue
     echo "ln -sf $BASE_DIR/$f ~/$f"
     ln -sf $BASE_DIR/$f ~/$f
 done
