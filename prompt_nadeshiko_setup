@@ -1,0 +1,45 @@
+# Nadeshiko
+# prompt theme for zshprompt
+# Put this file in $HOME/.zprezto/modules/prompt/functions
+# and execute `prompt nadeshiko`
+
+prompt_nadeshiko_precmd () {
+  vcs_info
+}
+
+prompt_nadeshiko_setup () {
+
+  setopt LOCAL_OPTIONS
+  unsetopt XTRACE KSH_ARRAYS
+  prompt_opts=(cr percent subst)
+
+  # Load required functions
+  autoload -Uz vcs_info
+  autoload -Uz add-zsh-hook
+  autoload -Uz prompt_special_chars
+  autoload -Uz colors
+
+  # Add hook for calling vcs_info before each command
+  add-zsh-hook precmd prompt_nadeshiko_precmd
+
+  # Set vcs_info parameters.
+  zstyle ':vcs_info:*' enable git
+  zstyle ':vcs_info:git:*' check-for-changes true
+  zstyle ':vcs_info:git:*' stagedstr '%F{green}!%f'
+  zstyle ':vcs_info:git:*' unstagedstr '%F{yellow}*%f'
+  zstyle ':vcs_info:git:*' formats '(%b%c%u)'
+  zstyle ':vcs_info:git:*' actionformats " %b%c%u|%F{cyan}%a%f"
+
+  PROMPT="%K{black}%F{red} %n@%m%f%F{blue} %~ %f%b"
+  PROMPT=$PROMPT'%K{black}${vcs_info_msg_0_} %k'
+  PROMPT=$PROMPT'%K{black}%F{yellow}%D{%H:%M:%S} %f%k'
+  PROMPT=$PROMPT$prompt_newline'%F{magenta}❯ %f'
+
+  RPROMPT=''
+}
+
+prompt_nadeshiko_preview () {
+  prompt_preview_theme nadeshiko "$@"
+}
+
+prompt_nadeshiko_setup "$@"
