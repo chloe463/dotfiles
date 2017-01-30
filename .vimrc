@@ -36,6 +36,9 @@ inoremap <silent> jj <ESC>
 inoremap <silent> kk <ESC>
 inoremap <silent> jk <ESC>
 
+" 検索ワードのハイライト
+set hlsearch
+
 " 2回連続でESCを押したら検索のハイライトをやめる
 nmap <Esc><Esc> :nohlsearch<CR><Esc>
 
@@ -78,6 +81,15 @@ call plug#begin('~/.vim/plugged')
 
     " Hybrid color scheme
     Plug 'w0ng/vim-hybrid'
+
+    " Editor config
+    Plug 'editorconfig/editorconfig-vim'
+
+    " Emmet
+    Plug 'mattn/emmet-vim'
+
+    " Html autocomplete
+    Plug 'alvan/vim-closetag'
 call plug#end()
 
 set laststatus=2
