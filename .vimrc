@@ -90,6 +90,8 @@ call plug#begin('~/.vim/plugged')
 
     " Html autocomplete
     Plug 'alvan/vim-closetag'
+
+    Plug 'ctrlpvim/ctrlp.vim'
 call plug#end()
 
 set laststatus=2
@@ -133,3 +135,14 @@ vmap <Enter> <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
 let g:indentLine_char = 'c'
+
+" Without this, webpack dev server doesnt work correctly
+set backupcopy=yes
+
+
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\v[\/]\.?(git|hg|svn|node_modules|vendor|bundle|tmp)$',
+  \ 'file': '\v\.(exe|so|dll)$',
+  \ 'link': 'some_bad_symbolic_links',
+  \ }
+
