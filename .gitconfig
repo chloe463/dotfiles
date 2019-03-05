@@ -4,7 +4,7 @@
 	branch = auto
 	grep = auto
 [core]
-	excludesfile = /home/vagrant/.gitignore
+	excludesfile = ~/.gitignore
 	editor = /usr/bin/vim
 [push]
 	default = current
