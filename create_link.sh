@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BASE_DIR=$(dirname $(readlink -f $0))
+BASE_DIR=$HOME/dotfiles
 
 for f in .**?
 do
