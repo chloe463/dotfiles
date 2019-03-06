@@ -53,7 +53,7 @@ if has('vim_starting')
 endif
 
 call plug#begin('~/.vim/plugged')
-    " 
+    "
     Plug 'junegunn/seoul256.vim'
 
     Plug 'junegunn/vim-plug',
