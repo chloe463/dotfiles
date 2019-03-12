@@ -25,31 +25,22 @@ prompt_nadeshiko_setup () {
   # Set vcs_info parameters.
   zstyle ':vcs_info:*' enable git
   zstyle ':vcs_info:git:*' check-for-changes true
-  zstyle ':vcs_info:git:*' stagedstr '%F{green}!%f'
+  zstyle ':vcs_info:git:*' stagedstr '%F{122}!%f'
+  # zstyle ':vcs_info:git:*' stagedstr '%F{243} %K{white}⮀%f%k%K{white}%F{red} ✔ %k%F{white}⮀%f%k'
   zstyle ':vcs_info:git:*' unstagedstr '%F{yellow}*%f'
-  # zstyle ':vcs_info:git:*' formats '(%b%c%u)'
+  # zstyle ':vcs_info:git:*' unstagedstr '%F{243} %K{white}⮀%f%k%K{white}%F{red} ✎  %k%F{white}⮀%f%k'
   zstyle ':vcs_info:git:*' formats '%b%c%u'
   zstyle ':vcs_info:git:*' actionformats " %b%c%u|%F{cyan}%a%f"
 
-  # PROMPT="%K{black}%F{red} %n@%m%f%F{blue} %~ %f%b"
-  # PROMPT=$PROMPT'%K{black}${vcs_info_msg_0_} %k'
-  # PROMPT=$PROMPT'%K{black}%F{yellow}%D{%H:%M:%S} %f%k'
-  # PROMPT=$PROMPT$prompt_newline'%F{magenta}❯ %f'
+  ACCENT='%K{190}  %k%K{black}%F{190}⮀%f%k'
+  DIRECTORY="%K{black}%F{252} %~ %f%k%K{243}%F{black}⮀%f%k"
+  VSC='%K{243}%F{white} ${vcs_info_msg_0_} %f%k%F{243}⮀%f '
+  PROMPT=$ACCENT$DIRECTORY$VSC
 
-  # LAST='%(?.%F{magenta}.%F{red})$ %f''
-  LAST='%(?.%K{magenta}%F{235} ✔ %f%K{235}%F{magenta}⮀%f%k.%K{red} ✘ %K{235}%F{red}⮀%f%k) %f'
-  # LAST='%(?.%K{green}%F{white} ✔ %f%K{235}%F{green}⮀%f%k.%K{red} ✘ %K{235}%F{red}⮀%f%k) %f'
-  DIRECTORY="%K{235}%F{250}%~ %f%k%K{black}%F{235}⮀%f%k"
-  # VSC='%K{black} ${vcs_info_msg_0_} %F{245}⮁%f %k'
-  VSC='%K{black}%F{white} ${vcs_info_msg_0_} %f%k'
-  # PROMPT="%K{black}%F{red} %n@%m%f %F{245}⮁%f %F{blue}%~ %f%b"
-  # PROMPT=$PROMPT'%K{black}${vcs_info_msg_0_} %F{245}⮁%f %k'
-  # TIME='%K{yellow}%F{black}⮀%f%k%K{yellow}%F{black} %D{%H:%M:%S} %f%k%F{yellow}⮀%f'
-  # TIME='%K{red}%F{black}⮀%f%F{235} %D{%H:%M:%S} %f%k%F{red}⮀%f'
-  TIME='%K{243}%F{black}⮀%f%F{235} %D{%H:%M:%S} %f%k%F{243}⮀%f'
-  PROMPT=$LAST$DIRECTORY$VSC$TIME$prompt_newline'%F{magenta}❯ %f'
-
-  RPROMPT=''
+  LAST='%F{237}⮂%f%K{237}  %(?.%F{122}✔%f.%F{161}✘%f) %f%k'
+  HISTORY_NUM='%K{237}%F{243}⮂%f%k%K{243}%F{235} %! %f%k'
+  TIME='%K{243}%F{white}⮂%f%K{white}%F{235} %D{%H:%M:%S} %f%k'
+  RPROMPT=$LAST$HISTORY_NUM$TIME
 }
 
 prompt_nadeshiko_preview () {
