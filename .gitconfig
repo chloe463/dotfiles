@@ -4,7 +4,7 @@
 	branch = auto
 	grep = auto
 [core]
-	excludesfile = /home/vagrant/.gitignore
+	excludesfile = ~/.gitignore
 	editor = /usr/bin/vim
 [push]
 	default = current
@@ -14,6 +14,7 @@
 	cb = checkout -b
 	ci = commit -v
 	di = diff
+	dif = diff
 	br = branch
 	bra = branch -a
 	puhs = push
@@ -23,6 +24,7 @@
 	pl = !git pull && git submodule update --init
 	graph = log --oneline --graph --decorate=full
 	push-f = push --force-with-lease
+	showpr = !"f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
 [user]
 	name = Tsuyoshi HARA
 	email = chloe463+git@gmail.com

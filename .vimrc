@@ -53,7 +53,7 @@ if has('vim_starting')
 endif
 
 call plug#begin('~/.vim/plugged')
-    " 
+    "
     Plug 'junegunn/seoul256.vim'
 
     Plug 'junegunn/vim-plug',
@@ -128,6 +128,7 @@ let g:lightline = {
 
 " show hidden files
 let NERDTreeShowHidden=1
+let g:NERDTreeNodeDelimiter = "\u00a0"
 
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
