@@ -43,6 +43,21 @@ function make_dot_files_symlinks()
     echo
 }
 
-make_prompt_set_symlinks
-make_dot_files_symlinks
+function main()
+{
+    case $1 in
+        "prompt")
+            make_prompt_set_symlinks
+            ;;
+        "dot")
+            make_dot_files_symlinks
+            ;;
+        *)
+            make_prompt_set_symlinks
+            make_dot_files_symlinks
+            ;;
+    esac
+}
+
+main ${1:-""}
 
