@@ -8,6 +8,7 @@ prompt_kongo_precmd () {
 }
 
 prompt_kongo_setup () {
+  local TYPE=${1:-"kongo"}
 
   setopt LOCAL_OPTIONS
   unsetopt XTRACE KSH_ARRAYS
@@ -35,6 +36,23 @@ prompt_kongo_setup () {
   PRIMARY_BG='%K{61}'
   PRIMARY_FG='%F{61}'
   TEXT_ON_PRIMARY='%F{255}'
+
+  case $TYPE in
+    "hiei")
+      PRIMARY_BG='%K{199}'
+      PRIMARY_FG='%F{199}'
+      ;;
+    "haruna")
+      PRIMARY_BG='%K{226}'
+      PRIMARY_FG='%F{226}'
+      TEXT_ON_PRIMARY='%F{235}'
+      ;;
+    "kirishima")
+      PRIMARY_BG='%K{82}'
+      PRIMARY_FG='%F{82}'
+      TEXT_ON_PRIMARY='%F{235}'
+      ;;
+  esac
 
   GRAY_BG='%K{243}'
   GRAY_FG='%F{243}'
