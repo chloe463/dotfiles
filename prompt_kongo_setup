@@ -8,6 +8,7 @@ prompt_kongo_precmd () {
 }
 
 prompt_kongo_setup () {
+  local TYPE=${1:-"kongo"}
 
   setopt LOCAL_OPTIONS
   unsetopt XTRACE KSH_ARRAYS
@@ -32,13 +33,48 @@ prompt_kongo_setup () {
   zstyle ':vcs_info:git:*' formats '%b%c%u'
   zstyle ':vcs_info:git:*' actionformats " %b%c%u|%F{cyan}%a%f"
 
-  DIRECTORY="%K{61}%F{255} %~ %f%k%K{243}%F{61}⮀%f%k"
-  VSC='%K{243}%F{235} ${vcs_info_msg_0_} %f%k%F{243}⮀%f '
+  PRIMARY_BG='%K{61}'
+  PRIMARY_FG='%F{61}'
+  TEXT_ON_PRIMARY='%F{255}'
+
+  case $TYPE in
+    "hiei")
+      PRIMARY_BG='%K{199}'
+      PRIMARY_FG='%F{199}'
+      ;;
+    "haruna")
+      PRIMARY_BG='%K{226}'
+      PRIMARY_FG='%F{226}'
+      TEXT_ON_PRIMARY='%F{235}'
+      ;;
+    "kirishima")
+      PRIMARY_BG='%K{82}'
+      PRIMARY_FG='%F{82}'
+      TEXT_ON_PRIMARY='%F{235}'
+      ;;
+  esac
+
+  GRAY_BG='%K{243}'
+  GRAY_FG='%F{243}'
+  TEXT_ON_GRAY='%F{235}'
+
+  BLACK_BG='%K{237}'
+  BLACK_FG='%F{237}'
+  WHITE_BG='%K{7}'
+  TEXT_ON_WHITE='%F{235}'
+  ERROR_FG='%F{161}'
+
+  CANCEL_BG='%k'
+  CANCEL_FG='%f'
+  CANCEL_BOTH='%k%f'
+
+  DIRECTORY="${PRIMARY_BG}${TEXT_ON_PRIMARY} %~ ${CANCEL_BOTH}${PRIMARY_FG}${GRAY_BG}⮀${CANCEL_BOTH}"
+  VSC='${GRAY_BG}${TEXT_ON_GRAY} ${vcs_info_msg_0_} ${CANCEL_BOTH}${GRAY_FG}⮀${CANCEL_FG} '
   PROMPT=$DIRECTORY$VSC
 
-  LAST='%F{237}⮂%f%K{237}  %(?.%F{61}✔%f.%F{161}✘%f) %f%k'
-  HISTORY_NUM='%K{237}%F{243}⮂%f%k%K{243}%F{235} %! %f%k'
-  TIME='%K{243}%F{white}⮂%f%K{white}%F{235} %D{%H:%M:%S} %f%k'
+  LAST='${BLACK_FG}⮂${CANCEL_FG}${BLACK_BG}  %(?.${PRIMARY_FG}✔.${ERROR_FG}✘%f) ${CANCEL_BOTH}'
+  HISTORY_NUM='${BLACK_BG}${GRAY_FG}⮂${CANCEL_BOTH}${GRAY_BG}${TEXT_ON_GRAY} %! ${CANCEL_BOTH}'
+  TIME='${GRAY_BG}${WHITE_FG}⮂${CANCEL_BOTH}${WHITE_BG}${TEXT_ON_WHITE} %D{%H:%M:%S} ${CANCEL_BOTH}'
   RPROMPT=$LAST$HISTORY_NUM$TIME
 }
 
