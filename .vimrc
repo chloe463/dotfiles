@@ -92,6 +92,12 @@ call plug#begin('~/.vim/plugged')
     Plug 'alvan/vim-closetag'
 
     Plug 'ctrlpvim/ctrlp.vim'
+
+    " fzf
+    Plug '/usr/local/opt/fzf'
+
+    " vim-surround
+    Plug 'tpope/vim-surround'
 call plug#end()
 
 set laststatus=2
