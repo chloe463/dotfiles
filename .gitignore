@@ -1,9 +1,22 @@
 .DS_Store
 Thumbs.db
+
+# Vim backup files
 *.swp
+
+# Custom backup directories and files
 *.bak
 .bak/
 *.backup
 .backup/
+
+# Vscode settings
 .vscode/
+
+# yarn error log
+yarn-error.log
+
+# env files
+.env
+.envrc
 
