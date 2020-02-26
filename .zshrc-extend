@@ -1,0 +1,24 @@
+alias g='git'
+alias be='bundle exec'
+
+export PSQL_EDITOR='vim +"set syntax=sql" '
+export EDITOR=/usr/bin/vim
+
+# Print Working Branch
+function pwb() {
+  CURRENT_BRANCH=$(git branch -a | grep -E '^\*' | cut -b 3-)
+  if [ ${CURRENT_BRANCH} = "master" ]; then
+    return 1
+  fi
+  echo ${CURRENT_BRANCH}
+  return 0
+}
+
+# Open new pull request
+function new_pr() {
+  REPO_URL=$(git remote get-url origin | sed -e 's/git@github.com:\(.*\)\.git/https:\/\/github.com\/\1/g')
+  NEW_PR_URL="${REPO_URL}/pull/new/$(pwb)"
+  echo ${NEW_PR_URL}
+  open ${NEW_PR_URL}
+}
+

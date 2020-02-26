@@ -43,6 +43,25 @@ function make_dot_files_symlinks()
     echo
 }
 
+function extend_zshrc()
+{
+    echo "Load .zshrc-extend from .zshrc"
+    echo
+
+    set +e
+    RES=$(grep "source \$HOME/dotfiles/.zshrc-extend" $HOME/.zshrc)
+
+    echo ${RES}
+    if [ "${RES}" = "" ]; then
+        echo "\"source \$HOME/dotfiles/.zshrc-extend\" >> $HOME/.zshrc"
+        echo "source \$HOME/dotfiles/.zshrc-extend" >> $HOME/.zshrc
+    fi
+    echo
+    echo "🎉 Done!"
+    echo
+    set -e
+}
+
 function main()
 {
     case $1 in
@@ -52,9 +71,13 @@ function main()
         "dot")
             make_dot_files_symlinks
             ;;
+        "extend-zshrc")
+            extend_zshrc
+            ;;
         *)
             make_prompt_set_symlinks
             make_dot_files_symlinks
+            extend_zshrc
             ;;
     esac
 }
