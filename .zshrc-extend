@@ -22,3 +22,11 @@ function new_pr() {
   open ${NEW_PR_URL}
 }
 
+# Search keyword with google
+function ggrks() {
+  BASE_URL="https://google.com/search"
+  QUERY=`echo $@ | sed -e "s/ /+/g"`
+
+  open "${BASE_URL}?q=${QUERY}"
+}
+
