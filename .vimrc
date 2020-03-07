@@ -12,11 +12,11 @@ set showmatch
 " コードの色分け
 " colorscheme hybrid
 syntax on
-" インデントをスペース4つ分に設定
-set tabstop=4
+" インデントをスペース2つ分に設定
+set tabstop=2
 set autoindent
 set expandtab
-set shiftwidth=4
+set shiftwidth=2
 
 " オートインデント
 set smartindent
