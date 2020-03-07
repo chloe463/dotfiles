@@ -30,3 +30,9 @@ function ggrks() {
   open "${BASE_URL}?q=${QUERY}"
 }
 
+# Setup tmux panes
+function ide() {
+  tmux split-window -v -p 30
+  tmux split-window -h -p 50
+}
+
