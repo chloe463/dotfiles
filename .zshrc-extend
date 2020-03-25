@@ -30,3 +30,7 @@ function ggrks() {
   open "${BASE_URL}?q=${QUERY}"
 }
 
+alias newpr='new_pr'
+alias openpr='new_pr'
+alias ls='exa'
+
