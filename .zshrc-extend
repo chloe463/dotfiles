@@ -30,7 +30,12 @@ function ggrks() {
   open "${BASE_URL}?q=${QUERY}"
 }
 
+# Setup tmux panes
+function ide() {
+  tmux split-window -v -p 30
+  tmux split-window -h -p 50
+}
+
 alias newpr='new_pr'
 alias openpr='new_pr'
 alias ls='exa'
-
