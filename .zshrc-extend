@@ -4,6 +4,15 @@ alias be='bundle exec'
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
 
+# For deno completion
+autoload -U compinit
+compinit
+
+COMPLETION_DIR=$HOME/.my_completions
+if [ -d $COMPLETION_DIR ]; then
+  fpath=($COMPLETION_DIR $fpath)
+fi
+
 # Print Working Branch
 function pwb() {
   CURRENT_BRANCH=$(git branch -a | grep -E '^\*' | cut -b 3-)
