@@ -6,6 +6,7 @@
 [core]
     excludesfile = ~/.gitignore
     editor = /usr/bin/vim
+    pager = diff-so-fancy | less --tabs=2 -RFX
 [push]
     default = current
 [alias]
@@ -31,11 +32,13 @@
     push-f = push --force-with-lease
     showpr = !"f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
     merge = merge --no-ff
+    sw = switch
+    rs = restore
     # c.f. https://qiita.com/awakia/items/4c599ebe29a8b2b6ca27#git%E3%81%AE%E8%A8%AD%E5%AE%9A
     logg = log --stat --decorate=short --pretty=format:'%C(yellow)%h %Cgreen%cr %Cblue%cn%Cred%d %Creset%s %C(cyan)%b'
     mergelog = log --merges --pretty=format:'%C(yellow)%h %Cgreen%ci %Cblue%cn%Cred%d %Creset%s %C(cyan)%b'
     history = log --graph --date=short --decorate=short --pretty=format:'%C(yellow)%h %Cgreen%cd %Cblue%cn%Cred%d %Creset%s'
-    sync = !git checkout master && git pull origin master && git fetch -p origin && git branch -d $(git branch --merged | grep -v master | grep -v '*')
+    sync = !git switch master && git pull origin master && git fetch -p origin && git branch -d $(git branch --merged | grep -v master | grep -v '*')
 [user]
     name = Tsuyoshi HARA
     email = chloe463+git@gmail.com
