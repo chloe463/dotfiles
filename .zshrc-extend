@@ -4,6 +4,8 @@ alias be='bundle exec'
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 # For deno completion
 autoload -U compinit
 compinit
