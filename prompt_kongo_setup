@@ -76,9 +76,24 @@ prompt_kongo_setup () {
   CANCEL_FG='%f'
   CANCEL_BOTH='%k%f'
 
+  # Wantedly
+  if [ -n "${KUBE_FORK_TARGET_ENV}" ]; then
+    case ${KUBE_FORK_TARGET_ENV} in
+      "qa")
+        CAUTION_BG='%K{208}'
+        CAUTION_FG='%F{208}'
+        ;;
+      "sandbox")
+        CAUTION_BG='%K{201}'
+        CAUTION_FG='%F{201}'
+        ;;
+    esac
+    KUBE_FORK_PROMPT="${CAUTION_BG} fork ${KUBE_FORK_TARGET_ENV} ${CAUTION_FG}${PRIMARY_BG}${CANCEL_BOTH}"
+  fi
+
   DIRECTORY="${PRIMARY_BG}${TEXT_ON_PRIMARY} %~ ${CANCEL_BOTH}${PRIMARY_FG}${GRAY_BG}${CANCEL_BOTH}"
   VSC='${GRAY_BG}${TEXT_ON_GRAY} ${vcs_info_msg_0_} ${CANCEL_BOTH}${GRAY_FG}${CANCEL_FG} '
-  PROMPT=$DIRECTORY$VSC
+  PROMPT=$KUBE_FORK_PROMPT$DIRECTORY$VSC
 
   LAST='${BLACK_FG}${CANCEL_FG}${BLACK_BG}  %(?.${PRIMARY_FG}✓.${ERROR_FG}✘%f) ${CANCEL_BOTH}'
   HISTORY_NUM='${BLACK_BG}${GRAY_FG}${CANCEL_BOTH}${GRAY_BG}${TEXT_ON_GRAY} %! ${CANCEL_BOTH}'
