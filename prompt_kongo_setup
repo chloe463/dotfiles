@@ -3,6 +3,14 @@
 # Put this file in $HOME/.zprezto/modules/prompt/functions
 # and execute `prompt kongo`
 
+#  : ue0a0
+# ✻ : u273b
+#  : ue0b0
+#  : ue0b1
+#  : ue0b2
+#  : ue0b3
+# ✓ : u2713
+
 prompt_kongo_precmd () {
   vcs_info
 }
@@ -26,12 +34,12 @@ prompt_kongo_setup () {
   # Set vcs_info parameters.
   zstyle ':vcs_info:*' enable git
   zstyle ':vcs_info:git:*' check-for-changes true
-  zstyle ':vcs_info:git:*' stagedstr '%F{122}!%f'
+  zstyle ':vcs_info:git:*' stagedstr ' %F{122}✓%f'
   # zstyle ':vcs_info:git:*' stagedstr '%F{243} %K{white}⮀%f%k%K{white}%F{red} ✔ %k%F{white}⮀%f%k'
-  zstyle ':vcs_info:git:*' unstagedstr '%F{yellow}*%f'
+  zstyle ':vcs_info:git:*' unstagedstr ' %F{yellow}✻%f'
   # zstyle ':vcs_info:git:*' unstagedstr '%F{243} %K{white}⮀%f%k%K{white}%F{red} ✎  %k%F{white}⮀%f%k'
-  zstyle ':vcs_info:git:*' formats '%b%c%u'
-  zstyle ':vcs_info:git:*' actionformats " %b%c%u|%F{cyan}%a%f"
+  zstyle ':vcs_info:git:*' formats ' %b%c%u'
+  zstyle ':vcs_info:git:*' actionformats " %b%c%u  %F{cyan}%a%f"
 
   PRIMARY_BG='%K{61}'
   PRIMARY_FG='%F{61}'
@@ -68,13 +76,28 @@ prompt_kongo_setup () {
   CANCEL_FG='%f'
   CANCEL_BOTH='%k%f'
 
-  DIRECTORY="${PRIMARY_BG}${TEXT_ON_PRIMARY} %~ ${CANCEL_BOTH}${PRIMARY_FG}${GRAY_BG}⮀${CANCEL_BOTH}"
-  VSC='${GRAY_BG}${TEXT_ON_GRAY} ${vcs_info_msg_0_} ${CANCEL_BOTH}${GRAY_FG}⮀${CANCEL_FG} '
-  PROMPT=$DIRECTORY$VSC
+  # Wantedly
+  if [ -n "${KUBE_FORK_TARGET_ENV}" ]; then
+    case ${KUBE_FORK_TARGET_ENV} in
+      "qa")
+        CAUTION_BG='%K{208}'
+        CAUTION_FG='%F{208}'
+        ;;
+      "sandbox")
+        CAUTION_BG='%K{201}'
+        CAUTION_FG='%F{201}'
+        ;;
+    esac
+    KUBE_FORK_PROMPT="${CAUTION_BG} fork ${KUBE_FORK_TARGET_ENV} ${CAUTION_FG}${PRIMARY_BG}${CANCEL_BOTH}"
+  fi
 
-  LAST='${BLACK_FG}⮂${CANCEL_FG}${BLACK_BG}  %(?.${PRIMARY_FG}✔.${ERROR_FG}✘%f) ${CANCEL_BOTH}'
-  HISTORY_NUM='${BLACK_BG}${GRAY_FG}⮂${CANCEL_BOTH}${GRAY_BG}${TEXT_ON_GRAY} %! ${CANCEL_BOTH}'
-  TIME='${GRAY_BG}${WHITE_FG}⮂${CANCEL_BOTH}${WHITE_BG}${TEXT_ON_WHITE} %D{%H:%M:%S} ${CANCEL_BOTH}'
+  DIRECTORY="${PRIMARY_BG}${TEXT_ON_PRIMARY} %~ ${CANCEL_BOTH}${PRIMARY_FG}${GRAY_BG}${CANCEL_BOTH}"
+  VSC='${GRAY_BG}${TEXT_ON_GRAY} ${vcs_info_msg_0_} ${CANCEL_BOTH}${GRAY_FG}${CANCEL_FG} '
+  PROMPT=$KUBE_FORK_PROMPT$DIRECTORY$VSC
+
+  LAST='${BLACK_FG}${CANCEL_FG}${BLACK_BG}  %(?.${PRIMARY_FG}✓.${ERROR_FG}✘%f) ${CANCEL_BOTH}'
+  HISTORY_NUM='${BLACK_BG}${GRAY_FG}${CANCEL_BOTH}${GRAY_BG}${TEXT_ON_GRAY} %! ${CANCEL_BOTH}'
+  TIME='${GRAY_BG}${WHITE_FG}${CANCEL_BOTH}${WHITE_BG}${TEXT_ON_WHITE} %D{%H:%M:%S} ${CANCEL_BOTH}'
   RPROMPT=$LAST$HISTORY_NUM$TIME
 }
 
