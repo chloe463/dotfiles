@@ -138,5 +138,7 @@
   ],
   "peacock.affectTitleBar": false,
   "eslint.run": "onSave",
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "javascript.implicitProjectConfig.experimentalDecorators": true,
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
 }
