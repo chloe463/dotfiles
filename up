@@ -65,6 +65,21 @@ function extend_zshrc()
     set -e
 }
 
+function install_homebrew()
+{
+  # Install Homebrew
+  if type brew > /dev/null 2>&1; then
+    echo 'Homebrew has already been installed.'
+  else
+    echo 'Install Homebrew'
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    brew update
+  fi
+
+  echo "brew bundle"
+  # brew bundle
+}
+
 function main()
 {
     case $1 in
@@ -77,10 +92,14 @@ function main()
         "extend-zshrc")
             extend_zshrc
             ;;
+        "brew")
+            install_homebrew
+            ;;
         *)
             make_prompt_set_symlinks
             make_dot_files_symlinks
             extend_zshrc
+            install_homebrew
             ;;
     esac
 }
