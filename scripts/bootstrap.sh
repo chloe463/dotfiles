@@ -12,7 +12,7 @@ function make_prompt_set_symlinks()
 
     for f in prompt**
     do
-        CMD="ln -sf $HOME/dotfiles/$f $HOME/.zprezto/modules/prompt/functions/$f"
+        CMD="ln -sf $HOME/dotfiles/prompts/$f $HOME/.zprezto/modules/prompt/functions/$f"
         echo $CMD
         $CMD
     done
