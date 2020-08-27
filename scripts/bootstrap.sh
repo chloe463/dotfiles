@@ -27,6 +27,8 @@ function make_dot_files_symlinks()
     echo "Making symlinks of dot files..."
     echo
 
+    CONFIG_DIR=$BASE_DIR/config
+
     for f in .**?
     do
         [ "$f" == ".git" ] && continue
@@ -34,8 +36,9 @@ function make_dot_files_symlinks()
         [ "$f" == "."    ] && continue
         [ "$f" == ".DS_Store" ] && continue
         [ "$f" == ".zshrc" ] && continue
-        echo "ln -sf $BASE_DIR/$f ~/$f"
-        ln -sf $BASE_DIR/$f ~/$f
+        [[ "$f" =~ \.swp$ ]] && continue
+        echo "ln -sf $CONFIG_DIR/$f ~/$f"
+        ln -sf $CONFIG_DIR/$f ~/$f
     done
 
     echo
@@ -49,12 +52,12 @@ function extend_zshrc()
     echo
 
     set +e
-    RES=$(grep "source \$HOME/dotfiles/.zshrc-extend" $HOME/.zshrc)
+    RES=$(grep "source \$HOME/dotfiles/config/.zshrc-extend" $HOME/.zshrc)
 
     echo ${RES}
     if [ "${RES}" = "" ]; then
-        echo "\"source \$HOME/dotfiles/.zshrc-extend\" >> $HOME/.zshrc"
-        echo "source \$HOME/dotfiles/.zshrc-extend" >> $HOME/.zshrc
+        echo "\"source \$HOME/dotfiles/config/.zshrc-extend\" >> $HOME/.zshrc"
+        echo "source \$HOME/dotfiles/config/.zshrc-extend" >> $HOME/.zshrc
     fi
     echo
     echo "🎉 Done!"
@@ -68,7 +71,7 @@ function main()
         "prompt")
             make_prompt_set_symlinks
             ;;
-        "dot")
+        "dot" | "dots")
             make_dot_files_symlinks
             ;;
         "extend-zshrc")
