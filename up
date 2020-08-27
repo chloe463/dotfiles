@@ -77,7 +77,7 @@ function install_homebrew()
   fi
 
   echo "brew bundle"
-  # brew bundle
+  brew bundle
 }
 
 function main()
