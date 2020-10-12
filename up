@@ -10,7 +10,7 @@ function make_prompt_set_symlinks()
     echo "Making symlinks of prompt setup..."
     echo
 
-    for f in prompt**
+    for f in `ls prompts`
     do
         CMD="ln -sf $HOME/dotfiles/prompts/$f $HOME/.zprezto/modules/prompt/functions/$f"
         echo $CMD
