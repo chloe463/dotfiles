@@ -39,6 +39,7 @@
     mergelog = log --merges --pretty=format:'%C(yellow)%h %Cgreen%ci %Cblue%cn%Cred%d %Creset%s %C(cyan)%b'
     history = log --graph --date=short --decorate=short --pretty=format:'%C(yellow)%h %Cgreen%cd %Cblue%cn%Cred%d %Creset%s'
     sync = !git switch master && git pull origin master && git fetch -p origin && git branch -d $(git branch --merged | grep -v master | grep -v '*')
+    syncmain = !git switch main && git pull origin main && git fetch -p origin && git branch -d $(git branch --merged | grep -v main | grep -v '*')
 [user]
     name = Tsuyoshi HARA
     email = chloe463+git@gmail.com
