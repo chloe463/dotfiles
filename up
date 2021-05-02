@@ -10,9 +10,9 @@ function make_prompt_set_symlinks()
     echo "Making symlinks of prompt setup..."
     echo
 
-    for f in prompt**
+    for f in `ls prompts`
     do
-        CMD="ln -sf $HOME/dotfiles/$f $HOME/.zprezto/modules/prompt/functions/$f"
+        CMD="ln -sf $HOME/dotfiles/prompts/$f $HOME/.zprezto/modules/prompt/functions/$f"
         echo $CMD
         $CMD
     done
@@ -27,6 +27,8 @@ function make_dot_files_symlinks()
     echo "Making symlinks of dot files..."
     echo
 
+    CONFIG_DIR=$BASE_DIR/config
+
     for f in .**?
     do
         [ "$f" == ".git" ] && continue
@@ -34,8 +36,9 @@ function make_dot_files_symlinks()
         [ "$f" == "."    ] && continue
         [ "$f" == ".DS_Store" ] && continue
         [ "$f" == ".zshrc" ] && continue
-        echo "ln -sf $BASE_DIR/$f ~/$f"
-        ln -sf $BASE_DIR/$f ~/$f
+        [[ "$f" =~ \.swp$ ]] && continue
+        echo "ln -sf $CONFIG_DIR/$f ~/$f"
+        ln -sf $CONFIG_DIR/$f ~/$f
     done
 
     echo
@@ -49,17 +52,32 @@ function extend_zshrc()
     echo
 
     set +e
-    RES=$(grep "source \$HOME/dotfiles/.zshrc-extend" $HOME/.zshrc)
+    RES=$(grep "source \$HOME/dotfiles/config/.zshrc-extend" $HOME/.zshrc)
 
     echo ${RES}
     if [ "${RES}" = "" ]; then
-        echo "\"source \$HOME/dotfiles/.zshrc-extend\" >> $HOME/.zshrc"
-        echo "source \$HOME/dotfiles/.zshrc-extend" >> $HOME/.zshrc
+        echo "\"source \$HOME/dotfiles/config/.zshrc-extend\" >> $HOME/.zshrc"
+        echo "source \$HOME/dotfiles/config/.zshrc-extend" >> $HOME/.zshrc
     fi
     echo
     echo "🎉 Done!"
     echo
     set -e
+}
+
+function install_homebrew()
+{
+  # Install Homebrew
+  if type brew > /dev/null 2>&1; then
+    echo 'Homebrew has already been installed.'
+  else
+    echo 'Install Homebrew'
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    brew update
+  fi
+
+  echo "brew bundle"
+  brew bundle
 }
 
 function main()
@@ -68,15 +86,19 @@ function main()
         "prompt")
             make_prompt_set_symlinks
             ;;
-        "dot")
+        "dot" | "dots")
             make_dot_files_symlinks
             ;;
         "extend-zshrc")
             extend_zshrc
             ;;
+        "brew")
+            install_homebrew
+            ;;
         *)
-            make_prompt_set_symlinks
+            install_homebrew
             make_dot_files_symlinks
+            make_prompt_set_symlinks
             extend_zshrc
             ;;
     esac

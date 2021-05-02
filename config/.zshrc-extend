@@ -7,13 +7,13 @@ export EDITOR=/usr/bin/vim
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # For deno completion
-autoload -U compinit
-compinit
-
-COMPLETION_DIR=$HOME/.my_completions
-if [ -d $COMPLETION_DIR ]; then
-  fpath=($COMPLETION_DIR $fpath)
-fi
+# autoload -U compinit
+# compinit
+# 
+# COMPLETION_DIR=$HOME/.my_completions
+# if [ -d $COMPLETION_DIR ]; then
+#   fpath=($COMPLETION_DIR $fpath)
+# fi
 
 # Print Working Branch
 function pwb() {

@@ -140,5 +140,6 @@
   "eslint.run": "onSave",
   "files.insertFinalNewline": true,
   "javascript.implicitProjectConfig.experimentalDecorators": true,
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup"
 }
