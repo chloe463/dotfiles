@@ -21,6 +21,7 @@ brew "fzf"
 brew "git"
 brew "goenv"
 brew "imagemagick@6", link: true
+brew "java"
 brew "jq"
 brew "node-build"
 brew "nodenv"

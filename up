@@ -99,10 +99,10 @@ function main()
             install_homebrew
             ;;
         *)
-            make_prompt_set_symlinks
-            make_dot_files_symlinks
-            extend_zshrc
             install_homebrew
+            make_dot_files_symlinks
+            make_prompt_set_symlinks
+            extend_zshrc
             ;;
     esac
 }

@@ -141,5 +141,6 @@
   "files.insertFinalNewline": true,
   "javascript.implicitProjectConfig.experimentalDecorators": true,
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
-  "workbench.iconTheme": "material-icon-theme"
+  "workbench.iconTheme": "material-icon-theme",
+  "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup"
 }
