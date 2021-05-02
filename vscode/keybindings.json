@@ -3,5 +3,10 @@
   {
     "key": "ctrl+cmd+j",
     "command": "workbench.action.toggleMaximizedPanel"
+  },
+  {
+    "key": "shift+space",
+    "command": "editor.action.triggerSuggest",
+    "when": "editorHasCompletionItemProvider && textInputFocus && !editorReadonly"
   }
 ]

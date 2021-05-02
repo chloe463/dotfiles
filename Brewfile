@@ -46,4 +46,5 @@ cask "graphiql"
 cask "font-hackgen"
 cask "insomnia"
 cask "iterm2"
-# cask "virtualbox"
+cask "java"
+

@@ -40,7 +40,7 @@
   "flow.useNPMPackagedFlow": true,
   "workbench.editor.showTabs": true,
   "editor.renderWhitespace": "all",
-  "window.zoomLevel": -1,
+  "window.zoomLevel": 0,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "todohighlight.isEnable": false,
   "todohighlight.keywords": ["TODO(chloe463):", "NOTE", "HACK", "!todo"],
@@ -141,5 +141,6 @@
   "files.insertFinalNewline": true,
   "javascript.implicitProjectConfig.experimentalDecorators": true,
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "workbench.iconTheme": "material-icon-theme",
   "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup"
 }

@@ -3,6 +3,11 @@ alias be='bundle exec'
 
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
+export PATH=$PATH:'/Applications/Postgres.app/Contents/Versions/latest/bin'
+
+eval "$(rbenv init -)"
+eval "$(nodenv init -)"
+eval "$(direnv hook zsh)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
