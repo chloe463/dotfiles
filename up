@@ -44,20 +44,24 @@ function make_dot_files_symlinks()
     echo
 
     CONFIG_DIR=$BASE_DIR/config
+    cd $CONFIG_DIR
 
     for f in .**?
     do
-        [ "$f" == ".git" ] && continue
-        [ "$f" == ".github" ] && continue
-        [ "$f" == ".."   ] && continue
-        [ "$f" == "."    ] && continue
-        [ "$f" == ".DS_Store" ] && continue
-        [ "$f" == ".zshrc" ] && continue
+        echo "$f"
+        [ "$f" = ".git" ] && continue
+        [ "$f" = ".github" ] && continue
+        [ "$f" = ".."   ] && continue
+        [ "$f" = "."    ] && continue
+        [ "$f" = ".DS_Store" ] && continue
+        [ "$f" = ".zshrc" ] && continue
         [[ "$f" =~ \.swp$ ]] && continue
         echo "ln -sf $CONFIG_DIR/$f ~/$f"
         ln -sf $CONFIG_DIR/$f ~/$f
     done
 
+    cd -
+    pwd
     echo
     echo "🎉 Done!"
     echo
