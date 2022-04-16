@@ -43,7 +43,7 @@ function make_dot_files_symlinks()
     echo "Making symlinks of dot files..."
     echo
 
-    CONFIG_DIR=$BASE_DIR/config
+    CONFIG_DIR=./config
     cd $CONFIG_DIR
 
     for f in .**?
