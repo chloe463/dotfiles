@@ -1,9 +1,22 @@
 #!/bin/sh
 
-set -eu
+set -eux
 set -o pipefail
 
 BASE_DIR=$HOME/dotfiles
+
+function install_zprezto()
+{
+    # https://github.com/sorin-ionescu/prezto#installation
+    git clone --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto
+
+    setopt EXTENDED_GLOB
+    for rcfile in $HOME/.zprezto/runcoms/^README.md(.N); do
+        ln -s "$rcfile" "$HOME/.${rcfile:t}"
+    done
+
+    chsh -s /bin/zsh
+}
 
 function make_prompt_set_symlinks()
 {
@@ -35,6 +48,7 @@ function make_dot_files_symlinks()
     for f in .**?
     do
         [ "$f" == ".git" ] && continue
+        [ "$f" == ".github" ] && continue
         [ "$f" == ".."   ] && continue
         [ "$f" == "."    ] && continue
         [ "$f" == ".DS_Store" ] && continue
@@ -86,6 +100,9 @@ function install_homebrew()
 function main()
 {
     case $1 in
+        "zprezto")
+            install_zprezto
+            ;;
         "prompt")
             make_prompt_set_symlinks
             ;;
@@ -100,6 +117,7 @@ function main()
             ;;
         *)
             install_homebrew
+            install_zprezto
             make_dot_files_symlinks
             make_prompt_set_symlinks
             extend_zshrc
