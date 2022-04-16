@@ -15,7 +15,7 @@ function install_zprezto()
         ln -s "$rcfile" "$HOME/.${rcfile:t}"
     done
 
-    chsh -s /bin/zsh
+    # chsh -s /bin/zsh
 }
 
 function make_prompt_set_symlinks()
