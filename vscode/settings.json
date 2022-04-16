@@ -40,7 +40,6 @@
   "flow.useNPMPackagedFlow": true,
   "workbench.editor.showTabs": true,
   "editor.renderWhitespace": "all",
-  "window.zoomLevel": 0,
   "typescript.updateImportsOnFileMove.enabled": "always",
   "todohighlight.isEnable": false,
   "todohighlight.keywords": ["TODO(chloe463):", "NOTE", "HACK", "!todo"],
@@ -94,8 +93,9 @@
   "gitlens.defaultDateStyle": "absolute",
   "editor.codeActionsOnSave": {
     "source.organizeImports": true,
-    "source.fixAll": true
-    // "source.fixAll.eslint": true
+    "source.fixAll": true,
+    "source.fixAll.eslint": true, // eslint
+    "source.fixAll.stylelint": true // Stylelint
   },
   "peacock.favoriteColors": [
     {
@@ -139,7 +139,14 @@
   "eslint.run": "onSave",
   "files.insertFinalNewline": true,
   "js/ts.implicitProjectConfig.experimentalDecorators": true,
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "workbench.iconTheme": "material-icon-theme",
-  "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup"
+  "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup",
+  "window.zoomLevel": 1,
+  "editor.inlineSuggest.enabled": true,
+  // "editor.cursorStyle": "line",
+  // "editor.insertSpaces": false,
+  // "editor.lineNumbers": "on",
+  // "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
+  // "editor.wordWrap": "off"
 }
