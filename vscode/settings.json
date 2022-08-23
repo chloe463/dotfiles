@@ -144,6 +144,12 @@
   "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup",
   "window.zoomLevel": 1,
   "editor.inlineSuggest.enabled": true,
+  // "github.copilot.enable": {
+  //   "*": true,
+  //   "yaml": true,
+  //   "plaintext": false,
+  //   "markdown": false
+  // }
   // "editor.cursorStyle": "line",
   // "editor.insertSpaces": false,
   // "editor.lineNumbers": "on",
