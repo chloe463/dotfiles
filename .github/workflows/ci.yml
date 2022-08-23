@@ -7,11 +7,30 @@ on:
   pull_request:
 
 jobs:
-  test:
-    name: Test
+  test-brew-install:
+    name: brew install
     runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Test setup scripts
-        run: ./up
+        run: ./up brew
+  test-zprezto:
+    name: Install zprezto
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Test setup scripts
+        run: |
+          ./up zprezto
+          ./up prompt
+          ./up extend-zshrc
+  test-dots-syms:
+    name: Make symlinks
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Test setup scripts
+        run: ./up dots
