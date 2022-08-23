@@ -50,7 +50,8 @@ function make_prompt_set_symlinks()
         echo $f
         file=$(echo $f | sed -e 's/prompts\///g')
         echo $file
-        CMD="ln -sf $HOME/dotfiles/prompts/$file $HOME/.zprezto/modules/prompt/functions/$file"
+        # CMD="ln -sf $HOME/dotfiles/prompts/$file $HOME/.zprezto/modules/prompt/functions/$file"
+        CMD="ln -sf $BASE_DIR/prompts/$file $HOME/.zprezto/modules/prompt/functions/$file"
         echo $CMD
         $CMD
     done
