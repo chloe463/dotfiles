@@ -20,7 +20,7 @@ brew "fd"
 brew "fzf"
 brew "git"
 # brew "goenv"
-brew "imagemagick@6", link: true
+# brew "imagemagick@6", link: true
 # brew "java"
 brew "jq"
 brew "node-build"
@@ -28,7 +28,7 @@ brew "nodenv"
 brew "protobuf"
 brew "ruby-build"
 brew "rbenv"
-brew "redis@3.2", restart_service: true
+# brew "redis@3.2", restart_service: true
 brew "ripgrep"
 brew "the_silver_searcher"
 brew "tmux"
