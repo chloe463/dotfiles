@@ -12,7 +12,7 @@ tap "uzimaru0000/tap"
 tap "wantedly/tools", "git@github.com:wantedly/homebrew-tools"
 tap "yoheimuta/protolint"
 brew "python@3.10", link: false
-brew "awscli"
+brew "awscli", link: false
 brew "glib"
 brew "python@3.9"
 brew "tcl-tk"
@@ -36,7 +36,7 @@ brew "goenv"
 brew "librsvg"
 brew "graphviz"
 brew "htop"
-brew "imagemagick@6", link: true
+brew "imagemagick@6", link: false 
 brew "jq"
 brew "node-build"
 brew "nodenv"
@@ -57,7 +57,6 @@ brew "tree"
 brew "watch"
 brew "yarn"
 brew "datawire/blackbird/telepresence", link: false
-brew "datawire/blackbird/telepresence-legacy"
 brew "ktr0731/evans/evans"
 brew "rerost/tools/giro"
 brew "sanemat/font/ricty", args: ["with-powerline"]
@@ -65,7 +64,6 @@ brew "teamookla/speedtest/speedtest"
 brew "uzimaru0000/tap/tv"
 brew "yoheimuta/protolint/protolint"
 cask "chromedriver"
-cask "cyberduck"
 cask "docker"
 cask "font-hackgen"
 cask "graphiql"
