@@ -113,8 +113,9 @@
   "gitlens.defaultDateStyle": "absolute",
   "editor.codeActionsOnSave": {
     "source.organizeImports": true,
-    "source.fixAll": true
-    // "source.fixAll.eslint": true
+    "source.fixAll": true,
+    "source.fixAll.eslint": true, // eslint
+    "source.fixAll.stylelint": true // Stylelint
   },
   "peacock.favoriteColors": [
     {
@@ -158,9 +159,10 @@
   "eslint.run": "onSave",
   "files.insertFinalNewline": true,
   "js/ts.implicitProjectConfig.experimentalDecorators": true,
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "workbench.iconTheme": "material-icon-theme",
   "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup",
+
   "editor.matchBrackets": "near",
   "editor.bracketPairColorization.enabled": true,
   "[typescriptreact]": {
@@ -183,4 +185,9 @@
     "javascript": false,
     "sql": false
   }
+  // "editor.cursorStyle": "line",
+  // "editor.insertSpaces": false,
+  // "editor.lineNumbers": "on",
+  // "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
+  // "editor.wordWrap": "off"
 }
