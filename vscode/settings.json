@@ -41,8 +41,28 @@
   "workbench.editor.showTabs": true,
   "editor.renderWhitespace": "all",
   "typescript.updateImportsOnFileMove.enabled": "always",
-  "todohighlight.isEnable": false,
-  "todohighlight.keywords": ["TODO(chloe463):", "NOTE", "HACK", "!todo"],
+  "todohighlight.isEnable": true,
+  // "todohighlight.keywords": ["TODO(chloe463):", "NOTE", "HACK", "!todo"],
+  "todohighlight.keywords": [
+    "FIXME",
+    {
+      "text": "NOTE",
+      "color": "#ffffff",
+      "backgroundColor": "#08C5E7",
+      "overviewRulerColor": "grey"
+    },
+    {
+      "text": "HACK",
+      "color": "#000",
+      "isWholeLine": false,
+    },
+    {
+      "text": "TODO(chloe463)",
+      "color": "white",
+      "backgroundColor": "#f65948",
+    },
+    "TODO"
+  ],
   "todohighlight.exclude": [
     "**/node_modules/**",
     "**/bower_components/**",
@@ -142,14 +162,29 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "workbench.iconTheme": "material-icon-theme",
   "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup",
+
+  "editor.matchBrackets": "near",
+  "editor.bracketPairColorization.enabled": true,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "explorer.confirmDragAndDrop": false,
+  "javascript.updateImportsOnFileMove.enabled": "always",
   "window.zoomLevel": 1,
   "editor.inlineSuggest.enabled": true,
-  // "github.copilot.enable": {
-  //   "*": true,
-  //   "yaml": true,
-  //   "plaintext": false,
-  //   "markdown": false
-  // }
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": false,
+    "plaintext": true,
+    "markdown": false,
+    "typescriptreact": false,
+    "ruby": true,
+    "typescript": true,
+    "jsonc": true,
+    "haml": true,
+    "javascript": false,
+    "sql": false
+  }
   // "editor.cursorStyle": "line",
   // "editor.insertSpaces": false,
   // "editor.lineNumbers": "on",
