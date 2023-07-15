@@ -1,0 +1,65 @@
+# https://www.nerdfonts.com/cheat-sheet
+
+format = """
+[░▒▓](#a3aed2)\
+[  ](bg:#a3aed2 fg:#090c0c)\
+[](bg:#769ff0 fg:#a3aed2)\
+$directory\
+[](fg:#769ff0 bg:#394260)\
+$git_branch\
+$git_status\
+[](fg:#394260 bg:#1d2230)\
+$time\
+[ ](fg:#1d2230)\
+$custom\
+\n$character"""
+
+right_format = """
+$ruby\
+$nodejs\
+"""
+
+[directory]
+style = "fg:#e3e5e5 bg:#769ff0"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = " "
+"Pictures" = " "
+
+[git_branch]
+symbol = ""
+style = "bg:#394260"
+format = '[[ $symbol $branch ](fg:#769ff0 bg:#394260)]($style)'
+
+[git_status]
+style = "bg:#394260"
+format = '[[($all_status$ahead_behind )](fg:#769ff0 bg:#394260)]($style)'
+
+[nodejs]
+symbol = ""
+format = '[[ $symbol ($version) ](fg:#3c873a)]($style)'
+
+[ruby]
+symbol = ""
+format = '[[ $symbol ($version) ](fg:#e0115f)]($style)'
+
+[time]
+disabled = false
+time_format = "%T" # Hour:Minute:Second
+style = "bg:#1d2230"
+format = '[[ $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+
+[custom.wtd-fork-qa]
+command = 'echo fork qa' # shows output of command
+when = ''' test $KUBE_FORK_TARGET_ENV = "qa" '''
+format = ' [[$output](fg:#ff9900 italic)]($style)'
+
+[custom.wtd-fork-sb]
+command = 'echo fork sb' # shows output of command
+when = ''' test $KUBE_FORK_TARGET_ENV = "sandbox" '''
+format = ' [[$output](fg:#c52587 italic)]($style)'
