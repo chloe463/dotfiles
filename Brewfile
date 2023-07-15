@@ -51,6 +51,7 @@ brew "rbenv"
 # brew "redis@3.2", restart_service: true
 brew "ripgrep"
 brew "shared-mime-info"
+brew "stow"
 brew "the_silver_searcher"
 brew "tmux"
 brew "tree"
