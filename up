@@ -61,30 +61,13 @@ function make_prompt_set_symlinks()
     echo
 }
 
-function make_dot_files_symlinks()
+function run_stow()
 {
     echo "Making symlinks of dot files..."
     echo
 
-    CONFIG_DIR=./config
-    cd $CONFIG_DIR
+    stow -vvv git tmux vim zsh
 
-    for f in .**?
-    do
-        echo "$f"
-        [ "$f" = ".git" ] && continue
-        [ "$f" = ".github" ] && continue
-        [ "$f" = ".."   ] && continue
-        [ "$f" = "."    ] && continue
-        [ "$f" = ".DS_Store" ] && continue
-        [ "$f" = ".zshrc" ] && continue
-        [[ "$f" =~ \.swp$ ]] && continue
-        echo "ln -sf $CONFIG_DIR/$f ~/$f"
-        ln -sf $CONFIG_DIR/$f ~/$f
-    done
-
-    cd -
-    pwd
     echo
     echo "🎉 Done!"
     echo
@@ -133,8 +116,8 @@ function main()
         "prompt")
             make_prompt_set_symlinks
             ;;
-        "dot" | "dots")
-            make_dot_files_symlinks
+        "dot" | "dots" | "stow")
+            run_stow
             ;;
         "extend-zshrc")
             extend_zshrc
