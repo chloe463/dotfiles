@@ -184,7 +184,8 @@
     "haml": true,
     "javascript": false,
     "sql": false
-  }
+  },
+  "terminal.integrated.env.osx": {}
   // "editor.cursorStyle": "line",
   // "editor.insertSpaces": false,
   // "editor.lineNumbers": "on",
