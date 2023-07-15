@@ -59,17 +59,17 @@ brew "yarn"
 brew "datawire/blackbird/telepresence", link: false
 brew "ktr0731/evans/evans"
 brew "rerost/tools/giro"
-brew "sanemat/font/ricty", args: ["with-powerline"]
+# brew "sanemat/font/ricty", args: ["with-powerline"]
 brew "teamookla/speedtest/speedtest"
 brew "uzimaru0000/tap/tv"
-brew "yoheimuta/protolint/protolint"
+# brew "yoheimuta/protolint/protolint"
 cask "chromedriver"
 cask "docker"
 cask "font-hackgen"
-cask "graphiql"
-cask "hyperswitch"
-cask "insomnia"
+# cask "graphiql"
+# cask "hyperswitch"
+# cask "insomnia"
 cask "iterm2"
 cask "keycastr"
-cask "osxfuse"
+# cask "osxfuse"
 
