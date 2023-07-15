@@ -40,27 +40,6 @@ function install_zprezto()
     # chsh -s /bin/zsh
 }
 
-function make_prompt_set_symlinks()
-{
-    echo "Making symlinks of prompt setup..."
-    echo
-
-    for f in prompts/*
-    do
-        echo $f
-        file=$(echo $f | sed -e 's/prompts\///g')
-        echo $file
-        # CMD="ln -sf $HOME/dotfiles/prompts/$file $HOME/.zprezto/modules/prompt/functions/$file"
-        CMD="ln -sf $BASE_DIR/prompts/$file $HOME/.zprezto/modules/prompt/functions/$file"
-        echo $CMD
-        $CMD
-    done
-
-    echo
-    echo "🎉 Done!"
-    echo
-}
-
 function run_stow()
 {
     echo "Making symlinks of dot files..."
@@ -113,9 +92,6 @@ function main()
         "zprezto")
             install_zprezto
             ;;
-        "prompt")
-            make_prompt_set_symlinks
-            ;;
         "dot" | "dots" | "stow")
             run_stow
             ;;
@@ -129,7 +105,6 @@ function main()
             install_homebrew
             install_zprezto
             make_dot_files_symlinks
-            make_prompt_set_symlinks
             extend_zshrc
             ;;
     esac
