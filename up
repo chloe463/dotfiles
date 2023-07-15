@@ -45,7 +45,7 @@ function run_stow()
     echo "Making symlinks of dot files..."
     echo
 
-    stow -vvv git tmux vim zsh
+    stow -vvv git tmux vim zsh starship
 
     echo
     echo "🎉 Done!"
