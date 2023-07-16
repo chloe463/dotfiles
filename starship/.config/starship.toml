@@ -57,9 +57,9 @@ format = '[[ $time ](fg:#a0a9cb bg:#1d2230)]($style)'
 [custom.wtd-fork-qa]
 command = 'echo fork qa' # shows output of command
 when = ''' test $KUBE_FORK_TARGET_ENV = "qa" '''
-format = ' [[$output](fg:#ff9900 italic)]($style)'
+format = ' [[$output](fg:#ff9900)]($style)'
 
 [custom.wtd-fork-sb]
 command = 'echo fork sb' # shows output of command
 when = ''' test $KUBE_FORK_TARGET_ENV = "sandbox" '''
-format = ' [[$output](fg:#c52587 italic)]($style)'
+format = ' [[$output](fg:#c52587)]($style)'
