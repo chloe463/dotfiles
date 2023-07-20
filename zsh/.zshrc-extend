@@ -9,16 +9,31 @@ eval "$(rbenv init -)"
 eval "$(nodenv init -)"
 eval "$(direnv hook zsh)"
 
+export GOENV_ROOT="$HOME/.goenv"
+export PATH="$HOME/bin:$GOENV_ROOT/bin:$HOME/go/1.19.0/bin:$PATH"
+eval "$(goenv init -)"
+
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # For deno completion
 # autoload -U compinit
 # compinit
-# 
+
 # COMPLETION_DIR=$HOME/.my_completions
 # if [ -d $COMPLETION_DIR ]; then
 #   fpath=($COMPLETION_DIR $fpath)
 # fi
+# You need to run the following commands
+# gh completion -s zsh > $HOME/.my_completions/_gh
+
+COMPLETION_DIR=$HOME/.my_completions
+if [ -d $COMPLETION_DIR ]; then
+  fpath=($COMPLETION_DIR $fpath)
+fi
+
+# For completion
+autoload -U compinit
+compinit -i
 
 # Print Working Branch
 function pwb() {
