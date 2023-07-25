@@ -67,7 +67,7 @@ brew "uzimaru0000/tap/tv"
 cask "chromedriver"
 cask "docker"
 cask "font-hackgen"
+cask "font-hackgen-nerd"
 cask "iterm2"
 cask "keycastr"
-# cask "osxfuse"
 

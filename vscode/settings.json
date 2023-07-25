@@ -1,5 +1,5 @@
 {
-  "editor.fontFamily": "HackGen Console",
+  "editor.fontFamily": "HackGen Console NF",
   "editor.formatOnSave": true,
   "vim.easymotion": true,
   "vim.sneak": true,
@@ -120,7 +120,7 @@
   ],
   "workbench.colorTheme": "Nord",
   "terminal.external.osxExec": "iTerm.app",
-  "terminal.integrated.fontFamily": "HackGen Console",
+  "terminal.integrated.fontFamily": "HackGen Console NF",
   "terminal.integrated.fontSize": 14,
   "eslint.validate": [
     "javascript",

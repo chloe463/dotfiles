@@ -24,7 +24,6 @@ jobs:
       - name: Test setup scripts
         run: |
           ./up zprezto
-          ./up prompt
           ./up extend-zshrc
   test-dots-syms:
     name: Make symlinks
