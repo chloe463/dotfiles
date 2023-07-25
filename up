@@ -63,14 +63,18 @@ function make_prompt_set_symlinks()
 
 function run_stow()
 {
-    echo "Making symlinks of dot files..."
-    echo
+    if type stow > /dev/null 2>&1; then
+        echo "Making symlinks of dot files..."
+        echo
 
-    stow -vvv git tmux vim zsh
+        stow -vvv git tmux vim zsh
 
-    echo
-    echo "🎉 Done!"
-    echo
+        echo
+        echo "🎉 Done!"
+        echo
+    else
+        echo "Install stow first!"
+    fi
 }
 
 function extend_zshrc()
