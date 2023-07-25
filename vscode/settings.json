@@ -9,30 +9,60 @@
   "vim.hlsearch": true,
   "vim.insertModeKeyBindings": [
     {
-      "before": ["j", "j"],
-      "after": ["<Esc>"]
+      "before": [
+        "j",
+        "j"
+      ],
+      "after": [
+        "<Esc>"
+      ]
     },
     {
-      "before": ["j", "k"],
-      "after": ["<Esc>"]
+      "before": [
+        "j",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ]
     },
     {
-      "before": ["k", "j"],
-      "after": ["<Esc>"]
+      "before": [
+        "k",
+        "j"
+      ],
+      "after": [
+        "<Esc>"
+      ]
     },
     {
-      "before": ["k", "k"],
-      "after": ["<Esc>"]
+      "before": [
+        "k",
+        "k"
+      ],
+      "after": [
+        "<Esc>"
+      ]
     }
   ],
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": ["<leader>", "d"],
-      "after": ["d", "d"]
+      "before": [
+        "<leader>",
+        "d"
+      ],
+      "after": [
+        "d",
+        "d"
+      ]
     },
     {
-      "before": ["<C-n>"],
-      "commands": [":nohl"]
+      "before": [
+        "<C-n>"
+      ],
+      "commands": [
+        ":nohl"
+      ]
     }
   ],
   "vim.leader": "<space>",
@@ -54,12 +84,22 @@
     {
       "text": "HACK",
       "color": "#000",
-      "isWholeLine": false,
+      "isWholeLine": false
     },
     {
       "text": "TODO(chloe463)",
       "color": "white",
-      "backgroundColor": "#f65948",
+      "backgroundColor": "#f65948"
+    },
+    {
+      "text": "Question",
+      "color": "white",
+      "backgroundColor": "#f65948"
+    },
+    {
+      "text": "Review",
+      "color": "white",
+      "backgroundColor": "#f65948"
     },
     "TODO"
   ],
@@ -113,8 +153,8 @@
   "gitlens.defaultDateStyle": "absolute",
   "editor.codeActionsOnSave": {
     "source.organizeImports": true,
-    "source.fixAll": true,
-    "source.fixAll.eslint": true, // eslint
+    // "source.fixAll": true,
+    // "source.fixAll.eslint": true, // eslint
     "source.fixAll.stylelint": true // Stylelint
   },
   "peacock.favoriteColors": [
@@ -162,7 +202,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "workbench.iconTheme": "material-icon-theme",
   "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup",
-
   "editor.matchBrackets": "near",
   "editor.bracketPairColorization.enabled": true,
   "[typescriptreact]": {
@@ -170,7 +209,6 @@
   },
   "explorer.confirmDragAndDrop": false,
   "javascript.updateImportsOnFileMove.enabled": "always",
-  "window.zoomLevel": 1,
   "editor.inlineSuggest.enabled": true,
   "github.copilot.enable": {
     "*": true,
@@ -185,7 +223,31 @@
     "javascript": false,
     "sql": false
   },
-  "terminal.integrated.env.osx": {}
+  "terminal.integrated.env.osx": {},
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "deno.enablePaths": [
+    "/Users/tsuyoshihara/Dev/ws/node"
+  ],
+  "deno.path": "/opt/homebrew/bin/deno",
+  "terminal.integrated.env.osx": {},
+  "console-ninja.allowedHosts": [
+    "chloe463.qa.wantedly.com",
+    "chloe463.admin-qa.wantedly.com",
+    "localhost:3000",
+    "localhost:4000",
+    "localhost:3030",
+    "localhost:3031"
+  ],
+  "console-ninja.featureSet": "Community",
+  "console-ninja.fontSize": 14,
+  "javascript.referencesCodeLens.enabled": true,
+  "editor.linkedEditing": true,
+  "window.zoomLevel": 1
   // "editor.cursorStyle": "line",
   // "editor.insertSpaces": false,
   // "editor.lineNumbers": "on",
