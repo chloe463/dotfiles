@@ -74,7 +74,6 @@ function run_stow()
         echo
     else
         echo "Install stow first!"
-        exit 1
     fi
 }
 
