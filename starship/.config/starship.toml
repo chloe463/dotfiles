@@ -1,22 +1,24 @@
 # https://www.nerdfonts.com/cheat-sheet
 
+# [](fg:#394260 bg:#1d2230)\
 format = """
 [░▒▓](#a3aed2)\
 $directory\
 [](fg:#769ff0 bg:#394260)\
 $git_branch\
 $git_status\
-[](fg:#394260 bg:#1d2230)\
-$time\
-[ ](fg:#1d2230)\
+[](fg:#394260)\
 $custom\
 $fill\
 $ruby\
 $nodejs\
+[](fg:#a3aed2)\
+$time\
+[▓▒░](#a3aed2)\
 \n$character"""
 
 [directory]
-style = "fg:#e3e5e5 bg:#769ff0"
+style = "fg:#292929 bg:#769ff0"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
@@ -51,7 +53,7 @@ format = '[[ $symbol ($version) ](fg:#e0115f)]($style)'
 disabled = false
 time_format = "%T" # Hour:Minute:Second
 style = "bg:#1d2230"
-format = '[[ $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+format = '[[ $time ](fg:#292929 bg:#a3aed2)]($style)'
 
 [custom.wtd-fork-qa]
 command = 'echo fork qa' # shows output of command
