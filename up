@@ -31,12 +31,6 @@ function install_zprezto()
 {
     # https://github.com/sorin-ionescu/prezto#installation
     git clone --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto
-
-    setopt EXTENDED_GLOB
-    for rcfile in $HOME/.zprezto/runcoms/^README.md(.N); do
-        ln -s "$rcfile" "$HOME/.${rcfile:t}"
-    done
-
     # chsh -s /bin/zsh
 }
 
@@ -54,25 +48,6 @@ function run_stow()
     else
         echo "Install stow first!"
     fi
-}
-
-function extend_zshrc()
-{
-    echo "Load .zshrc-extend from .zshrc"
-    echo
-
-    set +e
-    RES=$(grep "source \$HOME/dotfiles/config/.zshrc-extend" $HOME/.zshrc)
-
-    echo ${RES}
-    if [ "${RES}" = "" ]; then
-        echo "\"source \$HOME/dotfiles/config/.zshrc-extend\" >> $HOME/.zshrc"
-        echo "source \$HOME/dotfiles/config/.zshrc-extend" >> $HOME/.zshrc
-    fi
-    echo
-    echo "🎉 Done!"
-    echo
-    set -e
 }
 
 function install_homebrew()
@@ -99,9 +74,6 @@ function main()
         "dot" | "dots" | "stow")
             run_stow
             ;;
-        "extend-zshrc")
-            extend_zshrc
-            ;;
         "brew")
             install_homebrew
             ;;
@@ -109,7 +81,6 @@ function main()
             install_homebrew
             install_zprezto
             make_dot_files_symlinks
-            extend_zshrc
             ;;
     esac
 }
