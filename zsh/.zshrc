@@ -5,6 +5,7 @@ fi
 
 alias g='git'
 alias be='bundle exec'
+alias ls='exa'
 
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
@@ -52,22 +53,6 @@ function pwb() {
   return 0
 }
 
-# Open new pull request
-function new_pr() {
-  REPO_URL=$(git remote get-url origin | sed -e 's/git@github.com:\(.*\)\.git/https:\/\/github.com\/\1/g')
-  NEW_PR_URL="${REPO_URL}/pull/new/$(pwb)"
-  echo ${NEW_PR_URL}
-  open ${NEW_PR_URL}
-}
-
-# Search keyword with google
-function ggrks() {
-  BASE_URL="https://google.com/search"
-  QUERY=`echo $@ | sed -e "s/ /+/g"`
-
-  open "${BASE_URL}?q=${QUERY}"
-}
-
 # Setup tmux panes
 function ide() {
   tmux split-window -v -p 30
@@ -90,7 +75,3 @@ function 256colors() {
     fi
   done
 }
-
-alias newpr='new_pr'
-alias openpr='new_pr'
-alias ls='exa'
