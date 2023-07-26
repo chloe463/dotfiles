@@ -1,4 +1,6 @@
 # https://www.nerdfonts.com/cheat-sheet
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
 
 # [](fg:#394260 bg:#1d2230)\
 format = """
