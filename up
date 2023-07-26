@@ -80,6 +80,24 @@ function install_global_npm_packages()
   fi
 }
 
+function install_tmux_plugins()
+{
+  if type tmux > /dev/null 2>&1 ; then
+    if [ -d ~/.tmux/plugins/tpm ]; then
+      echo 'tpm is already installed!'
+    else
+      echo 'install tpm'
+      # https://github.com/tmux-plugins/tpm
+      git clone https://github.com/tmux-plugins/tpm.git ~/.tmux/plugins/tpm
+
+      echo 'Create tmux session and run the following command in the session.'
+      echo 'prefix + I (ctrl + t → I)'
+    fi
+  else
+    echo 'Install tmux first!'
+  fi
+}
+
 function main()
 {
     case $1 in
@@ -95,11 +113,15 @@ function main()
         "npm" | "yarn")
             install_global_npm_packages
             ;;
+        "tmux")
+            install_tmux_plugins
+            ;;
         *)
             install_homebrew
             install_zprezto
             make_dot_files_symlinks
             install_global_npm_packages
+            install_tmux_plugins
             ;;
     esac
 }
