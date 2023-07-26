@@ -3,9 +3,13 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
   source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
+# Credentials, such as GitHub token, must be written in the following file
+[ -f ~/.credentials.zsh ] && source ~/.credentials.zsh
+
 alias g='git'
 alias be='bundle exec'
-alias ls='exa'
+alias ls='exa --group-directories-first --icons'
+alias vim='nvim'
 
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
