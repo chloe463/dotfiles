@@ -38,12 +38,13 @@ format = '[[ $symbol $branch ](fg:#f5f5f5 bg:#394260)]($style)'
 [git_status]
 style = "bg:#394260"
 conflicted = '! '
-stashed = '󰄠 '
+# stashed = '󰄠 '
+stashed = ''
 staged = ' '
 modified = '✻ '
 renamed = '» '
 deleted = " "
-format = '[[($all_status$ahead_behind )](fg:#f5f5f5 bg:#394260)]($style)'
+format = '[[($all_status$ahead_behind)](fg:#f5f5f5 bg:#394260)]($style)'
 
 [fill]
 symbol = ' '
