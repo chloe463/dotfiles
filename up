@@ -65,6 +65,21 @@ function install_homebrew()
   brew bundle
 }
 
+function install_global_npm_packages()
+{
+  if type yarn > /dev/null 2>&1; then
+    # yarn global list
+    yarn global add \
+        create-next-app \
+        git-delete-squashed \
+        git-split-diffs \
+        npkill \
+        yarn-deduplicate
+  else
+    echo 'Install yarn first!'
+  fi
+}
+
 function main()
 {
     case $1 in
@@ -77,10 +92,14 @@ function main()
         "brew")
             install_homebrew
             ;;
+        "npm" | "yarn")
+            install_global_npm_packages
+            ;;
         *)
             install_homebrew
             install_zprezto
             make_dot_files_symlinks
+            install_global_npm_packages
             ;;
     esac
 }
