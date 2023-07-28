@@ -40,7 +40,16 @@ function run_stow()
         echo "Making symlinks of dot files..."
         echo
 
-        stow -vvv git tmux vim zsh starship
+        stow -R -vvv \
+          alacritty \
+          gh \
+          git \
+          starship \
+          tmux \
+          vim \
+          zsh
+
+        stow -R -vvv -t "$HOME/Library/Application Support/Code/User" vscode
 
         echo
         echo "🎉 Done!"
