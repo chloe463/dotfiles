@@ -16,6 +16,7 @@ window:
     x: 4
     y: 0
   decorations: Buttonless
+  startup_mode: Maximized
 
 font:
   normal:
@@ -33,7 +34,7 @@ font:
   size: 14.0
 
 cursor:
-  style: Block
+  style: Beam
   unfocused_hollow: true
 
 
