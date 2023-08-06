@@ -182,6 +182,7 @@ require('lazy').setup({
       })
     end
   },
+  { 'akinsho/bufferline.nvim', version = "*", dependencies = 'nvim-tree/nvim-web-devicons' },
 }, {})
 
 -- [[ Basic Keymaps ]]
