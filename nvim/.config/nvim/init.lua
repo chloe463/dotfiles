@@ -183,7 +183,6 @@ require('lazy').setup({
     end
   },
   { 'akinsho/bufferline.nvim', version = "*", dependencies = 'nvim-tree/nvim-web-devicons' },
-  { 'dinhhuy258/git.nvim' },
 }, {})
 
 -- [[ Highlight on yank ]]
