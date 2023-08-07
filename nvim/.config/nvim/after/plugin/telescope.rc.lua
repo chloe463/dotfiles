@@ -27,9 +27,10 @@ telescope.setup {
     find_files = {
       hidden = true,
     },
-    file_ignore_pattern = {
-      {"node_modules"},
-      {".git"},
+    file_ignore_patterns = {
+      "node_modules",
+      ".git/",
+      ".yarn/cache/",
     },
     vimgrep_arguments = {
       "rg",
