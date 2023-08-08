@@ -1,9 +1,6 @@
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
--- Set Cursor
-vim.o.guicursor = ''
-
 -- Set highlight on search
 vim.o.hlsearch = true
 
@@ -41,3 +38,11 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
+
+-- cf. https://github.com/alacritty/alacritty/issues/5450#issuecomment-929797364
+vim.api.nvim_create_autocmd("ExitPre", {
+  group = vim.api.nvim_create_augroup("Exit", { clear = true }),
+  command = "set guicursor=a:ver90",
+  desc = "Set cursor back to beam when leaving Neovim."
+})
+
