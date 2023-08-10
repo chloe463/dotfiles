@@ -4,6 +4,7 @@ vim.keymap.set('i', 'jk', '<ESC>', { noremap = true, silent = true })
 vim.keymap.set('i', 'kj', '<ESC>', { noremap = true, silent = true })
 
 vim.keymap.set('n', 'x', '"_x')
+vim.keymap.set('n', '<ESC><ESC>', vim.cmd.noh)
 
 -- [[ Basic Keymaps ]]
 
@@ -20,4 +21,8 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = "Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
+
+-- Window spliting
+vim.keymap.set('n', 'ss', ':split<CR><C-w>w')
+vim.keymap.set('n', 'vs', ':vsplit<CR><C-w>w')
 
