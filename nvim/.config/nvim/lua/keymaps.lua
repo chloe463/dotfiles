@@ -1,13 +1,27 @@
+-- [[ Basic Keymaps ]]
+
+-- Enter normal mode by pressing double j or k
 vim.keymap.set('i', 'jj', '<ESC>', { noremap = true, silent = true })
 vim.keymap.set('i', 'kk', '<ESC>', { noremap = true, silent = true })
+
+-- ...or j(k) and k(j)
 vim.keymap.set('i', 'jk', '<ESC>', { noremap = true, silent = true })
 vim.keymap.set('i', 'kj', '<ESC>', { noremap = true, silent = true })
 
-vim.keymap.set('n', 'x', '"_x')
+-- Don't yank with x
+vim.keymap.set('n', 'x', '"_x', { noremap = true, silent = true })
+
+-- Hide highlight on double escape keys
 vim.keymap.set('n', '<ESC><ESC>', vim.cmd.noh, { noremap = true, silent = true })
 
--- [[ Basic Keymaps ]]
+-- Window spliting
+vim.keymap.set('n', 'ss', ':split<CR><C-w>w')
+vim.keymap.set('n', 'vs', ':vsplit<CR><C-w>w')
 
+-- Reopen
+-- vim.keymap.set('n', 'E', '<cmd>bufdo e!<cr>')
+
+-- The following keymaps are from kickstart configuration
 -- Keymaps for better default experience
 -- See `:help vim.keymap.set()`
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
@@ -21,8 +35,4 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = "Go to previous dia
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
-
--- Window spliting
-vim.keymap.set('n', 'ss', ':split<CR><C-w>w')
-vim.keymap.set('n', 'vs', ':vsplit<CR><C-w>w')
 
