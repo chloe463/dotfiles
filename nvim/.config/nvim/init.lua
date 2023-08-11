@@ -101,6 +101,8 @@ require('lazy').setup({
     'hrsh7th/nvim-cmp',
     dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
   },
+  { 'hrsh7th/cmp-path' },
+  { 'hrsh7th/cmp-cmdline' },
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
@@ -183,7 +185,6 @@ require('lazy').setup({
       })
     end
   },
-  { 'hrsh7th/cmp-path' },
 }, {})
 
 -- [[ Highlight on yank ]]
@@ -300,6 +301,10 @@ local luasnip = require 'luasnip'
 luasnip.config.setup {}
 
 cmp.setup {
+  window = {
+    completion = cmp.config.window.bordered(),
+    documentation = cmp.config.window.bordered(),
+  },
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
@@ -338,6 +343,28 @@ cmp.setup {
     { name = 'path' },
   },
 }
+-- `/` cmdline setup.
+cmp.setup.cmdline('/', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = {
+    { name = 'buffer' }
+  }
+})
+
+-- `:` cmdline setup.
+cmp.setup.cmdline(':', {
+  mapping = cmp.mapping.preset.cmdline(),
+  sources = cmp.config.sources({
+    { name = 'path' }
+  }, {
+      {
+        name = 'cmdline',
+        option = {
+          ignore_cmds = { 'Man', '!' }
+        }
+      }
+    })
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
