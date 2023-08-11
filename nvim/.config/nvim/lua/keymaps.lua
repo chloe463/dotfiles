@@ -4,7 +4,7 @@ vim.keymap.set('i', 'jk', '<ESC>', { noremap = true, silent = true })
 vim.keymap.set('i', 'kj', '<ESC>', { noremap = true, silent = true })
 
 vim.keymap.set('n', 'x', '"_x')
-vim.keymap.set('n', '<ESC><ESC>', vim.cmd.noh)
+vim.keymap.set('n', '<ESC><ESC>', vim.cmd.noh, { noremap = true, silent = true })
 
 -- [[ Basic Keymaps ]]
 
