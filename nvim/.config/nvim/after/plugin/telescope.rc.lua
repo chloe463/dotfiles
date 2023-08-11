@@ -67,6 +67,7 @@ telescope.setup {
   },
 }
 
+telescope.load_extension "file_browser"
 
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', builtin.oldfiles, { desc = '[?] Find recently opened files' })
