@@ -182,6 +182,7 @@ require('lazy').setup({
       })
     end
   },
+  { 'hrsh7th/cmp-path' },
 }, {})
 
 -- [[ Highlight on yank ]]
@@ -333,6 +334,7 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
+    { name = 'path' },
   },
 }
 
