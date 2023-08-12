@@ -29,6 +29,12 @@ font:
     family: "HackGen Console NF"
     style: Bold Italic
   size: 16.0
+  offset:
+    x: 0 
+    y: 2
+  glyph_offset:
+    x: 0 
+    y: 2
 
 cursor:
   style: Beam
