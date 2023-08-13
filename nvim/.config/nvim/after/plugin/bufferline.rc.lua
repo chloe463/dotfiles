@@ -13,6 +13,7 @@ bufferline.setup({
       style = 'underline',
     },
     diagnostics = 'nvim_lsp',
+    --- @diagnostic disable-next-line: unused-local
     diagnostics_indicator = function(_count, _level, diagnostics_dict)
       local error_icon = ' '
       local warning_icon = ' '
