@@ -85,6 +85,7 @@ function install_global_npm_packages()
         git-delete-squashed \
         git-split-diffs \
         npkill \
+        prettierd \
         yarn-deduplicate
   else
     echo 'Install yarn first!'
