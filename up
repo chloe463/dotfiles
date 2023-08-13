@@ -45,6 +45,7 @@ function run_stow()
           bat \
           gh \
           git \
+          nvim \
           starship \
           tmux \
           vim \
@@ -84,6 +85,7 @@ function install_global_npm_packages()
         git-delete-squashed \
         git-split-diffs \
         npkill \
+        prettierd \
         yarn-deduplicate
   else
     echo 'Install yarn first!'
