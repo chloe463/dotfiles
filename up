@@ -42,6 +42,7 @@ function run_stow()
 
         stow -R -vvv \
           alacritty \
+          bat \
           gh \
           git \
           starship \

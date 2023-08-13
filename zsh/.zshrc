@@ -6,6 +6,7 @@ fi
 # Credentials, such as GitHub token, must be written in the following file
 [ -f ~/.credentials.zsh ] && source ~/.credentials.zsh
 
+alias cat='bat'
 alias g='git'
 alias be='bundle exec'
 alias ls='exa --group-directories-first --icons'
