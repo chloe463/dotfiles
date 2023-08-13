@@ -103,6 +103,7 @@ require('lazy').setup({
   },
   { 'hrsh7th/cmp-path' },
   { 'hrsh7th/cmp-cmdline' },
+  { 'hrsh7th/cmp-buffer' },
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
