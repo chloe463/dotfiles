@@ -46,3 +46,4 @@ vim.api.nvim_create_autocmd("ExitPre", {
   desc = "Set cursor back to beam when leaving Neovim."
 })
 
+vim.o.cursorline = true
