@@ -264,6 +264,7 @@ local servers = {
   -- rust_analyzer = {},
   tsserver = {},
   eslint = {},
+  jsonls = {},
 
   lua_ls = {
     Lua = {
