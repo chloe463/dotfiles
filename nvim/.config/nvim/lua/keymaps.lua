@@ -41,6 +41,9 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagn
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
+vim.keymap.set("v", "<M-Down>", ":m '>+1<CR>gv=gv")
+vim.keymap.set("v", "<M-Up>", ":m '<-2<CR>gv=gv")
+
 -- Better page scrolling
 vim.keymap.set('n', '<C-d>', '<C-d>zz', { silent = true })
 vim.keymap.set('n', '<C-u>', '<C-u>zz', { silent = true })
