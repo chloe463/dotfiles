@@ -48,6 +48,13 @@ fi
 autoload -U compinit
 compinit -i
 
+# History
+setopt inc_append_history
+setopt share_history
+
+export HISTSIZE=100000
+export SAVEHIST=100000
+
 # Print Working Branch
 function pwb() {
   CURRENT_BRANCH=$(git branch -a | grep -E '^\*' | cut -b 3-)
