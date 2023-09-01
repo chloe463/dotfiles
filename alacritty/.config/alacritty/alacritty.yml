@@ -37,7 +37,10 @@ font:
     y: 2
 
 cursor:
-  style: Beam
+  # style: Beam
+  style:
+    shape: Beam
+    blinking: Never
   unfocused_hollow: true
 
 
