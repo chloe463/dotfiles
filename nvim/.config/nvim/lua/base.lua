@@ -46,4 +46,15 @@ vim.api.nvim_create_autocmd("ExitPre", {
   desc = "Set cursor back to beam when leaving Neovim."
 })
 
+-- cf. https://neovim.discourse.group/t/a-lua-based-auto-refresh-buffers-when-they-change-on-disk-function/2482/5
+vim.o.autoread = true
+vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
+  command = "if mode() != 'c' | checktime | endif",
+  pattern = { "*" },
+})
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+  pattern = { "*" },
+  command = 'echo "File changed on disk. Buffer reloaded."',
+})
+
 vim.o.cursorline = true
