@@ -229,6 +229,7 @@ local on_attach = function(_, bufnr)
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+  nmap('<leader>h', vim.lsp.buf.hover, '[H]over Documentation')
   nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
@@ -258,6 +259,7 @@ vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
 --  the `settings` field of the server config. You must look up that documentation yourself.
 local servers = {
   cssls = {},
+  graphql = {},
   -- clangd = {},
   -- gopls = {},
   -- pyright = {},
