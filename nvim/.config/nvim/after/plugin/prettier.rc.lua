@@ -15,3 +15,12 @@ prettier.setup {
   }
 }
 
+vim.keymap.set(
+  'n',
+  '<leader>pf',
+  function()
+    vim.lsp.buf.format({ async = true })
+  end,
+  { desc = '[P]retti[F]y' }
+)
+
