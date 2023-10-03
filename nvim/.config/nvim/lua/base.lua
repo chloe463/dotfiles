@@ -1,6 +1,13 @@
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
+-- Indent
+vim.opt.tabstop = 2
+vim.opt.softtabstop = 2
+vim.opt.shiftwidth = 2
+vim.opt.smartindent = true
+vim.opt.autoindent = true
+
 -- Set highlight on search
 vim.o.hlsearch = true
 
