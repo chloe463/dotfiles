@@ -14,6 +14,10 @@ vim.keymap.set('n', 'x', '"_x', { noremap = true, silent = true })
 -- Hide highlight on double escape keys
 vim.keymap.set('n', '<ESC><ESC>', vim.cmd.noh, { noremap = true, silent = true })
 
+vim.keymap.set('n', 'n', 'nzz', { silent = true });
+vim.keymap.set('n', 'N', 'Nzz', { silent = true });
+vim.keymap.set('n', '*', '*Nzz', { silent = true });
+
 -- Window spliting
 vim.keymap.set('n', 'ss', ':split<CR><C-w>w')
 vim.keymap.set('n', 'vs', ':vsplit<CR><C-w>w')
@@ -53,3 +57,5 @@ vim.keymap.set('n', '<C-b>', '<C-b>zz', { silent = true })
 -- Store yanked string to clipboard
 vim.keymap.set({"n", "v"}, "<leader>y", [["+y]])
 
+-- greatest remap ever
+vim.keymap.set("x", "<leader>p", [["_dP]])
