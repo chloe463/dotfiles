@@ -87,3 +87,15 @@ function 256colors() {
     fi
   done
 }
+
+# Change directory by using ghq
+function search_repo_and_change_directory() {
+  local repo=$(ghq list -p | fzf)
+  if [ -n "${repo}" ]; then
+    BUFFER="cd ${repo}"
+    zle accept-line
+  fi
+}
+zle -N search_repo_and_change_directory
+bindkey '^F' search_repo_and_change_directory
+
