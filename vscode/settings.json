@@ -63,6 +63,133 @@
       "commands": [
         ":nohl"
       ]
+    },
+    {
+      "before": [
+        "n"
+      ],
+      "after": [
+        "n",
+        "z",
+        "z"
+      ]
+    },
+    {
+      "before": [
+        "N"
+      ],
+      "after": [
+        "N",
+        "z",
+        "z"
+      ]
+    },
+    {
+      "before": [
+        "*"
+      ],
+      "after": [
+        "*",
+        "N",
+        "z",
+        "z"
+      ]
+    },
+    {
+      "before": [
+        "x"
+      ],
+      "after": [
+        "\"",
+        "_",
+        "x"
+      ]
+    },
+    {
+      "before": [
+        "p"
+      ],
+      "after": [
+        "p",
+        "g",
+        "v",
+        "y"
+      ]
+    },
+    {
+      "before": [
+        "v",
+        "s"
+      ],
+      "commands": [
+        ":vsplit"
+      ]
+    },
+    {
+      "before": [
+        "s",
+        "s"
+      ],
+      "commands": [
+        ":split"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "r",
+        "n"
+      ],
+      "commands": [
+        "editor.action.rename"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "r"
+      ],
+      "commands": [
+        "editor.action.goToReferences"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "I"
+      ],
+      "commands": [
+        "editor.action.goToImplementation"
+      ]
+    },
+    {
+      "before": [
+        "g",
+        "d"
+      ],
+      "commands": [
+        "editor.action.goToTypeDefinition"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "s",
+        "f"
+      ],
+      "commands": [
+        "workbench.action.quickOpen"
+      ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "s",
+        "g"
+      ],
+      "commands": [
+        "workbench.action.findInFiles"
+      ]
     }
   ],
   "vim.leader": "<space>",
