@@ -4,7 +4,7 @@ if (not status) then
 end
 
 -- cf. https://github.com/lukas-reineke/indent-blankline.nvim
--- See `:help indent_blankline.txt`
+-- See `:help ibl.config
 indent_blankline.setup {
   indent = {
     char = '┊',
