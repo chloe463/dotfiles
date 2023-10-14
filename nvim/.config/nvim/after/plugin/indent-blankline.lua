@@ -1,4 +1,4 @@
-local status, indent_blankline = pcall(require, 'indent_blankline')
+local status, indent_blankline = pcall(require, 'ibl')
 if (not status) then
   return
 end
@@ -6,7 +6,11 @@ end
 -- cf. https://github.com/lukas-reineke/indent-blankline.nvim
 -- See `:help indent_blankline.txt`
 indent_blankline.setup {
-  char = '┊',
-  show_trailing_blankline_indent = false,
+  indent = {
+    char = '┊',
+  },
+  whitespace = {
+    remove_blankline_trail = false,
+  }
 }
 
