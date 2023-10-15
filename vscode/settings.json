@@ -357,6 +357,42 @@
       "commands": [
         "redo"
       ]
+    },
+    {
+      "before": [
+        "<tab>"
+      ],
+      "after": [
+        "g",
+        "t",
+      ]
+    },
+    {
+      "before": [
+        "<shift+tab>"
+      ],
+      "after": [
+        "g",
+        "T",
+      ]
+    },
+    {
+      "before": [
+        "<C-l>"
+      ],
+      "after": [
+        "<C-w>",
+        "l"
+      ]
+    },
+    {
+      "before": [
+        "<C-h>"
+      ],
+      "after": [
+        "<C-w>",
+        "h"
+      ]
     }
   ],
   "vim.sneak": true,
