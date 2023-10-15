@@ -190,7 +190,23 @@
       "commands": [
         "workbench.action.findInFiles"
       ]
-    }
+    },
+    {
+      "before": [
+        "u"
+      ],
+      "commands": [
+        "undo"
+      ]
+    },
+    {
+      "before": [
+        "<C-r>"
+      ],
+      "commands": [
+        "redo"
+      ]
+    },
   ],
   "vim.leader": "<space>",
   "breadcrumbs.enabled": true,
