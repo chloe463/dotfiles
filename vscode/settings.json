@@ -107,17 +107,6 @@
     },
     {
       "before": [
-        "p"
-      ],
-      "after": [
-        "p",
-        "g",
-        "v",
-        "y"
-      ]
-    },
-    {
-      "before": [
         "v",
         "s"
       ],
@@ -210,12 +199,10 @@
   ],
   "vim.leader": "<space>",
   "breadcrumbs.enabled": true,
-  "flow.useNPMPackagedFlow": true,
   "workbench.editor.showTabs": true,
   "editor.renderWhitespace": "all",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "todohighlight.isEnable": true,
-  // "todohighlight.keywords": ["TODO(chloe463):", "NOTE", "HACK", "!todo"],
   "todohighlight.keywords": [
     "FIXME",
     {
@@ -271,13 +258,9 @@
     "typescript",
     "typescriptreact"
   ],
-  "editor.tabSize": 2,
-  "eslint.alwaysShowStatus": true,
-  "eslint.packageManager": "yarn",
-  "editor.fontWeight": "100",
-  "liveshare.featureSet": "insiders",
-  "ruby.rubocop.useBundler": true,
   "editor.fontSize": 14,
+  "editor.tabSize": 2,
+  "editor.fontWeight": "100",
   "files.exclude": {
     "/.git": true,
     "/.DS_Store": true,
@@ -296,8 +279,6 @@
   "gitlens.defaultDateStyle": "absolute",
   "editor.codeActionsOnSave": {
     "source.organizeImports": true,
-    // "source.fixAll": true,
-    // "source.fixAll.eslint": true, // eslint
     "source.fixAll.stylelint": true // Stylelint
   },
   "peacock.favoriteColors": [
@@ -344,7 +325,6 @@
   "js/ts.implicitProjectConfig.experimentalDecorators": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "workbench.iconTheme": "material-icon-theme",
-  "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup",
   "editor.matchBrackets": "near",
   "editor.bracketPairColorization.enabled": true,
   "[typescriptreact]": {
@@ -366,17 +346,12 @@
     "javascript": false,
     "sql": false
   },
-  "terminal.integrated.env.osx": {},
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features"
   },
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
-  "deno.enablePaths": [
-    "/Users/tsuyoshihara/Dev/ws/node"
-  ],
-  "deno.path": "/opt/homebrew/bin/deno",
   "terminal.integrated.env.osx": {},
   "console-ninja.allowedHosts": [
     "chloe463.qa.wantedly.com",
@@ -391,9 +366,4 @@
   "javascript.referencesCodeLens.enabled": true,
   "editor.linkedEditing": true,
   "window.zoomLevel": 1
-  // "editor.cursorStyle": "line",
-  // "editor.insertSpaces": false,
-  // "editor.lineNumbers": "on",
-  // "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
-  // "editor.wordWrap": "off"
 }
