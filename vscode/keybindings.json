@@ -31,7 +31,8 @@
   },
   {
     "key": "shift+h",
-    "command": "editor.action.showDefinitionPreviewHover"
+    "command": "editor.action.showDefinitionPreviewHover",
+    "when": "editorFocus"
   },
   {
     "key": "ctrl+`",
