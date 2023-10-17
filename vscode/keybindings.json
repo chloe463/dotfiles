@@ -30,7 +30,7 @@
     "when": "editorFocus"
   },
   {
-    "key": "shift+h",
+    "key": "ctrl+h",
     "command": "editor.action.showDefinitionPreviewHover",
     "when": "editorFocus"
   },
