@@ -395,6 +395,19 @@
       ]
     }
   ],
+  "vim.visualModeKeyBindingsNonRecursive": [
+    {
+      "before": [
+        "p"
+      ],
+      "after": [
+        "p",
+        "g",
+        "v",
+        "y"
+      ]
+    }
+  ],
   "vim.sneak": true,
   "vim.useCtrlKeys": true,
   "vim.useSystemClipboard": true,
