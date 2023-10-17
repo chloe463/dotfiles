@@ -288,6 +288,16 @@
     {
       "before": [
         "<leader>",
+        "h"
+      ],
+      "commands": [
+        "editor.action.showDefinitionPreviewHover"
+      ],
+      "when": "editorFocus"
+    },
+    {
+      "before": [
+        "<leader>",
         "r",
         "n"
       ],
