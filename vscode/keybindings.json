@@ -30,10 +30,6 @@
     "when": "editorFocus"
   },
   {
-    "key": "shift+h",
-    "command": "editor.action.showDefinitionPreviewHover"
-  },
-  {
     "key": "ctrl+`",
     "command": "workbench.action.focusActiveEditorGroup",
     "when": "terminalFocus"

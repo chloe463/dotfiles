@@ -1,58 +1,220 @@
 {
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "breadcrumbs.enabled": true,
+  "console-ninja.allowedHosts": [
+    "chloe463.qa.wantedly.com",
+    "chloe463.admin-qa.wantedly.com",
+    "localhost:3000",
+    "localhost:4000",
+    "localhost:3030",
+    "localhost:3031"
+  ],
+  "console-ninja.featureSet": "Community",
+  "console-ninja.fontSize": 14,
+  "editor.bracketPairColorization.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.stylelint": true,
+    "source.organizeImports": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.fontFamily": "HackGen Console NF",
+  "editor.fontSize": 14,
+  "editor.fontWeight": "100",
   "editor.formatOnSave": true,
+  "editor.inlineSuggest.enabled": true,
+  "editor.linkedEditing": true,
+  "editor.matchBrackets": "near",
+  "editor.renderWhitespace": "all",
+  "editor.tabSize": 2,
+  "eslint.run": "onSave",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "explorer.confirmDragAndDrop": false,
+  "files.exclude": {
+    "/.DS_Store": true,
+    "/.git": true,
+    "/node_modules": true,
+    "/node_modules/": true
+  },
+  "files.insertFinalNewline": true,
+  "files.watcherExclude": {
+    "/node_modules/": true
+  },
+  "github.copilot.enable": {
+    "*": true,
+    "haml": true,
+    "javascript": false,
+    "jsonc": true,
+    "markdown": false,
+    "plaintext": true,
+    "ruby": true,
+    "sql": false,
+    "typescript": true,
+    "typescriptreact": false,
+    "yaml": false
+  },
+  "gitlens.codeLens.enabled": false,
+  "gitlens.defaultDateStyle": "absolute",
+  "gitlens.hovers.currentLine.over": "line",
+  "gitlens.statusBar.enabled": false,
+  "javascript.referencesCodeLens.enabled": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "js/ts.implicitProjectConfig.experimentalDecorators": true,
+  "peacock.affectTitleBar": false,
+  "peacock.favoriteColors": [
+    {
+      "name": "Angular Red",
+      "value": "#dd0531"
+    },
+    {
+      "name": "Azure Blue",
+      "value": "#007fff"
+    },
+    {
+      "name": "JavaScript Yellow",
+      "value": "#f9e64f"
+    },
+    {
+      "name": "Mandalorian Blue",
+      "value": "#1857a4"
+    },
+    {
+      "name": "Node Green",
+      "value": "#215732"
+    },
+    {
+      "name": "React Blue",
+      "value": "#61dafb"
+    },
+    {
+      "name": "Something Different",
+      "value": "#832561"
+    },
+    {
+      "name": "Svelte Orange",
+      "value": "#ff3d00"
+    },
+    {
+      "name": "Vue Green",
+      "value": "#42b883"
+    }
+  ],
+  "search.exclude": {
+    "/node_modules": true
+  },
+  "terminal.external.osxExec": "iTerm.app",
+  "terminal.integrated.env.osx": {},
+  "terminal.integrated.fontFamily": "HackGen Console NF",
+  "terminal.integrated.fontSize": 14,
+  "todohighlight.exclude": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.vscode/**",
+    "**/.github/**",
+    "**/_output/**",
+    "**/*.min.*",
+    "**/*.map",
+    "**/.next/**",
+    "**/vendor/**",
+    "**/tmp/**",
+    "**/log/**"
+  ],
+  "todohighlight.isEnable": true,
+  "todohighlight.keywords": [
+    "FIXME",
+    {
+      "backgroundColor": "#08C5E7",
+      "color": "#ffffff",
+      "overviewRulerColor": "grey",
+      "text": "NOTE"
+    },
+    {
+      "color": "#000",
+      "isWholeLine": false,
+      "text": "HACK"
+    },
+    {
+      "backgroundColor": "#f65948",
+      "color": "white",
+      "text": "TODO(chloe463):"
+    },
+    {
+      "backgroundColor": "#f65948",
+      "color": "white",
+      "text": "Question:"
+    },
+    {
+      "backgroundColor": "#f65948",
+      "color": "white",
+      "text": "Review:"
+    },
+    "TODO"
+  ],
+  "typescript.updateImportsOnFileMove.enabled": "always",
   "vim.easymotion": true,
-  "vim.sneak": true,
-  "vim.incsearch": true,
-  "vim.useSystemClipboard": true,
-  "vim.useCtrlKeys": true,
   "vim.hlsearch": true,
+  "vim.incsearch": true,
   "vim.insertModeKeyBindings": [
     {
+      "after": [
+        "<Esc>"
+      ],
       "before": [
         "j",
         "j"
-      ],
-      "after": [
-        "<Esc>"
       ]
     },
     {
+      "after": [
+        "<Esc>"
+      ],
       "before": [
         "j",
         "k"
-      ],
-      "after": [
-        "<Esc>"
       ]
     },
     {
+      "after": [
+        "<Esc>"
+      ],
       "before": [
         "k",
         "j"
-      ],
-      "after": [
-        "<Esc>"
       ]
     },
     {
+      "after": [
+        "<Esc>"
+      ],
       "before": [
         "k",
         "k"
-      ],
-      "after": [
-        "<Esc>"
       ]
     }
   ],
+  "vim.leader": "<space>",
   "vim.normalModeKeyBindingsNonRecursive": [
     {
-      "before": [
-        "<leader>",
-        "d"
-      ],
       "after": [
         "d",
+        "d"
+      ],
+      "before": [
+        "<leader>",
         "d"
       ]
     },
@@ -65,55 +227,44 @@
       ]
     },
     {
-      "before": [
-        "n"
-      ],
       "after": [
         "n",
         "z",
         "z"
+      ],
+      "before": [
+        "n"
       ]
     },
     {
-      "before": [
-        "N"
-      ],
       "after": [
         "N",
         "z",
         "z"
+      ],
+      "before": [
+        "N"
       ]
     },
     {
-      "before": [
-        "*"
-      ],
       "after": [
         "*",
         "N",
         "z",
         "z"
+      ],
+      "before": [
+        "*"
       ]
     },
     {
-      "before": [
-        "x"
-      ],
       "after": [
         "\"",
         "_",
         "x"
-      ]
-    },
-    {
-      "before": [
-        "p"
       ],
-      "after": [
-        "p",
-        "g",
-        "v",
-        "y"
+      "before": [
+        "x"
       ]
     },
     {
@@ -133,6 +284,16 @@
       "commands": [
         ":split"
       ]
+    },
+    {
+      "before": [
+        "<leader>",
+        "h"
+      ],
+      "commands": [
+        "editor.action.showDefinitionPreviewHover"
+      ],
+      "when": "editorFocus"
     },
     {
       "before": [
@@ -190,194 +351,78 @@
       "commands": [
         "workbench.action.findInFiles"
       ]
+    },
+    {
+      "before": [
+        "u"
+      ],
+      "commands": [
+        "undo"
+      ]
+    },
+    {
+      "before": [
+        "<C-r>"
+      ],
+      "commands": [
+        "redo"
+      ]
+    },
+    {
+      "before": [
+        "<tab>"
+      ],
+      "after": [
+        "g",
+        "t"
+      ]
+    },
+    {
+      "before": [
+        "<shift+tab>"
+      ],
+      "after": [
+        "g",
+        "T"
+      ]
+    },
+    {
+      "before": [
+        "<C-l>"
+      ],
+      "after": [
+        "<C-w>",
+        "l"
+      ]
+    },
+    {
+      "before": [
+        "<C-h>"
+      ],
+      "after": [
+        "<C-w>",
+        "h"
+      ]
     }
   ],
-  "vim.leader": "<space>",
-  "breadcrumbs.enabled": true,
-  "flow.useNPMPackagedFlow": true,
-  "workbench.editor.showTabs": true,
-  "editor.renderWhitespace": "all",
-  "typescript.updateImportsOnFileMove.enabled": "always",
-  "todohighlight.isEnable": true,
-  // "todohighlight.keywords": ["TODO(chloe463):", "NOTE", "HACK", "!todo"],
-  "todohighlight.keywords": [
-    "FIXME",
+  "vim.visualModeKeyBindingsNonRecursive": [
     {
-      "text": "NOTE",
-      "color": "#ffffff",
-      "backgroundColor": "#08C5E7",
-      "overviewRulerColor": "grey"
-    },
-    {
-      "text": "HACK",
-      "color": "#000",
-      "isWholeLine": false
-    },
-    {
-      "text": "TODO(chloe463)",
-      "color": "white",
-      "backgroundColor": "#f65948"
-    },
-    {
-      "text": "Question",
-      "color": "white",
-      "backgroundColor": "#f65948"
-    },
-    {
-      "text": "Review",
-      "color": "white",
-      "backgroundColor": "#f65948"
-    },
-    "TODO"
+      "before": [
+        "p"
+      ],
+      "after": [
+        "\"",
+        "_",
+        "d",
+        "P"
+      ]
+    }
   ],
-  "todohighlight.exclude": [
-    "**/node_modules/**",
-    "**/bower_components/**",
-    "**/dist/**",
-    "**/build/**",
-    "**/.vscode/**",
-    "**/.github/**",
-    "**/_output/**",
-    "**/*.min.*",
-    "**/*.map",
-    "**/.next/**",
-    "**/vendor/**",
-    "**/tmp/**",
-    "**/log/**"
-  ],
+  "vim.sneak": true,
+  "vim.useCtrlKeys": true,
+  "vim.useSystemClipboard": true,
   "workbench.colorTheme": "Nord",
-  "terminal.external.osxExec": "iTerm.app",
-  "terminal.integrated.fontFamily": "HackGen Console NF",
-  "terminal.integrated.fontSize": 14,
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
-  "editor.tabSize": 2,
-  "eslint.alwaysShowStatus": true,
-  "eslint.packageManager": "yarn",
-  "editor.fontWeight": "100",
-  "liveshare.featureSet": "insiders",
-  "ruby.rubocop.useBundler": true,
-  "editor.fontSize": 14,
-  "files.exclude": {
-    "/.git": true,
-    "/.DS_Store": true,
-    "/node_modules": true,
-    "/node_modules/": true
-  },
-  "search.exclude": {
-    "/node_modules": true
-  },
-  "files.watcherExclude": {
-    "/node_modules/": true
-  },
-  "gitlens.hovers.currentLine.over": "line",
-  "gitlens.codeLens.enabled": false,
-  "gitlens.statusBar.enabled": false,
-  "gitlens.defaultDateStyle": "absolute",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": true,
-    // "source.fixAll": true,
-    // "source.fixAll.eslint": true, // eslint
-    "source.fixAll.stylelint": true // Stylelint
-  },
-  "peacock.favoriteColors": [
-    {
-      "name": "Angular Red",
-      "value": "#dd0531"
-    },
-    {
-      "name": "Azure Blue",
-      "value": "#007fff"
-    },
-    {
-      "name": "JavaScript Yellow",
-      "value": "#f9e64f"
-    },
-    {
-      "name": "Mandalorian Blue",
-      "value": "#1857a4"
-    },
-    {
-      "name": "Node Green",
-      "value": "#215732"
-    },
-    {
-      "name": "React Blue",
-      "value": "#61dafb"
-    },
-    {
-      "name": "Something Different",
-      "value": "#832561"
-    },
-    {
-      "name": "Svelte Orange",
-      "value": "#ff3d00"
-    },
-    {
-      "name": "Vue Green",
-      "value": "#42b883"
-    }
-  ],
-  "peacock.affectTitleBar": false,
-  "eslint.run": "onSave",
-  "files.insertFinalNewline": true,
-  "js/ts.implicitProjectConfig.experimentalDecorators": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "workbench.editor.showTabs": "multiple",
   "workbench.iconTheme": "material-icon-theme",
-  "rust-client.rustupPath": "/Users/Tsuyoshi/.cargo/bin/rustup",
-  "editor.matchBrackets": "near",
-  "editor.bracketPairColorization.enabled": true,
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "explorer.confirmDragAndDrop": false,
-  "javascript.updateImportsOnFileMove.enabled": "always",
-  "editor.inlineSuggest.enabled": true,
-  "github.copilot.enable": {
-    "*": true,
-    "yaml": false,
-    "plaintext": true,
-    "markdown": false,
-    "typescriptreact": false,
-    "ruby": true,
-    "typescript": true,
-    "jsonc": true,
-    "haml": true,
-    "javascript": false,
-    "sql": false
-  },
-  "terminal.integrated.env.osx": {},
-  "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  },
-  "deno.enablePaths": [
-    "/Users/tsuyoshihara/Dev/ws/node"
-  ],
-  "deno.path": "/opt/homebrew/bin/deno",
-  "terminal.integrated.env.osx": {},
-  "console-ninja.allowedHosts": [
-    "chloe463.qa.wantedly.com",
-    "chloe463.admin-qa.wantedly.com",
-    "localhost:3000",
-    "localhost:4000",
-    "localhost:3030",
-    "localhost:3031"
-  ],
-  "console-ninja.featureSet": "Community",
-  "console-ninja.fontSize": 14,
-  "javascript.referencesCodeLens.enabled": true,
-  "editor.linkedEditing": true,
   "window.zoomLevel": 1
-  // "editor.cursorStyle": "line",
-  // "editor.insertSpaces": false,
-  // "editor.lineNumbers": "on",
-  // "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
-  // "editor.wordWrap": "off"
 }
