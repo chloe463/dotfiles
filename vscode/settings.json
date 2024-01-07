@@ -150,17 +150,17 @@
     {
       "backgroundColor": "#f65948",
       "color": "white",
-      "text": "TODO(chloe463)"
+      "text": "TODO(chloe463):"
     },
     {
       "backgroundColor": "#f65948",
       "color": "white",
-      "text": "Question"
+      "text": "Question:"
     },
     {
       "backgroundColor": "#f65948",
       "color": "white",
-      "text": "Review"
+      "text": "Review:"
     },
     "TODO"
   ],
@@ -411,18 +411,18 @@
         "p"
       ],
       "after": [
-        "p",
-        "g",
-        "v",
-        "y"
+        "\"",
+        "_",
+        "d",
+        "P"
       ]
     }
   ],
   "vim.sneak": true,
   "vim.useCtrlKeys": true,
   "vim.useSystemClipboard": true,
-  "window.zoomLevel": 1,
   "workbench.colorTheme": "Nord",
-  "workbench.editor.showTabs": true,
-  "workbench.iconTheme": "material-icon-theme"
+  "workbench.editor.showTabs": "multiple",
+  "workbench.iconTheme": "material-icon-theme",
+  "window.zoomLevel": 1
 }
