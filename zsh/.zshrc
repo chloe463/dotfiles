@@ -101,3 +101,13 @@ function search_repo_and_change_directory() {
 zle -N search_repo_and_change_directory
 bindkey '^F' search_repo_and_change_directory
 
+# Switch git branch
+function search_branch() {
+  local branch=$(git branch | grep -v '*' | fzf)
+  if [ -n "${branch}" ]; then
+    BUFFER="git switch ${branch}"
+    zle accept-line
+  fi
+}
+zle -N search_branch
+bindkey '^G' search_branch
