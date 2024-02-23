@@ -165,6 +165,8 @@
     },
     "TODO"
   ],
+  "turboConsoleLog.addSemicolonInTheEnd": true,
+  "turboConsoleLog.logMessagePrefix": "🐞",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "vim.easymotion": true,
   "vim.hlsearch": true,
