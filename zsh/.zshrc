@@ -111,6 +111,6 @@ function search_branch() {
   fi
 }
 zle -N search_branch
-bindkey '^G' search_branch
+bindkey '^B' search_branch
 
 PATH=~/.console-ninja/.bin:$PATH
