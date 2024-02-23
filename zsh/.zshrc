@@ -24,7 +24,7 @@ eval "$(direnv hook zsh)"
 eval "$(starship init zsh)"
 
 export GOENV_ROOT="$HOME/.goenv"
-export PATH="$HOME/bin:$GOENV_ROOT/bin:$HOME/go/1.19.0/bin:$PATH"
+export PATH="$HOME/bin:$HOME/scripts:$GOENV_ROOT/bin:$HOME/go/1.19.0/bin:$PATH"
 eval "$(goenv init -)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
