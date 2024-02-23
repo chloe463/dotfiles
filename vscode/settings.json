@@ -21,8 +21,8 @@
   "console-ninja.fontSize": 14,
   "editor.bracketPairColorization.enabled": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.stylelint": true,
-    "source.organizeImports": true
+    "source.fixAll.stylelint": "explicit",
+    "source.organizeImports": "explicit"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.fontFamily": "HackGen Console NF",
