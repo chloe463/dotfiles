@@ -53,6 +53,11 @@ function run_stow()
 
         stow -R -vvv -t "$HOME/Library/Application Support/Code/User" vscode
 
+        if [ ! -d $HOME/scripts ]; then
+            mkdir $HOME/scripts
+        fi
+        stow -R -vvv -t "$HOME/scripts" scripts
+
         echo
         echo "🎉 Done!"
         echo
