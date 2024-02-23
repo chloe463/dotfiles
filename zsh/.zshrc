@@ -15,6 +15,7 @@ alias vim='nvim'
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
 export PATH=$PATH:'/Applications/Postgres.app/Contents/Versions/latest/bin'
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
 eval "$(rbenv init -)"
 eval "$(nodenv init -)"
