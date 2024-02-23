@@ -21,8 +21,8 @@
   "console-ninja.fontSize": 14,
   "editor.bracketPairColorization.enabled": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.stylelint": true,
-    "source.organizeImports": true
+    "source.fixAll.stylelint": "explicit",
+    "source.organizeImports": "explicit"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.fontFamily": "HackGen Console NF",
@@ -112,6 +112,7 @@
     }
   ],
   "search.exclude": {
+    ".yarn": true,
     "/node_modules": true
   },
   "terminal.external.osxExec": "iTerm.app",
@@ -164,6 +165,8 @@
     },
     "TODO"
   ],
+  "turboConsoleLog.addSemicolonInTheEnd": true,
+  "turboConsoleLog.logMessagePrefix": "🐞",
   "typescript.updateImportsOnFileMove.enabled": "always",
   "vim.easymotion": true,
   "vim.hlsearch": true,

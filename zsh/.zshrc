@@ -111,3 +111,5 @@ function search_branch() {
 }
 zle -N search_branch
 bindkey '^G' search_branch
+
+PATH=~/.console-ninja/.bin:$PATH
