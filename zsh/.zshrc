@@ -29,16 +29,9 @@ eval "$(goenv init -)"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# For deno completion
-# autoload -U compinit
-# compinit
-
-# COMPLETION_DIR=$HOME/.my_completions
-# if [ -d $COMPLETION_DIR ]; then
-#   fpath=($COMPLETION_DIR $fpath)
-# fi
 # You need to run the following commands
 # gh completion -s zsh > $HOME/.my_completions/_gh
+# kube completion zsh > $HOME/.my_completions/_kube
 
 COMPLETION_DIR=$HOME/.my_completions
 if [ -d $COMPLETION_DIR ]; then
