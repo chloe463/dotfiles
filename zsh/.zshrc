@@ -38,6 +38,12 @@ if [ -d $COMPLETION_DIR ]; then
   fpath=($COMPLETION_DIR $fpath)
 fi
 
+# For ffi
+export LIBFFI_ROOT=$(brew --prefix libffi)
+export PATH="$LIBFFI_ROOT/bin:$PATH"
+export LDFLAGS="-L$LIBFFI_ROOT/lib $LDFLAGS"
+export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$LIBFFI_ROOT/lib/pkgconfig"
+
 # For completion
 autoload -U compinit
 compinit -i
