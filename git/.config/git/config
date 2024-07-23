@@ -41,6 +41,7 @@
     sync = !sh ~/scripts/git_sync.sh
     cof = !git branch -a | fzf | xargs git checkout
     cofzf = !git branch -a | fzf | xargs git checkout
+    unstage = reset HEAD
 [user]
     name = Tsuyoshi HARA
     email = chloe463+git@gmail.com
