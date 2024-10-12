@@ -115,8 +115,9 @@ bindkey '^B' search_branch
 PATH=~/.console-ninja/.bin:$PATH
 
 # bun completions
-[ -s "/Users/tsuyoshihara/.bun/_bun" ] && source "/Users/tsuyoshihara/.bun/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
