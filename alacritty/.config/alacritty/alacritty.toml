@@ -1,3 +1,5 @@
+live_config_reload = true
+import = ["/Users/tsuyoshihara/.config/alacritty/color-schemes/iceberg.toml"]
 
 [[mouse.bindings]]
 action = "Copy"
@@ -8,10 +10,6 @@ mouse = "Left"
 action = "Paste"
 mods = "Shift"
 mouse = "Right"
-
-[general]
-live_config_reload = true
-import = ["/Users/tsuyoshihara/.config/alacritty/color-schemes/iceberg.toml"]
 
 [cursor]
 unfocused_hollow = true
