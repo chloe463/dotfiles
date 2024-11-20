@@ -9,7 +9,7 @@ fi
 alias cat='bat'
 alias g='git'
 alias be='bundle exec'
-alias ls='exa --group-directories-first --icons'
+alias ls='eza --group-directories-first --icons'
 alias vim='nvim'
 
 export PSQL_EDITOR='vim +"set syntax=sql" '
