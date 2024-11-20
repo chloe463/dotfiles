@@ -21,8 +21,9 @@
   "console-ninja.fontSize": 14,
   "editor.bracketPairColorization.enabled": true,
   "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
     "source.fixAll.stylelint": "explicit",
-    "source.organizeImports": "explicit"
+    "source.organizeImports": "never"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.fontFamily": "HackGen Console NF",
@@ -70,7 +71,6 @@
   "gitlens.hovers.currentLine.over": "line",
   "gitlens.statusBar.enabled": false,
   "javascript.referencesCodeLens.enabled": true,
-  "javascript.updateImportsOnFileMove.enabled": "always",
   "js/ts.implicitProjectConfig.experimentalDecorators": true,
   "peacock.affectTitleBar": false,
   "peacock.favoriteColors": [
@@ -427,5 +427,6 @@
   "workbench.colorTheme": "Nord",
   "workbench.editor.showTabs": "multiple",
   "workbench.iconTheme": "material-icon-theme",
-  "window.zoomLevel": 1
+  "window.zoomLevel": 1,
+  "javascript.updateImportsOnFileMove.enabled": "always"
 }
