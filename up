@@ -73,7 +73,8 @@ function install_homebrew()
     echo 'Homebrew has already been installed.'
   else
     echo 'Install Homebrew'
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    # https://brew.sh
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     brew update
   fi
 
