@@ -264,7 +264,7 @@ local servers = {
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
-  tsserver = {},
+  ts_ls = {},
   eslint = {},
   jsonls = {},
 
@@ -274,7 +274,7 @@ local servers = {
       telemetry = { enable = false },
     },
   },
-  ruby_ls = {},
+  ruby_lsp = {},
   solargraph = {},
 }
 
