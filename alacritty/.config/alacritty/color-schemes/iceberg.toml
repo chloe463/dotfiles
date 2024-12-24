@@ -26,30 +26,30 @@ yellow = "0xF5B78A"
 background = "0x16171E"
 foreground = "0xD1D2D3"
 
-[schemes.iceberge.bright]
-black = "0x676767"
-blue = "0x6871FF"
-cyan = "0x5FFDFF"
-green = "0x5FF967"
-magenta = "0xFF76FF"
-red = "0xFF6D67"
-white = "0xFEFFFF"
-yellow = "0xFEFB67"
-
-[schemes.iceberge.cursor]
-cursor = "0xc7c7c7"
-text = "0xFEFFFF"
-
-[schemes.iceberge.normal]
-black = "0x000000"
-blue = "0x9BB8DC"
-cyan = "0x00C5C7"
-green = "0x83AC8E"
-magenta = "0xBAACE2"
-red = "0xE68E8E"
-white = "0xC7C7C7"
-yellow = "0xF5B78A"
-
-[schemes.iceberge.primary]
-background = "0x16171E"
-foreground = "0xD1D2D3"
+# [schemes.iceberge.bright]
+# black = "0x676767"
+# blue = "0x6871FF"
+# cyan = "0x5FFDFF"
+# green = "0x5FF967"
+# magenta = "0xFF76FF"
+# red = "0xFF6D67"
+# white = "0xFEFFFF"
+# yellow = "0xFEFB67"
+#
+# [schemes.iceberge.cursor]
+# cursor = "0xc7c7c7"
+# text = "0xFEFFFF"
+#
+# [schemes.iceberge.normal]
+# black = "0x000000"
+# blue = "0x9BB8DC"
+# cyan = "0x00C5C7"
+# green = "0x83AC8E"
+# magenta = "0xBAACE2"
+# red = "0xE68E8E"
+# white = "0xC7C7C7"
+# yellow = "0xF5B78A"
+#
+# [schemes.iceberge.primary]
+# background = "0x16171E"
+# foreground = "0xD1D2D3"
