@@ -5,7 +5,7 @@ if (not status) then return end
 -- See `:help nvim-treesitter`
 treesitter.setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'css', 'go', 'graphql', 'lua', 'python', 'ruby', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'c', 'cpp', 'css', 'go', 'graphql', 'lua', 'python', 'ruby', 'rust', 'styled', 'tsx', 'typescript', 'vimdoc', 'vim' },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
