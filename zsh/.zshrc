@@ -22,6 +22,7 @@ alias g='git'
 alias be='bundle exec'
 alias ls='eza --group-directories-first --icons'
 alias vim='nvim'
+alias top='btop'
 
 ####################################################################################################
 # Environment variables
