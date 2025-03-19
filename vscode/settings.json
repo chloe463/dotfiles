@@ -62,15 +62,15 @@
   "github.copilot.enable": {
     "*": true,
     "haml": true,
-    "javascript": false,
     "jsonc": true,
     "markdown": false,
     "plaintext": true,
     "ruby": true,
     "sql": false,
     "typescript": true,
-    "typescriptreact": false,
-    "yaml": false
+    "yaml": false,
+    "typescriptreact": true,
+    "javascript": true
   },
   "gitlens.codeLens.enabled": false,
   "gitlens.defaultDateStyle": "absolute",
@@ -435,5 +435,6 @@
   "workbench.iconTheme": "material-icon-theme",
   "window.zoomLevel": 1,
   "javascript.updateImportsOnFileMove.enabled": "always",
-  "terminal.integrated.enableMultiLinePasteWarning": false
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "github.copilot.editor.enableCodeActions": false
 }
