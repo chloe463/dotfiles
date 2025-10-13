@@ -433,8 +433,14 @@
   "workbench.colorTheme": "Nord",
   "workbench.editor.showTabs": "multiple",
   "workbench.iconTheme": "material-icon-theme",
-  "window.zoomLevel": 1,
   "javascript.updateImportsOnFileMove.enabled": "always",
   "terminal.integrated.enableMultiLinePasteWarning": false,
-  "github.copilot.editor.enableCodeActions": false
+  "workbench.editorAssociations": {
+    "*.svg": "default"
+  },
+  "tailwindCSS.classFunctions": [
+    "cva"
+  ],
+  "window.zoomLevel": 1,
+  "github.copilot.nextEditSuggestions.enabled": true
 }
