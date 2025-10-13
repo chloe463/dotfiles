@@ -12,13 +12,13 @@
 format = """
 [░▒▓](#292929)\
 $directory\
-[](fg:#292929 bg:#3b4252)\
+[](fg:#292929 bg:#3b4252)\
 $git_branch\
 $git_status\
-[](fg:#3b4252)\
+[](fg:#3b4252)\
 $custom\
 $fill\
-[](fg:#a3aed2)\
+[](fg:#a3aed2)\
 $time\
 [▓▒░](#a3aed2)\
 \n$character"""
