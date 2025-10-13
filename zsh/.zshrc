@@ -153,3 +153,5 @@ function search_branch() {
 zle -N search_branch
 bindkey '^B' search_branch
 
+# Load Angular CLI autocompletion.
+source <(ng completion script)
