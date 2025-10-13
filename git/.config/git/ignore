@@ -23,3 +23,6 @@ yarn-error.log
 
 # misc
 telepresence.log
+
+# AI configurations
+**/.claude/settings.local.json
