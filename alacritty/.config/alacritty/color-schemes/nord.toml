@@ -1,0 +1,79 @@
+# Alacritty color configuration for the Nord color palette
+# https://alacritty.org/config-alacritty.html#colors
+# https://www.nordtheme.com/docs/colors-and-palettes
+
+[colors.primary]
+background = "#2e3440"  # nord0
+foreground = "#d8dee9"  # Between nord4 and nord5
+dim_foreground = "#a5abb6"
+bright_foreground = "#eceff4"  # nord6
+
+[colors.cursor]
+text = "#2e3440"  # nord0
+cursor = "#d8dee9"  # Between nord4 and nord5
+
+[colors.vi_mode_cursor]
+text = "#2e3440"  # nord0
+cursor = "#d8dee9"  # Between nord4 and nord5
+
+[colors.selection]
+text = "CellForeground"
+background = "#4c566a"  # nord3
+
+[colors.search.matches]
+foreground = "CellBackground"
+background = "#88c0d0"  # nord8
+
+[colors.search.bar]
+background = "#434c5e"  # nord2
+foreground = "#d8dee9"  # Between nord4 and nord5
+
+[colors.search.focused_match]
+foreground = "#2e3440"  # nord0
+background = "#a3be8c"  # nord14
+
+[colors.hints.start]
+foreground = "#2e3440"  # nord0
+background = "#ebcb8b"  # nord13
+
+[colors.hints.end]
+foreground = "#2e3440"  # nord0
+background = "#bf616a"  # nord11
+
+[colors.line_indicator]
+foreground = "None"
+background = "None"
+
+[colors.footer_bar]
+foreground = "#2e3440"  # nord0
+background = "#d8dee9"  # Between nord4 and nord5
+
+[colors.normal]
+black = "#3b4252"  # nord1
+red = "#bf616a"  # nord11
+green = "#a3be8c"  # nord14
+yellow = "#ebcb8b"  # nord13
+blue = "#81a1c1"  # nord9
+magenta = "#b48ead"  # nord15
+cyan = "#88c0d0"  # nord8
+white = "#e5e9f0"  # nord5
+
+[colors.bright]
+black = "#4c566a"  # nord3
+red = "#bf616a"  # nord11
+green = "#a3be8c"  # nord14
+yellow = "#ebcb8b"  # nord13
+blue = "#81a1c1"  # nord9
+magenta = "#b48ead"  # nord15
+cyan = "#8fbcbb"  # nord7
+white = "#eceff4"  # nord6
+
+[colors.dim]
+black = "#373e4d"
+red = "#94545d"
+green = "#809575"
+yellow = "#b29e75"
+blue = "#68809a"
+magenta = "#8c738c"
+cyan = "#6d96a5"
+white = "#aeb3bb"

@@ -11,7 +11,8 @@ mouse = "Right"
 
 [general]
 live_config_reload = true
-import = ["/Users/tsuyoshihara/.config/alacritty/color-schemes/iceberg.toml"]
+# import = ["~/.config/alacritty/color-schemes/iceberg.toml"]
+import = ["~/.config/alacritty/color-schemes/nord.toml"]
 
 [cursor]
 unfocused_hollow = true
