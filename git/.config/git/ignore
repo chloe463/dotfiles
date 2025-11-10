@@ -26,3 +26,5 @@ telepresence.log
 
 # AI configurations
 **/.claude/settings.local.json
+.ai_logs/
+
