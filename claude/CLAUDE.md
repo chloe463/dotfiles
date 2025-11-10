@@ -96,6 +96,31 @@ This is my global Claude Code configuration directory (`~/.claude`) that sets up
 - **YOU MUST: Generate unit tests for new code**
 - **YOU MUST: Output plan and temporary files to .ai_logs of working repository**
 
+#### Setting up .ai_logs directory
+The `.ai_logs` directory is used to store AI-generated plans, analysis, and temporary work files.
+
+```bash
+# Create in project root
+mkdir -p .ai_logs
+
+# Already ignored by global gitignore
+# No additional configuration needed
+```
+
+**File naming convention:**
+- Use format: `YYYYMMDD_<topic>.md`
+- Examples:
+  - `20250111_refactoring_plan.md`
+  - `20250111_api_design.md`
+  - `20250111_performance_analysis.md`
+
+**What to store in .ai_logs:**
+- Planning documents and design decisions
+- Code analysis reports
+- Refactoring plans
+- TODO lists and task breakdowns
+- Experiment results and benchmarks
+
 ## 📘 TypeScript Development
 
 ### Core Rules
@@ -195,7 +220,9 @@ trap 'echo "Error on line $LINENO"' ERR
 ## 📊 Efficiency Metrics & Tracking
 
 ### Time Savings Report
-**Generate weekly efficiency reports**
+**Request weekly efficiency reports from Claude**
+
+*Note: This is an example of reports you can request from Claude, not an automated feature.*
 
 ```
 📈 This Week's Productivity Gains:
@@ -206,6 +233,10 @@ trap 'echo "Error on line $LINENO"' ERR
 - Refactoring automated: 8 patterns extracted
 Total time saved: ~11 hours
 ```
+
+**How to request:**
+- Ask Claude: "Can you provide a weekly efficiency report?"
+- Claude will analyze the session history and generate insights
 
 ## 🔧 Commit Standards
 
