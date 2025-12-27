@@ -53,7 +53,7 @@ y = 2
 
 [window]
 decorations = "Buttonless"
-opacity = 0.99
+opacity = 1
 startup_mode = "Windowed"
 
 [window.padding]
