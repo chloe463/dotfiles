@@ -59,6 +59,7 @@
   "files.watcherExclude": {
     "/node_modules/": true
   },
+  "github.copilot.editor.enableCodeActions": false,
   "github.copilot.enable": {
     "*": true,
     "haml": true,
@@ -72,6 +73,7 @@
     "typescriptreact": true,
     "javascript": true
   },
+  "github.copilot.nextEditSuggestions.enabled": true,
   "gitlens.codeLens.enabled": false,
   "gitlens.defaultDateStyle": "absolute",
   "gitlens.hovers.currentLine.over": "line",
@@ -442,6 +444,6 @@
     "cva"
   ],
   "window.zoomLevel": 1,
-  "github.copilot.nextEditSuggestions.enabled": true,
-  "editor.unicodeHighlight.nonBasicASCII": false
+  "editor.unicodeHighlight.nonBasicASCII": false,
+  "claudeCode.preferredLocation": "panel"
 }
