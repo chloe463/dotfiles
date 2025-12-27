@@ -24,9 +24,9 @@ background = "#4c566a"  # nord3
 foreground = "CellBackground"
 background = "#88c0d0"  # nord8
 
-[colors.search.bar]
-background = "#434c5e"  # nord2
-foreground = "#d8dee9"  # Between nord4 and nord5
+# [colors.search.bar]
+# background = "#434c5e"  # nord2
+# foreground = "#d8dee9"  # Between nord4 and nord5
 
 [colors.search.focused_match]
 foreground = "#2e3440"  # nord0
