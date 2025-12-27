@@ -442,5 +442,6 @@
     "cva"
   ],
   "window.zoomLevel": 1,
-  "github.copilot.nextEditSuggestions.enabled": true
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "editor.unicodeHighlight.nonBasicASCII": false
 }

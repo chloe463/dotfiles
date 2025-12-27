@@ -52,6 +52,7 @@ function run_stow()
           zsh
 
         stow -R -vvv -t "$HOME/Library/Application Support/Code/User" vscode
+        stow -R -vvv -t "$HOME/Library/Application Support/Cursor/User" cursor
         stow -R -vvv -t "$HOME/.claude" claude
 
         if [ ! -d $HOME/scripts ]; then
