@@ -1,19 +1,6 @@
 {
   "permissions": {
     "allow": [],
-    "ask": [
-      "Bash(git push:*)",
-      "Bash(git commit:*)",
-      "Bash(git reset:*)",
-      "Bash(git rebase:*)",
-      "Bash(curl:*)",
-      "Bash(wget:*)",
-      "Bash(nc:*)",
-      "Bash(gh:*)",
-      "Bash(npm install:*)",
-      "Bash(yarn install:*)",
-      "Bash(pnpm install:*)"
-    ],
     "deny": [
       "Read(.env*)",
       "Read(.envrc)",
@@ -102,6 +89,32 @@
       "Write(~/.ssh/*_rsa)",
       "Write(~/.ssh/*_ecdsa)",
       "Write(~/.ssh/*_ed25519)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git rebase:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(nc:*)",
+      "Bash(gh:*)",
+      "Bash(npm install:*)",
+      "Bash(yarn install:*)",
+      "Bash(pnpm install:*)"
+    ]
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "osascript -e 'display notification \"Claude Codeが許可を求めています\" with title \"Claude Code\" subtitle \"確認待ち\" sound name \"Glass\"'"
+          }
+        ]
+      }
     ]
   }
 }
