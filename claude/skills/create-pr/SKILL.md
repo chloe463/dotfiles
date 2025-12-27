@@ -1,0 +1,193 @@
+---
+name: create-pr
+description: Create a GitHub pull request with meaningful description following project standards
+---
+
+# Create PR Skill
+
+This skill creates well-structured GitHub pull requests with meaningful descriptions.
+
+## Prerequisites
+
+- **gh CLI installed**: Verify with `gh --version`
+- **Authenticated**: Run `gh auth status` to check
+- **Pushed branch**: Current branch must be pushed to remote
+- **Clean commits**: All commits should follow conventional commits format
+
+## PR Scope
+
+- **MUST**: Review ALL commits in the branch since divergence from base
+- **MUST**: Understand the complete scope of changes, not just the latest commit
+- **NEVER**: Create PR based only on the most recent commit
+- **NEVER**: Create PR without understanding the full context
+
+## PR Title Format
+
+Follow the **Conventional Commits** format (same as commit messages):
+
+```
+<type>[optional scope]: <subject>
+```
+
+### Guidelines
+
+- Use the dominant type from commits in the branch
+- Keep it concise and descriptive (maximum 72 characters)
+- If multiple features, use the main feature or use `feat` with broader scope
+- Examples:
+  - `feat(auth): add OAuth2 authentication flow`
+  - `fix(api): resolve race condition in user updates`
+  - `refactor(db): migrate to connection pooling`
+
+## PR Description Format
+
+### Check for PR Template First
+
+Before creating the PR description, check if a PR template exists:
+
+```bash
+# Common locations for PR templates
+.github/PULL_REQUEST_TEMPLATE.md
+.github/pull_request_template.md
+.github/PULL_REQUEST_TEMPLATE/pull_request_template.md
+docs/PULL_REQUEST_TEMPLATE.md
+```
+
+**If template exists**: Follow the template structure and fill in all sections
+**If no template**: Use the default format below
+
+### Default Format (when no template exists)
+
+```markdown
+## Summary
+
+Brief overview of what this PR does (2-4 bullet points)
+
+## Why
+
+Explain the motivation and context for this change:
+- What problem does this solve?
+- Why is this change necessary?
+- What is the business value or technical benefit?
+
+## Changes
+
+- List major changes or components affected
+- Group related changes together
+- Mention any breaking changes
+
+## Test Plan
+
+- [ ] Describe how to test the changes
+- [ ] List manual testing steps if applicable
+- [ ] Mention automated tests added/updated
+
+## Notes
+
+[Optional section for additional context]
+- Any caveats or known limitations
+- Follow-up work needed
+- Performance impact (if relevant)
+- Migration steps (if applicable)
+```
+
+## Workflow
+
+1. **Check for PR template**
+   - Look for PR template in common locations
+   - Read and understand the template structure if it exists
+
+2. **Analyze branch history**
+   - Run `git log <base-branch>...HEAD` to see all commits
+   - Run `git diff <base-branch>...HEAD` to understand full changes
+   - Review commit messages to understand the scope
+
+3. **Verify branch state**
+   - Check if branch is pushed: `git status`
+   - Push if needed: `git push -u origin <branch-name>`
+
+4. **Draft PR content**
+   - Create title based on the dominant change type
+   - Write description following template (if exists) or default format
+   - Ensure all sections are filled appropriately
+
+5. **Create PR**
+   - Use `gh pr create --title "..." --body "..."`
+   - Add reviewers if configured
+   - Set base branch if not default
+
+6. **Verify PR**
+   - Return the PR URL for user review
+   - Check that description is clear and complete
+
+## Examples
+
+### Good PR with Default Format
+
+**Title:** `feat(auth): add JWT token refresh mechanism`
+
+**Description:**
+```markdown
+## Summary
+
+- Implements automatic JWT token refresh before expiration
+- Reduces authentication errors and improves user experience
+- Adds background refresh logic with configurable timing
+
+## Why
+
+Users were experiencing frequent authentication errors when tokens expired
+during active sessions. This implementation proactively refreshes tokens
+before expiration, eliminating interruptions and improving UX.
+
+## Changes
+
+- Add `TokenRefreshService` for managing token lifecycle
+- Update authentication middleware to handle token refresh
+- Add configuration options for refresh timing
+- Include comprehensive error handling and logging
+
+## Test Plan
+
+- [ ] Verify token refresh works before expiration
+- [ ] Test error handling when refresh fails
+- [ ] Confirm existing authentication flows still work
+- [ ] Run integration tests for auth endpoints
+
+## Notes
+
+Performance impact: Minimal, refresh happens in background.
+```
+
+### Bad PR Examples ❌
+
+```
+# Too vague
+fix: bug fixes
+
+# Not descriptive
+Update code
+
+# Multiple unrelated changes
+feat: add login, fix user profile, update tests, refactor API
+
+# Missing Why section
+Just implements the feature without explaining motivation
+```
+
+## PR Guidelines (from CLAUDE.md)
+
+- **Focus on high-level problem and solution**
+- **Never mention tools used** (no "Generated by Claude Code", no co-authored-by)
+- **Add specific reviewers** as configured in repository settings
+- **Include performance impact** if relevant to the changes
+- **Keep descriptions clear and concise**
+
+## Notes
+
+- PR description should be self-contained and explain the context
+- Assume reviewers may not have full context of discussions
+- Link to related issues if applicable: `Closes #123`, `Relates to #456`
+- For large PRs, consider breaking into smaller, focused PRs
+- Each PR should ideally address one logical feature or fix
+- Always respect project-specific PR templates when they exist
