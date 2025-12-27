@@ -112,11 +112,11 @@ function ide() {
 
 # Setup tmux panes (4 panes)
 function four-panes() {
-  tmux split-window -h -p 50
+  tmux split-window -h -l 50%
   tmux select-pane -t 0
-  tmux split-window -v -p 50
+  tmux split-window -v -l 50%
   tmux select-pane -t 2
-  tmux split-window -v -p 50
+  tmux split-window -v -l 50%
 }
 
 # Print 256 colors
