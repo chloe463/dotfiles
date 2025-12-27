@@ -154,4 +154,5 @@ zle -N search_branch
 bindkey '^B' search_branch
 
 # Load Angular CLI autocompletion.
-source <(ng completion script)
+# Temporarily disabled due to ESM/CommonJS compatibility issue
+# command -v ng > /dev/null 2>&1 && source <(ng completion script)
