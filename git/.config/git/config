@@ -30,7 +30,6 @@
     pl = !git pull && git submodule update --init
     graph = log --oneline --graph --decorate=full
     push-f = push --force-with-lease
-    showpr = !"f() { git log --merges --oneline --reverse --ancestry-path $1...master | grep 'Merge pull request #' | head -n 1; }; f"
     merge = merge --no-ff
     sw = switch
     rs = restore
