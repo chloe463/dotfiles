@@ -98,6 +98,9 @@ function pwb() {
   if [ ${CURRENT_BRANCH} = "master" ]; then
     return 1
   fi
+  if [ ${CURRENT_BRANCH} = "main" ]; then
+    return 1
+  fi
   echo ${CURRENT_BRANCH}
   return 0
 }
