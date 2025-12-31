@@ -1,0 +1,12 @@
+# Work Machine Brewfile
+# This file extends Brewfile.shared with work-specific packages
+
+# Load shared packages
+instance_eval(File.read("Brewfile.shared"))
+
+# Work-specific packages (add your company tools here)
+# Example:
+# tap "company/internal"
+# brew "company-vpn"
+# cask "slack"
+# cask "zoom"

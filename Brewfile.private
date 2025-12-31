@@ -1,0 +1,11 @@
+# Private Machine Brewfile
+# This file extends Brewfile.shared with private-specific packages
+
+# Load shared packages
+instance_eval(File.read("Brewfile.shared"))
+
+# Private-specific packages (add your personal tools here)
+# Example:
+# brew "personal-tool"
+# cask "spotify"
+# cask "steam"
