@@ -6,7 +6,7 @@ Personal macOS configuration files managed with [GNU Stow](https://www.gnu.org/s
 
 ```bash
 # Clone this repository
-git clone git@github.com:YOUR_USERNAME/dotfiles.git
+git clone git@github.com:chloe463/dotfiles.git
 cd dotfiles
 
 # For private machine
@@ -17,67 +17,6 @@ git checkout work
 
 # Run full setup
 ./up
-```
-
-## What's Included
-
-### Shell & Terminal
-- **Zsh** - Shell with Prezto framework (162 lines of config)
-- **Tmux** - Terminal multiplexer
-- **Alacritty** - GPU-accelerated terminal emulator
-- **Starship** - Cross-shell prompt
-
-### Editors
-- **Neovim** - Modern Vim (33 Lua config files, LSP, Treesitter)
-- **VSCode** - 47 extensions pre-configured
-- **Cursor** - AI-powered editor
-- **Vim** - Classic editor
-
-### Development Tools
-- **Git** - Version control with 24 custom aliases
-- **GitHub CLI** (gh) - GitHub from command line
-- **gh-dash** - GitHub dashboard in terminal
-
-### Utilities
-- **bat** - Better cat with syntax highlighting
-- **fzf** - Fuzzy finder
-- **ripgrep** - Fast grep alternative
-- **fd** - Fast find alternative
-- **direnv** - Environment variable manager
-- **ghq** - Repository management
-
-### Package Management
-- **Homebrew** - macOS package manager
-- **Brewfile** - 60+ packages, 13 taps, managed declaratively
-
-## Repository Structure
-
-```
-dotfiles/
-├── alacritty/      # Terminal emulator config + 4 color schemes
-├── bat/            # Syntax highlighting config
-├── btt/            # BetterTouchTool settings
-├── claude/         # Claude Code CLI settings
-├── cursor/         # Cursor editor settings
-├── gh/             # GitHub CLI config
-├── gh-dash/        # GitHub dashboard config
-├── git/            # Git config with aliases + functions
-├── nvim/           # Neovim (33 files, Lazy plugin manager)
-├── prompts/        # Shell prompt themes
-├── scripts/        # Utility scripts
-│   ├── git_sync.sh          # Sync and cleanup git branches
-│   └── sync-branches.sh     # Sync main → private/work branches
-├── starship/       # Cross-shell prompt
-├── tmux/           # Terminal multiplexer
-├── vim/            # Vim config
-├── vscode/         # VSCode settings + extensions
-├── zsh/            # Zsh + Prezto framework
-├── docs/           # Documentation
-│   └── MULTI_MACHINE_WORKFLOW.md  # Multi-machine guide
-├── Brewfile.shared    # Shared packages
-├── Brewfile.private   # Private machine packages
-├── Brewfile.work      # Work machine packages
-└── up              # Bootstrap script
 ```
 
 ## Usage
@@ -166,37 +105,6 @@ brew bundle --file=Brewfile.work
 - Git: `brew install git` (or comes with Xcode tools)
 - GNU Stow: `brew install stow`
 
-## Highlights
-
-### Shell (Zsh + Prezto)
-- 9 Prezto modules enabled
-- 6 custom utility functions
-- FZF integration with Ctrl+F/Ctrl+B bindings
-- Version managers: rbenv, nodenv, goenv, direnv
-- Multiple Python versions (3.8-3.12)
-
-### Git Configuration
-- 24 custom aliases (typo-resistant: `puhs`, `psuh`, `comit`)
-- `git sync` - Auto-sync and cleanup branches
-- `git cof` / `git cofzf` - FZF branch switching
-- git-split-diffs pager with arctic theme
-- Custom log formats (logg, mergelog, history)
-
-### Neovim Setup
-- Lua-based configuration
-- Lazy plugin manager
-- LSP with lspsaga
-- Treesitter syntax highlighting
-- File explorer: neo-tree
-- Git integration: git-blame
-- Auto-pairs, autotag
-- Multiple colorschemes
-
-### Terminal (Alacritty)
-- GPU-accelerated
-- 4 color schemes: Catppuccin, Nord, Iceberg, Tokyo Night
-- Font: MonaspaceNeon Nerd Font (size 14)
-
 ## Tools & Workflows
 
 ### Git Sync Script
@@ -225,23 +133,6 @@ brew bundle --file=Brewfile.work
 # Update lock file
 brew bundle dump --force
 ```
-
-## Configuration
-
-### Stow Packages
-
-Standard packages (symlinked to `~`):
-- alacritty, bat, gh, git, nvim, starship, tmux, vim, zsh
-
-macOS app configs (custom targets):
-- VSCode → `~/Library/Application Support/Code/User`
-- Cursor → `~/Library/Application Support/Cursor/User`
-- Claude → `~/.claude`
-
-Scripts:
-- scripts → `~/scripts`
-
-The `up` script automatically detects which apps are installed and only creates symlinks for available applications.
 
 ## Troubleshooting
 
@@ -282,38 +173,3 @@ ls -la ~/.config/git/config.local
 cp git/.config/git/config.local.template ~/.config/git/config.local
 ```
 
-## Development
-
-### CI/CD
-
-GitHub Actions runs on every push to test:
-- Zprezto installation
-- Stow symlink creation
-
-See `.github/workflows/ci.yml`
-
-### Analysis Logs
-
-AI-generated analysis and planning documents are stored in `.ai_logs/`:
-- `20251230_up_script_refactoring.md` - Recent up script improvements
-- `20251230_todo_improvements.md` - Future improvement roadmap
-
-These files are gitignored and for local reference only.
-
-## Contributing
-
-This is a personal dotfiles repository, but feel free to:
-- Fork and use as inspiration
-- Open issues for bugs
-- Submit PRs for improvements
-
-## License
-
-MIT - Feel free to use any configuration you find useful.
-
-## Resources
-
-- [GNU Stow Manual](https://www.gnu.org/software/stow/manual/stow.html)
-- [Prezto](https://github.com/sorin-ionescu/prezto)
-- [Awesome Dotfiles](https://github.com/webpro/awesome-dotfiles)
-- [docs/MULTI_MACHINE_WORKFLOW.md](docs/MULTI_MACHINE_WORKFLOW.md)
