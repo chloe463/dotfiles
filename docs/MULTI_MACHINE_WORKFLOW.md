@@ -20,7 +20,7 @@ feature/*     (temporary branches for PRs to main)
 
 ```bash
 # Clone the repository
-git clone git@github.com:YOUR_USERNAME/dotfiles.git
+git clone git@github.com:chloe463/dotfiles.git
 cd dotfiles
 
 # Checkout private branch
@@ -34,7 +34,7 @@ git checkout private
 
 ```bash
 # Clone the repository
-git clone git@github.com:YOUR_USERNAME/dotfiles.git
+git clone git@github.com:chloe463/dotfiles.git
 cd dotfiles
 
 # Checkout work branch
@@ -321,7 +321,7 @@ git branch -vv
 
 ```bash
 # Full automated setup
-git clone git@github.com:YOUR_USERNAME/dotfiles.git
+git clone git@github.com:chloe463/dotfiles.git
 cd dotfiles
 git checkout private  # or work
 ./up
@@ -336,8 +336,3 @@ If you were using direct commits to main before this workflow:
 3. Going forward, use the PR workflow for main
 4. Add machine-specific configs to respective branches
 
-## Questions?
-
-- Check `.ai_logs/` for detailed analysis and planning documents
-- See `README.md` for overall repository documentation
-- Review commit history for examples: `git log --oneline`
