@@ -61,18 +61,38 @@ build_image() {
 run_test() {
     info "Starting test container..."
 
-    # Note: We're testing the bootstrap script in isolation
-    # In a real scenario, it would clone from GitHub, but for local testing
-    # we just verify the script logic works
-
+    # Test the bootstrap script with HTTPS clone (SSH not available in container)
+    # Use --skip-up flag to skip the lengthy 'up' script execution
     if ! docker run --name "${CONTAINER_NAME}" "${IMAGE_NAME}" \
         bash -c "
+            set -e
             echo '==> Testing bootstrap script...'
-            echo '==> Note: This is a local test. The script expects to clone from GitHub.'
-            echo '==> Checking script can be executed...'
-            /tmp/bootstrap --help 2>&1 || echo 'Help not available (expected)'
-            echo '==> Bootstrap script is executable and syntactically correct'
-            exit 0
+            echo '==> Running bootstrap with HTTPS fallback (skipping up script)...'
+
+            # Run bootstrap script with --skip-up flag
+            /tmp/bootstrap --skip-up
+
+            # Verify clone was successful
+            if [ ! -d /home/testuser/dotfiles ]; then
+                echo 'ERROR: dotfiles directory was not created'
+                exit 1
+            fi
+
+            # Verify git repository was cloned
+            if [ ! -d /home/testuser/dotfiles/.git ]; then
+                echo 'ERROR: dotfiles is not a git repository'
+                exit 1
+            fi
+
+            # Verify up script exists
+            if [ ! -f /home/testuser/dotfiles/up ]; then
+                echo 'ERROR: up script not found in cloned repository'
+                exit 1
+            fi
+
+            echo '==> Bootstrap test completed successfully!'
+            echo '==> Repository cloned to /home/testuser/dotfiles'
+            echo '==> All validation checks passed'
         "; then
         error "Test failed"
         return 1

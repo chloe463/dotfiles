@@ -4,15 +4,21 @@
 #
 # Usage:
 #   Remote: curl https://raw.githubusercontent.com/chloe463/dotfiles/refs/heads/main/bootstrap | bash
-#   Local:  ./bootstrap
+#   Local:  ./bootstrap [--skip-up]
+#
+# Options:
+#   --skip-up    Clone repository only, skip running the 'up' script
 #
 # This script will:
 #   1. Clone the dotfiles repository to $HOME/dotfiles (if not already present)
-#   2. Run the 'up' script to complete setup
+#      - Tries SSH first (git@github.com:...)
+#      - Falls back to HTTPS if SSH fails
+#   2. Run the 'up' script to complete setup (unless --skip-up is specified)
 
 set -euo pipefail
 
-readonly REPO_URL="git@github.com:chloe463/dotfiles.git"
+readonly REPO_URL_SSH="git@github.com:chloe463/dotfiles.git"
+readonly REPO_URL_HTTPS="https://github.com/chloe463/dotfiles.git"
 readonly DOTFILES_DIR="${HOME}/dotfiles"
 
 # Print informational message
@@ -30,6 +36,7 @@ error() {
 }
 
 # Clone the dotfiles repository
+# Tries SSH first, falls back to HTTPS if SSH fails
 # Returns: 0 on success, 1 on error
 clone_dotfiles() {
     info "Cloning dotfiles repository to ${DOTFILES_DIR}..."
@@ -39,11 +46,21 @@ clone_dotfiles() {
         return 0
     fi
 
-    if ! git clone "${REPO_URL}" "${DOTFILES_DIR}"; then
-        error "Failed to clone repository"
+    # Try SSH first
+    info "Attempting to clone via SSH..."
+    if git clone "${REPO_URL_SSH}" "${DOTFILES_DIR}" 2>/dev/null; then
+        info "Successfully cloned dotfiles repository via SSH"
+        return 0
     fi
 
-    info "Successfully cloned dotfiles repository"
+    # Fall back to HTTPS if SSH fails
+    info "SSH clone failed, falling back to HTTPS..."
+    if git clone "${REPO_URL_HTTPS}" "${DOTFILES_DIR}"; then
+        info "Successfully cloned dotfiles repository via HTTPS"
+        return 0
+    fi
+
+    error "Failed to clone repository via both SSH and HTTPS"
 }
 
 # Run the up script
@@ -67,6 +84,21 @@ run_up_script() {
 
 # Main function
 main() {
+    local skip_up=0
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --skip-up)
+                skip_up=1
+                shift
+                ;;
+            *)
+                error "Unknown option: $1"
+                ;;
+        esac
+    done
+
     info "Starting dotfiles bootstrap process"
 
     # Check if git is installed
@@ -75,9 +107,14 @@ main() {
     fi
 
     clone_dotfiles
-    run_up_script
 
-    info "Bootstrap complete! 🎉"
+    if [ "${skip_up}" -eq 0 ]; then
+        run_up_script
+        info "Bootstrap complete! 🎉"
+    else
+        info "Skipping 'up' script execution (--skip-up flag provided)"
+        info "Clone complete! Run the 'up' script manually to finish setup."
+    fi
 }
 
 main "$@"

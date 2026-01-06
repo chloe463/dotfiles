@@ -5,8 +5,10 @@ This document describes how to test the `bootstrap` script in a clean environmen
 ## Overview
 
 The `bootstrap` script is designed to set up dotfiles on a new machine by:
-1. Cloning the dotfiles repository to `$HOME/dotfiles`
+1. Cloning the dotfiles repository to `$HOME/dotfiles` (tries SSH first, falls back to HTTPS)
 2. Running the `up` script to complete the setup
+
+The script supports a `--skip-up` flag for testing purposes, which clones the repository without running the full setup.
 
 Testing this script requires a clean environment to properly validate the clone and setup workflow.
 
@@ -34,13 +36,16 @@ Use Docker to test in a completely isolated environment that simulates a fresh m
 
 #### What Gets Tested
 - Script syntax validation
-- Script executability
-- Basic error handling
-- Script structure and logic
+- HTTPS clone fallback (SSH not available in Docker)
+- Repository cloning to correct location
+- Git repository structure validation
+- Presence of required files (`up` script)
+- Error handling and messaging
 
-#### Limitations
-- Cannot fully test the git clone operation without SSH keys
+#### Test Scope
+- Tests use `--skip-up` flag to verify clone operation only
 - Does not test the complete `up` script execution (requires Homebrew and other dependencies)
+- Full setup can be tested manually on a real machine
 
 ### 2. GitHub Actions CI
 
