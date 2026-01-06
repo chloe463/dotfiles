@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+#
+# Bootstrap script for dotfiles setup
+#
+# Usage:
+#   Remote: curl https://raw.githubusercontent.com/chloe463/dotfiles/refs/heads/main/bootstrap | bash
+#   Local:  ./bootstrap [--skip-up]
+#
+# Options:
+#   --skip-up    Clone repository only, skip running the 'up' script
+#
+# This script will:
+#   1. Clone the dotfiles repository to $HOME/dotfiles (if not already present)
+#      - Tries SSH first (git@github.com:...)
+#      - Falls back to HTTPS if SSH fails
+#   2. Run the 'up' script to complete setup (unless --skip-up is specified)
+
+set -euo pipefail
+
+readonly REPO_URL_SSH="git@github.com:chloe463/dotfiles.git"
+readonly REPO_URL_HTTPS="https://github.com/chloe463/dotfiles.git"
+readonly DOTFILES_DIR="${HOME}/dotfiles"
+
+# Print informational message
+# Usage: info <message>
+info() {
+    echo "==> ${1}"
+}
+
+# Print error message and exit
+# Usage: error <message>
+# Returns: exits with code 1
+error() {
+    echo "ERROR: ${1}" >&2
+    exit 1
+}
+
+# Clone the dotfiles repository
+# Tries SSH first, falls back to HTTPS if SSH fails
+# Returns: 0 on success, 1 on error
+clone_dotfiles() {
+    info "Cloning dotfiles repository to ${DOTFILES_DIR}..."
+
+    if [ -d "${DOTFILES_DIR}" ]; then
+        info "Directory ${DOTFILES_DIR} already exists, skipping clone"
+        return 0
+    fi
+
+    # Try SSH first
+    info "Attempting to clone via SSH..."
+    if git clone "${REPO_URL_SSH}" "${DOTFILES_DIR}" 2>/dev/null; then
+        info "Successfully cloned dotfiles repository via SSH"
+        return 0
+    fi
+
+    # Fall back to HTTPS if SSH fails
+    info "SSH clone failed, falling back to HTTPS..."
+    if git clone "${REPO_URL_HTTPS}" "${DOTFILES_DIR}"; then
+        info "Successfully cloned dotfiles repository via HTTPS"
+        return 0
+    fi
+
+    error "Failed to clone repository via both SSH and HTTPS"
+}
+
+# Run the up script
+# Returns: 0 on success, 1 on error
+run_up_script() {
+    local up_script="${DOTFILES_DIR}/up"
+
+    if [ ! -f "${up_script}" ]; then
+        error "up script not found at ${up_script}"
+    fi
+
+    if [ ! -x "${up_script}" ]; then
+        info "Making up script executable..."
+        chmod +x "${up_script}"
+    fi
+
+    info "Running up script..."
+    cd "${DOTFILES_DIR}"
+    "${up_script}"
+}
+
+# Main function
+main() {
+    local skip_up=0
+
+    # Parse arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --skip-up)
+                skip_up=1
+                shift
+                ;;
+            *)
+                error "Unknown option: $1"
+                ;;
+        esac
+    done
+
+    info "Starting dotfiles bootstrap process"
+
+    # Check if git is installed
+    if ! command -v git >/dev/null 2>&1; then
+        error "git is not installed. Please install git first."
+    fi
+
+    clone_dotfiles
+
+    if [ "${skip_up}" -eq 0 ]; then
+        run_up_script
+        info "Bootstrap complete! 🎉"
+    else
+        info "Skipping 'up' script execution (--skip-up flag provided)"
+        info "Clone complete! Run the 'up' script manually to finish setup."
+    fi
+}
+
+main "$@"

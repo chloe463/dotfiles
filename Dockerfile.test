@@ -1,0 +1,32 @@
+# Dockerfile for testing the bootstrap script
+# This creates a minimal environment to simulate a fresh system setup
+
+FROM ubuntu:22.04
+
+# Install minimal dependencies
+RUN apt-get update && \
+    apt-get install -y \
+        git \
+        curl \
+        sudo \
+        zsh \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a test user (similar to a real user environment)
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Switch to test user
+USER testuser
+WORKDIR /home/testuser
+
+# Set up git config (required for git operations)
+RUN git config --global user.email "test@example.com" && \
+    git config --global user.name "Test User"
+
+# Copy bootstrap script
+COPY --chown=testuser:testuser bootstrap /tmp/bootstrap
+RUN chmod +x /tmp/bootstrap
+
+# The actual test will be run as a command when the container starts
+CMD ["/bin/bash"]
