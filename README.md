@@ -4,6 +4,26 @@ Personal macOS configuration files managed with [GNU Stow](https://www.gnu.org/s
 
 ## Quick Start
 
+### Automated Setup (Recommended)
+
+Use the bootstrap script for one-command setup on a fresh machine:
+
+```bash
+# Remote installation (easiest)
+curl https://raw.githubusercontent.com/chloe463/dotfiles/refs/heads/main/bootstrap | bash
+
+# Or clone and run locally
+git clone git@github.com:chloe463/dotfiles.git ~/dotfiles
+cd ~/dotfiles
+./bootstrap
+```
+
+The bootstrap script will:
+1. Clone this repository to `~/dotfiles` (tries SSH, falls back to HTTPS)
+2. Run the `up` script to install everything
+
+### Manual Setup
+
 ```bash
 # Clone this repository
 git clone git@github.com:chloe463/dotfiles.git
@@ -20,6 +40,16 @@ git checkout work
 ```
 
 ## Usage
+
+### Bootstrap Script Options
+
+```bash
+# Standard usage (clone + setup)
+./bootstrap
+
+# Clone only, skip setup (useful for testing)
+./bootstrap --skip-up
+```
 
 ### Setup Commands
 
