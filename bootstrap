@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+#
+# Bootstrap script for dotfiles setup
+#
+# Usage:
+#   Remote: curl https://raw.githubusercontent.com/chloe463/dotfiles/refs/heads/main/bootstrap | bash
+#   Local:  ./bootstrap
+#
+# This script will:
+#   1. Clone the dotfiles repository to $HOME/dotfiles (if not already present)
+#   2. Run the 'up' script to complete setup
+
+set -euo pipefail
+
+readonly REPO_URL="git@github.com:chloe463/dotfiles.git"
+readonly DOTFILES_DIR="${HOME}/dotfiles"
+
+# Print informational message
+# Usage: info <message>
+info() {
+    echo "==> ${1}"
+}
+
+# Print error message and exit
+# Usage: error <message>
+# Returns: exits with code 1
+error() {
+    echo "ERROR: ${1}" >&2
+    exit 1
+}
+
+# Clone the dotfiles repository
+# Returns: 0 on success, 1 on error
+clone_dotfiles() {
+    info "Cloning dotfiles repository to ${DOTFILES_DIR}..."
+
+    if [ -d "${DOTFILES_DIR}" ]; then
+        info "Directory ${DOTFILES_DIR} already exists, skipping clone"
+        return 0
+    fi
+
+    if ! git clone "${REPO_URL}" "${DOTFILES_DIR}"; then
+        error "Failed to clone repository"
+    fi
+
+    info "Successfully cloned dotfiles repository"
+}
+
+# Run the up script
+# Returns: 0 on success, 1 on error
+run_up_script() {
+    local up_script="${DOTFILES_DIR}/up"
+
+    if [ ! -f "${up_script}" ]; then
+        error "up script not found at ${up_script}"
+    fi
+
+    if [ ! -x "${up_script}" ]; then
+        info "Making up script executable..."
+        chmod +x "${up_script}"
+    fi
+
+    info "Running up script..."
+    cd "${DOTFILES_DIR}"
+    "${up_script}"
+}
+
+# Main function
+main() {
+    info "Starting dotfiles bootstrap process"
+
+    # Check if git is installed
+    if ! command -v git >/dev/null 2>&1; then
+        error "git is not installed. Please install git first."
+    fi
+
+    clone_dotfiles
+    run_up_script
+
+    info "Bootstrap complete! 🎉"
+}
+
+main "$@"
