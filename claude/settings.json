@@ -104,6 +104,7 @@
       "Bash(pnpm install:*)"
     ]
   },
+  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
@@ -116,5 +117,8 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "example-skills@anthropic-agent-skills": true
   }
 }

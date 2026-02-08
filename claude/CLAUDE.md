@@ -108,11 +108,12 @@ mkdir -p .ai_logs
 ```
 
 **File naming convention:**
-- Use format: `YYYYMMDD_<topic>.md`
+- Use format: `.ai_logs/YYYY/MM/YYYYMMDD_<topic>.md`
+- Create year/month subdirectories: `mkdir -p .ai_logs/YYYY/MM`
 - Examples:
-  - `20250111_refactoring_plan.md`
-  - `20250111_api_design.md`
-  - `20250111_performance_analysis.md`
+  - `.ai_logs/2026/02/20260208_refactoring_plan.md`
+  - `.ai_logs/2026/01/20260115_api_design.md`
+  - `.ai_logs/2025/12/20251230_performance_analysis.md`
 
 **What to store in .ai_logs:**
 - Planning documents and design decisions
