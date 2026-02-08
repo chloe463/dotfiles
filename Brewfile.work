@@ -4,9 +4,46 @@
 # Load shared packages
 instance_eval(File.read("Brewfile.shared"))
 
-# Work-specific packages (add your company tools here)
-# Example:
-# tap "company/internal"
-# brew "company-vpn"
-# cask "slack"
-# cask "zoom"
+# Work-specific taps
+tap "ynqa/tap"
+tap "yoheimuta/protolint"
+tap "wantedly/tools", "git@github.com:wantedly/homebrew-tools"
+
+# Work-specific brews
+brew "aom"
+brew "btop"
+brew "buf"
+brew "envchain"
+brew "giflib"
+brew "imagemagick@6"
+brew "jpeg"
+brew "libffi"
+brew "libpng"
+brew "libpthread-stubs"
+brew "openjdk"
+brew "openjdk@11"
+brew "pixman"
+brew "pkgconf"
+brew "pnpm"
+brew "redis", restart_service: :changed
+brew "tailspin"
+brew "tree-sitter"
+brew "ynqa/tap/jnv"
+brew "yoheimuta/protolint/protolint"
+
+# Work-specific casks
+
+# Work-specific VSCode extensions
+vscode "angular.ng-template"
+vscode "astro-build.astro-vscode"
+vscode "denoland.vscode-deno"
+vscode "figma.figma-vscode-extension"
+vscode "jock.svg"
+vscode "karunamurti.haml"
+vscode "ms-vsliveshare.vsliveshare"
+vscode "shopify.ruby-lsp"
+vscode "streetsidesoftware.code-spell-checker"
+vscode "vue.volar"
+vscode "zainchen.json"
+vscode "zxh404.vscode-proto3"
+
