@@ -29,14 +29,57 @@ alias top='btop'
 ####################################################################################################
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
-export PATH=$PATH:'/Applications/Postgres.app/Contents/Versions/latest/bin'
-export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 
 # For ffi
 export LIBFFI_ROOT=$(brew --prefix libffi)
-export PATH="$LIBFFI_ROOT/bin:$PATH"
 export LDFLAGS="-L$LIBFFI_ROOT/lib $LDFLAGS"
 export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$LIBFFI_ROOT/lib/pkgconfig"
+
+####################################################################################################
+# PATH Configuration
+####################################################################################################
+# Helper function to prepend to PATH (adds to beginning, checked first)
+# Only adds if directory exists and not already in PATH
+path_prepend() {
+  local dir="$1"
+  # Expand tilde and check if directory exists
+  dir="${dir/#\~/$HOME}"
+  if [[ -d "$dir" ]] && [[ ":$PATH:" != *":$dir:"* ]]; then
+    PATH="$dir:$PATH"
+  fi
+}
+
+# Helper function to append to PATH (adds to end, checked last)
+# Only adds if directory exists and not already in PATH
+path_append() {
+  local dir="$1"
+  # Expand tilde and check if directory exists
+  dir="${dir/#\~/$HOME}"
+  if [[ -d "$dir" ]] && [[ ":$PATH:" != *":$dir:"* ]]; then
+    PATH="$PATH:$dir"
+  fi
+}
+
+# Build PATH in priority order (first = highest priority)
+# User binaries (highest priority)
+path_prepend "$HOME/bin"
+path_prepend "$HOME/scripts"
+
+# Language version managers
+path_prepend "$GOENV_ROOT/bin"
+path_prepend "$HOME/go/1.19.0/bin"  # TODO: Make Go version dynamic
+
+# Development tools
+path_prepend "$LIBFFI_ROOT/bin"
+path_prepend "/opt/homebrew/opt/openjdk/bin"
+path_prepend "$HOME/.console-ninja/.bin"
+
+# Additional tools (lower priority, appended)
+path_append "/Applications/Postgres.app/Contents/Versions/latest/bin"
+path_append "$HOME/.local/bin"
+path_append "$BUN_INSTALL/bin"
+
+export PATH
 
 # History
 setopt inc_append_history
@@ -58,16 +101,10 @@ eval "$(nodenv init -)"
 eval "$(direnv hook zsh)"
 
 export GOENV_ROOT="$HOME/.goenv"
-export PATH="$HOME/bin:$HOME/scripts:$GOENV_ROOT/bin:$HOME/go/1.19.0/bin:$PATH"
 eval "$(goenv init -)"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-# Console ninja
-# https://console-ninja.com/
-export PATH=~/.console-ninja/.bin:$PATH
 
 ####################################################################################################
 # Completion
