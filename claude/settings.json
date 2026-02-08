@@ -104,7 +104,6 @@
       "Bash(pnpm install:*)"
     ]
   },
-  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
@@ -118,7 +117,13 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.mjs",
+    "padding": 0
+  },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": true
-  }
+  },
+  "model": "sonnet"
 }
