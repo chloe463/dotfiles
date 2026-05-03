@@ -5,6 +5,7 @@
       "Read(.env*)",
       "Read(.envrc)",
       "Read(id_rsa)",
+      "Read(**/.credentials.zsh)",
       "Read(**/*token*)",
       "Read(**/*key*)",
       "Read(**/*secret*)",
@@ -123,7 +124,11 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "example-skills@anthropic-agent-skills": true
+    "example-skills@anthropic-agent-skills": true,
+    "pr-review-toolkit@claude-plugins-official": true
   },
-  "model": "sonnet"
+  "language": "Japanese",
+  "autoUpdatesChannel": "latest",
+  "theme": "dark-ansi",
+  "model": "opus"
 }
