@@ -28,3 +28,7 @@ telepresence.log
 **/.claude/settings.local.json
 .ai_logs/
 
+.worktrees
+
+# GitHub CLI per-machine auth state
+**/.config/gh/hosts.yml
