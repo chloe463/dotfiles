@@ -69,7 +69,7 @@ git fetch -p origin && git pull origin ${branch}
 # Remove squash merged branches if git-delete-squashed is installed
 # cf. https://github.com/not-an-aardvark/git-delete-squashed
 if type git-delete-squashed > /dev/null 2>&1; then
-  git-delete-squashed
+  git-delete-squashed ${branch}
 fi
 
 # Remove marged branches
