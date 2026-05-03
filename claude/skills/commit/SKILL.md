@@ -19,8 +19,11 @@ This skill enforces meaningful commit messages and proper commit workflow.
 **CRITICAL: Protect main/master branches**
 
 - **NEVER**: Commit directly to `main` or `master` branches
-- **MUST**: Work on feature branches (e.g., `feature/add-auth`, `fix/login-bug`)
+- **MUST**: Work on feature branches (e.g., `chloe463/feature/add-auth`, `chloe463/fix/login-bug`)
 - **MUST**: Merge changes via pull requests only
+- **SHOULD**: Add GitHub account name (`chloe463`) to branch name as a prefix
+    - **MUST** add prefix when the repository owner/org is NOT `chloe463` (e.g., `chloe463/feature/add-auth`)
+    - **MAY** omit prefix when the repository owner/org is `chloe463`
 - **EXCEPTION**: Only commit to `main`/`master` if the user explicitly requests it
 
 ### Before Committing
