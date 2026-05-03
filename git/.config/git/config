@@ -47,3 +47,5 @@
 [split-diffs]
     theme-name = arctic
 
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/
