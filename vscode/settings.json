@@ -445,5 +445,6 @@
   ],
   "window.zoomLevel": 1,
   "editor.unicodeHighlight.nonBasicASCII": false,
-  "claudeCode.preferredLocation": "panel"
+  "claudeCode.preferredLocation": "panel",
+  "chat.viewSessions.orientation": "stacked"
 }
