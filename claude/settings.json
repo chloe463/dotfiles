@@ -125,10 +125,18 @@
   },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": true,
-    "pr-review-toolkit@claude-plugins-official": true
+    "pr-review-toolkit@claude-plugins-official": true,
+    "tmux-agent-sidebar@hiroppy": true
+  },
+  "extraKnownMarketplaces": {
+    "hiroppy": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/tsuyoshi/.tmux/plugins/tmux-agent-sidebar"
+      }
+    }
   },
   "language": "Japanese",
   "autoUpdatesChannel": "latest",
-  "theme": "dark-ansi",
-  "model": "opus"
+  "theme": "dark-ansi"
 }
