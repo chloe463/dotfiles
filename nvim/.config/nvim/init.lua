@@ -228,8 +228,8 @@ local on_attach = function(_, bufnr)
   nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
   -- See `:help K` for why this keymap
-  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<leader>h', vim.lsp.buf.hover, '[H]over Documentation')
+  nmap('K', function() vim.lsp.buf.hover({ border = 'rounded' }) end, 'Hover Documentation')
+  nmap('<leader>h', function() vim.lsp.buf.hover({ border = 'rounded' }) end, '[H]over Documentation')
   nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
@@ -244,10 +244,6 @@ local on_attach = function(_, bufnr)
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
   end, { desc = 'Format current buffer with LSP' })
-end
-
-vim.lsp.handlers['textDocument/hover'] = function(err, result, ctx, config)
-  vim.lsp.handlers.hover(err, result, ctx, vim.tbl_deep_extend('force', config or {}, { border = 'rounded' }))
 end
 
 -- Enable the following language servers
