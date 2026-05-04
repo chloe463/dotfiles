@@ -77,6 +77,7 @@ path_prepend "$HOME/.console-ninja/.bin"
 # Additional tools (lower priority, appended)
 path_append "/Applications/Postgres.app/Contents/Versions/latest/bin"
 path_append "$HOME/.local/bin"
+path_append "$HOME/.yarn/bin"
 path_append "$BUN_INSTALL/bin"
 
 export PATH
