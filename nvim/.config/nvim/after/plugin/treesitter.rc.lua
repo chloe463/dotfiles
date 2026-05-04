@@ -12,8 +12,11 @@ vim.api.nvim_create_autocmd('FileType', {
   group = group,
   callback = function(args)
     local ok, err = pcall(vim.treesitter.start, args.buf)
-    if not ok and not tostring(err):find('no parser') then
-      vim.notify('[treesitter] ' .. tostring(err), vim.log.levels.WARN)
+    if not ok then
+      local msg = tostring(err)
+      if not msg:find('no parser') and not msg:find('could not be created') then
+        vim.notify('[treesitter] ' .. msg, vim.log.levels.WARN)
+      end
     end
   end,
 })
