@@ -246,11 +246,9 @@ local on_attach = function(_, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 end
 
-vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
-  vim.lsp.handlers.hover, {
-    border = 'rounded',
-  }
-)
+vim.lsp.handlers['textDocument/hover'] = function(err, result, ctx, config)
+  vim.lsp.handlers.hover(err, result, ctx, vim.tbl_deep_extend('force', config or {}, { border = 'rounded' }))
+end
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
