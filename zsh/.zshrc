@@ -79,6 +79,7 @@ path_append "/Applications/Postgres.app/Contents/Versions/latest/bin"
 path_append "$HOME/.local/bin"
 path_append "$HOME/.yarn/bin"
 path_append "$BUN_INSTALL/bin"
+path_append "$HOME/.cargo/bin"
 
 export PATH
 
