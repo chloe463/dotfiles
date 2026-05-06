@@ -132,7 +132,7 @@
     "hiroppy": {
       "source": {
         "source": "directory",
-        "path": "/Users/tsuyoshi/.tmux/plugins/tmux-agent-sidebar"
+        "path": "~/.tmux/plugins/tmux-agent-sidebar"
       }
     }
   },
