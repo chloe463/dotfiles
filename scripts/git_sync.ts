@@ -46,6 +46,7 @@ for (const arg of process.argv.slice(2)) {
     case '--version':
       console.log(`git-sync version ${VERSION}`);
       process.exit(0);
+      break;
     default:
       die(`Unknown option: ${arg}`);
   }
@@ -79,7 +80,7 @@ if (syncCurrentBranch) {
     die('git-sync: could not determine main branch (main or master)');
   }
   if (branches.length > 1) {
-    die('git-sync: both main and master exist; cannot determine default branch.');
+    die("git-sync: both main and master exist; cannot determine default branch. Delete one, or run 'git sync -c' to sync your current branch.");
   }
   branch = branches[0];
 }
