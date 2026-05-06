@@ -75,7 +75,9 @@ fi
 # Remove merged branches
 merged_branches=()
 if git_branch_output=$(git branch --merged 2>&1); then
-  mapfile -t merged_branches < <(printf '%s\n' "$git_branch_output" | grep -v master | grep -v main | grep -v '\*' || true)
+  while IFS= read -r b; do
+    [[ -n "$b" ]] && merged_branches+=("$b")
+  done < <(printf '%s\n' "$git_branch_output" | grep -v master | grep -v main | grep -v '\*' || true)
 else
   echo "git-sync: 'git branch --merged' failed: ${git_branch_output}" >&2
   echo "Skipping merged branch cleanup." >&2
