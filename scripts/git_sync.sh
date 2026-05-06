@@ -73,9 +73,8 @@ if type git-delete-squashed > /dev/null 2>&1; then
 fi
 
 # Remove marged branches
-merged_branches=( $(git branch --merged | grep -v master | grep -v main | grep -v '*') )
+merged_branches=( $(git branch --merged | grep -v master | grep -v main | grep -v '*' || true) )
 
-if [ -n "$merged_branches" ]; then
-  # Non empty
-  git branch -d ${merged_branches}
+if [ ${#merged_branches[@]} -gt 0 ]; then
+  git branch -d "${merged_branches[@]}"
 fi
