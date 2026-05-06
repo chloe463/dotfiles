@@ -2,3 +2,5 @@ alacritty/.config/alacritty/catppuccin/
 
 # Backup files
 *.json-bak
+
+node_modules
