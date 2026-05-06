@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/izumin5210/any-script-mcp/main/config.schema.json
+tools:
+  - name: list-repos
+    description: |
+      List all local git repositories managed by ghq.
+      Useful for finding project paths quickly.
+    inputs:
+      query:
+        type: string
+        description: Optional filter string to narrow down results
+    run: |
+      if [ -n "$INPUTS__QUERY" ]; then
+        ghq list | grep "$INPUTS__QUERY"
+      else
+        ghq list
+      fi
+
+  - name: git-recent-branches
+    description: |
+      Show recently checked-out git branches in the current repository,
+      sorted by last commit date. Helpful for resuming in-progress work.
+    run: |
+      git branch --sort=-committerdate --format='%(refname:short) %(committerdate:relative)' | head -20
