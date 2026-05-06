@@ -29,6 +29,7 @@ alias top='btop'
 ####################################################################################################
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
+export BUN_INSTALL="$HOME/.bun"
 
 # For ffi
 export LIBFFI_ROOT=$(brew --prefix libffi)
@@ -104,9 +105,6 @@ eval "$(direnv hook zsh)"
 
 export GOENV_ROOT="$HOME/.goenv"
 eval "$(goenv init -)"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
 
 ####################################################################################################
 # Completion
