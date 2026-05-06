@@ -120,7 +120,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "~/.claude/statusline.mjs",
+    "command": "bun ~/.claude/statusline.ts",
     "padding": 0
   },
   "enabledPlugins": {
@@ -132,7 +132,7 @@
     "hiroppy": {
       "source": {
         "source": "directory",
-        "path": "/Users/tsuyoshi/.tmux/plugins/tmux-agent-sidebar"
+        "path": "~/.tmux/plugins/tmux-agent-sidebar"
       }
     }
   },
