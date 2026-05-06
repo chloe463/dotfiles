@@ -22,6 +22,15 @@ function die(msg: string, code = 1): never {
   process.exit(code);
 }
 
+// Extract the actual git error output from Bun's ShellError
+function stderrOf(error: unknown): string {
+  if (error instanceof Error && 'stderr' in error) {
+    const raw = new TextDecoder().decode(error.stderr as Uint8Array).trim();
+    if (raw) return raw;
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
 let syncCurrentBranch = false;
 for (const arg of process.argv.slice(2)) {
   switch (arg) {
@@ -32,6 +41,7 @@ for (const arg of process.argv.slice(2)) {
     case '-h':
     case '--help':
       usage();
+      break;
     case '-v':
     case '--version':
       console.log(`git-sync version ${VERSION}`);
@@ -44,24 +54,64 @@ for (const arg of process.argv.slice(2)) {
 // Determine target branch
 let branch: string;
 if (syncCurrentBranch) {
-  branch = (await $`git rev-parse --abbrev-ref HEAD`.text()).trim();
+  let output: string;
+  try {
+    output = (await $`git rev-parse --abbrev-ref HEAD`.text()).trim();
+  } catch (error) {
+    die(`git-sync: failed to determine current branch: ${stderrOf(error)}`);
+  }
+  if (output === 'HEAD') {
+    die('git-sync: cannot sync in detached HEAD state. Check out a branch first.');
+  }
+  branch = output;
 } else {
-  const output = (await $`git branch -l master main`.text()).trim();
-  branch = output
+  let output: string;
+  try {
+    output = (await $`git branch -l master main`.text()).trim();
+  } catch (error) {
+    die(`git-sync: failed to list branches: ${stderrOf(error)}`);
+  }
+  const branches = output
     .split('\n')
     .map(b => b.replace(/^[* ]+/, '').trim())
-    .filter(Boolean)[0];
-  if (!branch) die('git-sync: could not determine main branch (main or master)');
+    .filter(Boolean);
+  if (branches.length === 0) {
+    die('git-sync: could not determine main branch (main or master)');
+  }
+  if (branches.length > 1) {
+    die('git-sync: both main and master exist; cannot determine default branch.');
+  }
+  branch = branches[0];
 }
 
 // Switch, fetch, pull
-await $`git switch ${branch}`;
-await $`git fetch -p origin`;
-await $`git pull origin ${branch}`;
+try {
+  await $`git switch ${branch}`;
+} catch (error) {
+  die(`git-sync: 'git switch ${branch}' failed: ${stderrOf(error)}`);
+}
+
+try {
+  await $`git fetch -p origin`;
+} catch (error) {
+  die(`git-sync: 'git fetch' failed: ${stderrOf(error)}`);
+}
+
+try {
+  await $`git pull origin ${branch}`;
+} catch (error) {
+  die(`git-sync: 'git pull' failed: ${stderrOf(error)}`);
+}
 
 // Remove squash-merged branches if git-delete-squashed is installed
-if (Bun.which('git-delete-squashed')) {
-  await $`git-delete-squashed ${branch}`;
+let hasError = false;
+if (Bun.which('git-delete-squashed') !== null) {
+  try {
+    await $`git-delete-squashed ${branch}`;
+  } catch (error) {
+    process.stderr.write(`git-sync: 'git-delete-squashed' failed (continuing): ${stderrOf(error)}\n`);
+    hasError = true;
+  }
 }
 
 // Remove merged branches
@@ -71,19 +121,22 @@ try {
   mergedBranches = output
     .split('\n')
     .filter(b => !b.includes('*'))
-    .map(b => b.trim())
+    .map(b => b.replace(/^[+* ]+/, '').trim())
     .filter(b => b && b !== 'main' && b !== 'master');
 } catch (error) {
-  const message = error instanceof Error ? error.message : String(error);
-  process.stderr.write(`git-sync: 'git branch --merged' failed: ${message}\n`);
+  process.stderr.write(`git-sync: 'git branch --merged' failed: ${stderrOf(error)}\n`);
   process.stderr.write('Skipping merged branch cleanup.\n');
+  hasError = true;
 }
 
 if (mergedBranches.length > 0) {
   try {
     await $`git branch -d ${mergedBranches}`;
-  } catch {
-    process.stderr.write('git-sync: some branches could not be deleted.\n');
+  } catch (error) {
+    process.stderr.write(`git-sync: 'git branch -d' failed: ${stderrOf(error)}\n`);
     process.stderr.write("If a branch was squash-merged, use 'git branch -D <branch>' to force delete.\n");
+    hasError = true;
   }
 }
+
+if (hasError) process.exit(1);
