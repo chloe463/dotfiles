@@ -136,7 +136,14 @@
       }
     }
   },
+  "mcpServers": {
+    "any-script": {
+      "command": "npx",
+      "args": ["any-script-mcp"]
+    }
+  },
   "language": "Japanese",
   "autoUpdatesChannel": "latest",
-  "theme": "dark-ansi"
+  "theme": "dark-ansi",
+  "effortLevel": "high"
 }
