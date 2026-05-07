@@ -116,23 +116,26 @@ if (currentUsage && contextSize && contextSize > 0) {
   contextInfo = `${Math.floor((currentTokens * 100) / contextSize)}%`;
 }
 
-const elements = [`🤖 ${modelDisplayName}`, `📁 ${currentDir}`];
-if (gitBranch) elements.push(` ${gitBranch}`);
-if (contextInfo) elements.push(`📊 ${contextInfo}`);
+const elements = [`\ue370 ${modelDisplayName}`, `\uea83 ${currentDir}`];
+if (gitBranch) elements.push(`\ue725 ${gitBranch}`);
+if (contextInfo) elements.push(`\udb83\ude91 ${contextInfo}`);
 
+const limitations = [];
 if (!isAwsBedrock) {
   const fiveHour = data.rate_limits?.five_hour;
   const sevenDay = data.rate_limits?.seven_day;
   if (fiveHour) {
-    elements.push(
-      `5-Hour limit: ${fiveHour.used_percentage}% Reset in ${formatResetTime(fiveHour.resets_at)}`,
+    limitations.push(
+      `\udb86\udd9f 5h: ${fiveHour.used_percentage}% (Reset at ${formatResetTime(fiveHour.resets_at)})`,
     );
   }
   if (sevenDay) {
-    elements.push(`Weekly limit: ${sevenDay.used_percentage}%`);
+    limitations.push(`\udb80\udcf0 7d: ${sevenDay.used_percentage}%`);
   }
 }
 
 const output = elements.join(" | ");
+const limitationOutput = limitations.join(" | ");
 log("INFO", `output: ${output}`);
 console.log(output);
+if (limitations.length > 0) console.log(limitationOutput);
