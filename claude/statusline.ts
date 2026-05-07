@@ -10,7 +10,11 @@ const LOG_FILE = process.env.STATUSLINE_LOG_FILE ?? "/tmp/statusline.log";
 function log(level: "INFO" | "ERROR", message: string): void {
   if (!DEBUG) return;
   const ts = new Date().toISOString();
-  appendFileSync(LOG_FILE, `${ts} [${level}] ${message}\n`);
+  try {
+    appendFileSync(LOG_FILE, `${ts} [${level}] ${message}\n`);
+  } catch {
+    // ログ書き込み失敗でstatuslineをクラッシュさせない
+  }
 }
 
 interface ContextWindow {
@@ -37,6 +41,16 @@ interface StatuslineInput {
   };
 }
 
+function isRateLimit(v: unknown): v is RateLimit {
+  if (typeof v !== "object" || v === null) return false;
+  const r = v as Record<string, unknown>;
+  return (
+    typeof r.used_percentage === "number" &&
+    typeof r.resets_at === "number" &&
+    Number.isFinite(r.resets_at)
+  );
+}
+
 function isStatuslineInput(value: unknown): value is StatuslineInput {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
@@ -44,10 +58,17 @@ function isStatuslineInput(value: unknown): value is StatuslineInput {
     return false;
   if (typeof (v.workspace as Record<string, unknown>)?.current_dir !== "string")
     return false;
+  const rl = v.rate_limits;
+  if (rl !== undefined && typeof rl === "object" && rl !== null) {
+    const rateLimits = rl as Record<string, unknown>;
+    if (rateLimits.five_hour !== undefined && !isRateLimit(rateLimits.five_hour)) return false;
+    if (rateLimits.seven_day !== undefined && !isRateLimit(rateLimits.seven_day)) return false;
+  }
   return true;
 }
 
 function formatResetTime(resetsAt: number): string {
+  if (!Number.isFinite(resetsAt) || resetsAt <= 0) return "??:??";
   const date = new Date(resetsAt * 1000);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
@@ -57,7 +78,6 @@ function formatResetTime(resetsAt: number): string {
 let input: string;
 try {
   input = await Bun.stdin.text();
-  log("INFO", `raw stdin: ${input}`);
 } catch (error) {
   const message = error instanceof Error ? error.message : String(error);
   process.stderr.write(`statusline: failed to read stdin: ${message}\n`);
@@ -83,11 +103,12 @@ if (!isStatuslineInput(data)) {
   log("ERROR", `invalid input shape: ${JSON.stringify(data)}`);
   process.exit(1);
 }
+log("INFO", `stdin fields: ${Object.keys(data as Record<string, unknown>).join(", ")}`);
 
 const isAwsBedrock = data.model.id?.startsWith("arn:") ?? false;
 const modelDisplayName = isAwsBedrock
   ? data.model.display_name.startsWith("arn:")
-    ? data.model.display_name
+    ? `${data.model.display_name.split("/").pop() ?? data.model.display_name} by AWS`
     : `${data.model.display_name} by AWS`
   : data.model.display_name;
 const currentDir = path.basename(data.workspace.current_dir);
@@ -120,7 +141,7 @@ const elements = [`\ue370 ${modelDisplayName}`, `\uea83 ${currentDir}`];
 if (gitBranch) elements.push(`\ue725 ${gitBranch}`);
 if (contextInfo) elements.push(`\udb83\ude91 ${contextInfo}`);
 
-const limitations = [];
+const limitations: string[] = [];
 if (!isAwsBedrock) {
   const fiveHour = data.rate_limits?.five_hour;
   const sevenDay = data.rate_limits?.seven_day;
