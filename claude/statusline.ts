@@ -61,8 +61,16 @@ function isStatuslineInput(value: unknown): value is StatuslineInput {
   const rl = v.rate_limits;
   if (rl !== undefined && typeof rl === "object" && rl !== null) {
     const rateLimits = rl as Record<string, unknown>;
-    if (rateLimits.five_hour !== undefined && !isRateLimit(rateLimits.five_hour)) return false;
-    if (rateLimits.seven_day !== undefined && !isRateLimit(rateLimits.seven_day)) return false;
+    if (
+      rateLimits.five_hour !== undefined &&
+      !isRateLimit(rateLimits.five_hour)
+    )
+      return false;
+    if (
+      rateLimits.seven_day !== undefined &&
+      !isRateLimit(rateLimits.seven_day)
+    )
+      return false;
   }
   return true;
 }
@@ -103,7 +111,7 @@ if (!isStatuslineInput(data)) {
   log("ERROR", `invalid input shape: ${JSON.stringify(data)}`);
   process.exit(1);
 }
-log("INFO", `stdin fields: ${Object.keys(data as Record<string, unknown>).join(", ")}`);
+log("INFO", `stdin fields: ${Object.keys(data).join(", ")}`);
 
 const isAwsBedrock = data.model.id?.startsWith("arn:") ?? false;
 const modelDisplayName = isAwsBedrock
