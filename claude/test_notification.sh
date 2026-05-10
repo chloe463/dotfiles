@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT="bun ~/.claude/scripts/notification.ts"
+readonly SCRIPT=(bun "${HOME}/.claude/scripts/notification.ts")
 PASS=0
 FAIL=0
 
@@ -9,10 +9,11 @@ run_test() {
   local label="$1"
   local input="$2"
   local expect_exit="$3"
+  local actual_exit=0
+  local output
 
   echo "=== ${label} ==="
-  actual_exit=0
-  output=$(echo "${input}" | eval "${SCRIPT}" 2>&1) || actual_exit=$?
+  output=$(printf '%s' "${input}" | "${SCRIPT[@]}" 2>&1) || actual_exit=$?
 
   if [[ "${actual_exit}" -eq "${expect_exit}" ]]; then
     echo "✓ exit ${actual_exit}"
