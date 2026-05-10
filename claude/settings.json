@@ -136,14 +136,18 @@
       }
     }
   },
+  "language": "Japanese",
+  "effortLevel": "high",
+  "autoUpdatesChannel": "latest",
+  "theme": "dark-ansi",
+  "editorMode": "vim",
   "mcpServers": {
     "any-script": {
       "command": "npx",
-      "args": ["any-script-mcp"]
+      "args": [
+        "any-script-mcp"
+      ]
     }
   },
-  "language": "Japanese",
-  "autoUpdatesChannel": "latest",
-  "theme": "dark-ansi",
-  "effortLevel": "high"
+  "model": "sonnet"
 }
