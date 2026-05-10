@@ -93,7 +93,7 @@ export function formatResetTime(resetsAt: number): string {
   return `${hours}:${minutes}`;
 }
 
-function extractModelName(model: StatuslineInput["model"]): string {
+export function extractModelName(model: StatuslineInput["model"]): string {
   if (!(model.id?.startsWith("arn:") ?? false)) return model.display_name;
   return model.display_name.startsWith("arn:")
     ? `${model.display_name.split("/").pop() ?? model.display_name} by AWS`

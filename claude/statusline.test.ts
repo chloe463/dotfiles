@@ -1,5 +1,5 @@
 import { expect, describe, it } from "bun:test";
-import { isRateLimit, isStatuslineInput, formatResetTime } from "./statusline";
+import { isRateLimit, isStatuslineInput, formatResetTime, extractModelName } from "./statusline";
 
 describe("isRateLimit", () => {
   it("returns true for valid RateLimit", () => {
@@ -74,6 +74,38 @@ describe("isStatuslineInput", () => {
         rate_limits: { seven_day: { used_percentage: 80, resets_at: Infinity } },
       }),
     ).toBe(false);
+  });
+});
+
+describe("extractModelName", () => {
+  it("returns display_name for a regular model", () => {
+    expect(extractModelName({ id: "claude-sonnet-4-6", display_name: "Claude Sonnet 4.6" })).toBe(
+      "Claude Sonnet 4.6",
+    );
+  });
+  it("returns display_name when id is undefined", () => {
+    expect(extractModelName({ display_name: "Claude Sonnet 4.6" })).toBe("Claude Sonnet 4.6");
+  });
+  it("shortens ARN display_name to last path segment and appends 'by AWS'", () => {
+    expect(
+      extractModelName({
+        id: "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0",
+        display_name: "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0",
+      }),
+    ).toBe("anthropic.claude-3-5-sonnet-20241022-v2:0 by AWS");
+  });
+  it("appends 'by AWS' when id is an ARN but display_name is friendly", () => {
+    expect(
+      extractModelName({
+        id: "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-5-sonnet-20241022-v2:0",
+        display_name: "Claude 3.5 Sonnet",
+      }),
+    ).toBe("Claude 3.5 Sonnet by AWS");
+  });
+  it("falls back to full ARN when path has no slash", () => {
+    expect(
+      extractModelName({ id: "arn:no-slash", display_name: "arn:no-slash" }),
+    ).toBe("arn:no-slash by AWS");
   });
 });
 
