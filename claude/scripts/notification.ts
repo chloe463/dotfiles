@@ -30,8 +30,7 @@ function isValidNotificationInput(input: unknown): input is NotificationInput {
   const obj = input as Record<string, unknown>;
   return (
     typeof obj.notification_type === "string" &&
-    typeof obj.message === "string" &&
-    typeof obj.title === "string"
+    typeof obj.message === "string"
   );
 }
 
@@ -68,7 +67,7 @@ async function main() {
 
   try {
     // argv[0]=message body, argv[1]=subtitle (title is hardcoded to "Claude Code")
-    await execFileAsync("osascript", ["-e", script, "--", data.message, data.title]);
+    await execFileAsync("osascript", ["-e", script, "--", data.message, data.title || "Permission needed"]);
   } catch (error) {
     process.exit(1);
   }
