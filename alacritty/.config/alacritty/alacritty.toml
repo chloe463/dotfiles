@@ -61,3 +61,8 @@ x = 4
 y = 0
 
 [mouse]
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"
