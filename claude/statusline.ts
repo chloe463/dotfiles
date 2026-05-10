@@ -51,7 +51,7 @@ interface StatuslineInput {
   };
 }
 
-function isRateLimit(v: unknown): v is RateLimit {
+export function isRateLimit(v: unknown): v is RateLimit {
   if (typeof v !== "object" || v === null) return false;
   const r = v as Record<string, unknown>;
   return (
@@ -61,7 +61,7 @@ function isRateLimit(v: unknown): v is RateLimit {
   );
 }
 
-function isStatuslineInput(value: unknown): value is StatuslineInput {
+export function isStatuslineInput(value: unknown): value is StatuslineInput {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
   if (typeof (v.model as Record<string, unknown>)?.display_name !== "string")
@@ -85,12 +85,48 @@ function isStatuslineInput(value: unknown): value is StatuslineInput {
   return true;
 }
 
-function formatResetTime(resetsAt: number): string {
+export function formatResetTime(resetsAt: number): string {
   if (!Number.isFinite(resetsAt) || resetsAt <= 0) return "??:??";
   const date = new Date(resetsAt * 1000);
   const hours = date.getHours().toString().padStart(2, "0");
   const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
+}
+
+function extractModelName(model: StatuslineInput["model"]): string {
+  if (!(model.id?.startsWith("arn:") ?? false)) return model.display_name;
+  return model.display_name.startsWith("arn:")
+    ? `${model.display_name.split("/").pop() ?? model.display_name} by AWS`
+    : `${model.display_name} by AWS`;
+}
+
+function extractCurrentDir(workspace: StatuslineInput["workspace"]): string {
+  return path.basename(workspace.current_dir);
+}
+
+function getBranchName(cwd: string): string {
+  try {
+    return execSync("git branch --show-current", {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`statusline: git branch failed: ${message}\n`);
+    return "";
+  }
+}
+
+function calcContextUsage(contextWindow: ContextWindow | undefined): number {
+  const contextSize = contextWindow?.context_window_size;
+  const currentUsage = contextWindow?.current_usage;
+  if (!currentUsage || !contextSize || contextSize <= 0) return 0;
+  const currentTokens =
+    (currentUsage.input_tokens ?? 0) +
+    (currentUsage.cache_creation_input_tokens ?? 0) +
+    (currentUsage.cache_read_input_tokens ?? 0);
+  return Math.floor((currentTokens * 100) / contextSize);
 }
 
 async function main() {
@@ -121,41 +157,16 @@ async function main() {
   }
 
   const isAwsBedrock = data.model.id?.startsWith("arn:") ?? false;
-  const modelDisplayName = isAwsBedrock
-    ? data.model.display_name.startsWith("arn:")
-      ? `${data.model.display_name.split("/").pop() ?? data.model.display_name} by AWS`
-      : `${data.model.display_name} by AWS`
-    : data.model.display_name;
-  const currentDir = path.basename(data.workspace.current_dir);
-
-  let gitBranch = "";
-  try {
-    gitBranch = execSync("git branch --show-current", {
-      cwd: data.workspace.current_dir,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`statusline: git branch failed: ${message}\n`);
-  }
-
-  let contextInfo = 0;
-  const contextSize = data.context_window?.context_window_size;
-  const currentUsage = data.context_window?.current_usage;
-  if (currentUsage && contextSize && contextSize > 0) {
-    const currentTokens =
-      (currentUsage.input_tokens ?? 0) +
-      (currentUsage.cache_creation_input_tokens ?? 0) +
-      (currentUsage.cache_read_input_tokens ?? 0);
-    contextInfo = Math.floor((currentTokens * 100) / contextSize);
-  }
+  const modelDisplayName = extractModelName(data.model);
+  const currentDir = extractCurrentDir(data.workspace);
+  const gitBranch = getBranchName(data.workspace.current_dir);
+  const contextInfo = calcContextUsage(data.context_window);
 
   const elements = [
-    renderClaudeBrandColor(` ${modelDisplayName}`),
-    renderSubText(` ${currentDir}`),
+    renderClaudeBrandColor(` ${modelDisplayName}`),
+    renderSubText(` ${currentDir}`),
   ];
-  if (gitBranch) elements.push(renderSubText(` ${gitBranch}`));
+  if (gitBranch) elements.push(renderSubText(` ${gitBranch}`));
   if (contextInfo) elements.push(renderRatio(`󰺑 %d\%`, contextInfo));
 
   const limitations: string[] = [];
@@ -184,4 +195,6 @@ async function main() {
   if (limitations.length > 0) console.log(limitationOutput);
 }
 
-main();
+if (import.meta.main) {
+  main();
+}
