@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 
-import { format } from "node:util";
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 const SOUND = "Glass";
 
@@ -68,18 +70,20 @@ async function main() {
 
   if (isIdlePrompt(data)) return;
 
+  const script = `
+    on run argv
+      display notification (item 1 of argv) with title "Claude Code" subtitle (item 2 of argv)
+    end run
+  `;
+
   try {
-    const command = format(
-      "osascript -e 'display notification \"%s\" with title \"Claude Code\" subtitle \"%s\"'",
-      data.message,
-      data.title
-    );
-    exec(command);
-    exec(format("afplay /System/Library/Sounds/%s.aiff", SOUND));
+    await Promise.all([
+      execFileAsync("osascript", ["-e", script, "--", data.message, data.title]),
+      execFileAsync("afplay", [`/System/Library/Sounds/${SOUND}.aiff`]),
+    ]);
   } catch (error) {
-    process.stderr.write(
-      "notification: failed to run osascript\n",
-    );
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`notification: failed to run notification: ${message}\n`);
     process.exit(1);
   }
 }
