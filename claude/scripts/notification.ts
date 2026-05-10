@@ -44,7 +44,6 @@ async function main() {
   try {
     input = await Bun.stdin.text();
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     process.exit(1);
   }
 
@@ -52,7 +51,6 @@ async function main() {
   try {
     data = JSON.parse(input);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     process.exit(1);
   }
 
@@ -72,7 +70,6 @@ async function main() {
     // argv[0]=message body, argv[1]=subtitle (title is hardcoded to "Claude Code")
     await execFileAsync("osascript", ["-e", script, "--", data.message, data.title]);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     process.exit(1);
   }
 }
