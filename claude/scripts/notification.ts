@@ -5,8 +5,6 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-const SOUND = "Glass";
-
 interface BaseInput {
   type: "command" | "http" | "mcp_tool" | "prompt" | "agent";
   if: string;
@@ -79,7 +77,6 @@ async function main() {
   try {
     await Promise.all([
       execFileAsync("osascript", ["-e", script, "--", data.message, data.title]),
-      execFileAsync("afplay", [`/System/Library/Sounds/${SOUND}.aiff`]),
     ]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
