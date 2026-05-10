@@ -69,9 +69,8 @@ async function main() {
   `;
 
   try {
-    await Promise.all([
-      execFileAsync("osascript", ["-e", script, "--", data.message, data.title]),
-    ]);
+    // argv[0]=message body, argv[1]=subtitle (title is hardcoded to "Claude Code")
+    await execFileAsync("osascript", ["-e", script, "--", data.message, data.title]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     process.exit(1);
