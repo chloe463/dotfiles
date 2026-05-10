@@ -163,10 +163,10 @@ async function main() {
   const contextInfo = calcContextUsage(data.context_window);
 
   const elements = [
-    renderClaudeBrandColor(` ${modelDisplayName}`),
-    renderSubText(` ${currentDir}`),
+    renderClaudeBrandColor(` ${modelDisplayName}`),
+    renderSubText(` ${currentDir}`),
   ];
-  if (gitBranch) elements.push(renderSubText(` ${gitBranch}`));
+  if (gitBranch) elements.push(renderSubText(` ${gitBranch}`));
   if (contextInfo) elements.push(renderRatio(`󰺑 %d\%`, contextInfo));
 
   const limitations: string[] = [];
