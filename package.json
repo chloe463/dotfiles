@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "typecheck": "tsc -p . --noEmit"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "chalk": "^5.6.2"
   }
 }
