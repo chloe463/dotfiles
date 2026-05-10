@@ -28,9 +28,17 @@ function renderClaudeBrandColor(msg: string) {
 }
 
 function renderRatio(msg: string, ratio: number) {
-  if (ratio < 50) return chalk.reset(format(msg, ratio));
+  if (ratio < 50) return chalk.hex("cccccc")(format(msg, ratio));
   if (ratio < 75) return chalk.yellow(format(msg, ratio));
   return chalk.red(format(msg, ratio));
+}
+
+function renderSubText(msg: string) {
+  return chalk.hex("9c9c9c")(msg);
+}
+
+function renderDivider(msg: string) {
+  return chalk.hex("5c5c5c")(msg);
 }
 
 interface ContextWindow {
@@ -161,8 +169,8 @@ if (currentUsage && contextSize && contextSize > 0) {
   contextInfo = Math.floor((currentTokens * 100) / contextSize);
 }
 
-const elements = [renderClaudeBrandColor(`\ue370 ${modelDisplayName}`), `\uea83 ${currentDir}`];
-if (gitBranch) elements.push(`\ue725 ${gitBranch}`);
+const elements = [renderClaudeBrandColor(`\ue370 ${modelDisplayName}`), renderSubText(`\uea83 ${currentDir}`)];
+if (gitBranch) elements.push(renderSubText(`\ue725 ${gitBranch}`));
 if (contextInfo) elements.push(
   renderRatio(`\udb83\ude91 %d\%`, contextInfo)
 );
@@ -184,8 +192,9 @@ if (!isAwsBedrock) {
   }
 }
 
-const output = elements.join(" | ");
-const limitationOutput = limitations.join(" | ");
+const divider = renderDivider(" | ");
+const output = elements.join(divider);
+const limitationOutput = limitations.join(divider);
 log("INFO", `output: ${output}`);
 console.log(output);
 if (limitations.length > 0) console.log(limitationOutput);
