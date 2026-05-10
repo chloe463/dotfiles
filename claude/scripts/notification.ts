@@ -45,8 +45,6 @@ async function main() {
     input = await Bun.stdin.text();
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`notification: failed to read stdin: ${message}\n`);
-    process.stdout.write("🤖 Claude Code\n");
     process.exit(1);
   }
 
@@ -55,14 +53,10 @@ async function main() {
     data = JSON.parse(input);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`notification: JSON parse failed: ${message}\n`);
     process.exit(1);
   }
 
   if (!isValidNotificationInput(data)) {
-    process.stderr.write(
-      "notification: invalid input: missing required fields\n",
-    );
     process.exit(1);
   }
 
@@ -80,11 +74,14 @@ async function main() {
     ]);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`notification: failed to run notification: ${message}\n`);
     process.exit(1);
   }
 }
 
 if (import.meta.main) {
-  main().catch((error) => console.error(error));
+  main().catch((error) => {
+    const message = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`notification: unexpected error: ${message}\n`);
+    process.exit(1);
+  });
 }
