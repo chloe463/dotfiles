@@ -1,8 +1,14 @@
 #!/usr/bin/env bun
 
+import { format } from "node:util";
 import { execSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 import path from "node:path";
+
+import chalk from "chalk";
+
+// NOTE: Set level 3 to affect colors in the statusline.
+chalk.level = 3;
 
 const DEBUG = process.env.STATUSLINE_DEBUG === "1";
 const LOG_FILE = process.env.STATUSLINE_LOG_FILE ?? "/tmp/statusline.log";
@@ -15,6 +21,16 @@ function log(level: "INFO" | "ERROR", message: string): void {
   } catch {
     // ログ書き込み失敗でstatuslineをクラッシュさせない
   }
+}
+
+function renderClaudeBrandColor(msg: string) {
+  return chalk.hex("#DE7356")(msg);
+}
+
+function renderRatio(msg: string, ratio: number) {
+  if (ratio < 50) return chalk.reset(format(msg, ratio));
+  if (ratio < 75) return chalk.yellow(format(msg, ratio));
+  return chalk.red(format(msg, ratio));
 }
 
 interface ContextWindow {
@@ -134,7 +150,7 @@ try {
   log("ERROR", `git branch failed: ${message}`);
 }
 
-let contextInfo = "";
+let contextInfo = 0;
 const contextSize = data.context_window?.context_window_size;
 const currentUsage = data.context_window?.current_usage;
 if (currentUsage && contextSize && contextSize > 0) {
@@ -142,12 +158,14 @@ if (currentUsage && contextSize && contextSize > 0) {
     (currentUsage.input_tokens ?? 0) +
     (currentUsage.cache_creation_input_tokens ?? 0) +
     (currentUsage.cache_read_input_tokens ?? 0);
-  contextInfo = `${Math.floor((currentTokens * 100) / contextSize)}%`;
+  contextInfo = Math.floor((currentTokens * 100) / contextSize);
 }
 
-const elements = [`\ue370 ${modelDisplayName}`, `\uea83 ${currentDir}`];
+const elements = [renderClaudeBrandColor(`\ue370 ${modelDisplayName}`), `\uea83 ${currentDir}`];
 if (gitBranch) elements.push(`\ue725 ${gitBranch}`);
-if (contextInfo) elements.push(`\udb83\ude91 ${contextInfo}`);
+if (contextInfo) elements.push(
+  renderRatio(`\udb83\ude91 %d\%`, contextInfo)
+);
 
 const limitations: string[] = [];
 if (!isAwsBedrock) {
@@ -155,11 +173,14 @@ if (!isAwsBedrock) {
   const sevenDay = data.rate_limits?.seven_day;
   if (fiveHour) {
     limitations.push(
-      `\udb86\udd9f 5h: ${fiveHour.used_percentage}% (Reset at ${formatResetTime(fiveHour.resets_at)})`,
+      renderRatio(
+        `\udb86\udd9f 5h: %d\% (Reset at ${formatResetTime(fiveHour.resets_at)})`,
+        Math.floor(fiveHour.used_percentage)
+      )
     );
   }
   if (sevenDay) {
-    limitations.push(`\udb80\udcf0 7d: ${sevenDay.used_percentage}%`);
+    limitations.push(renderRatio(`\udb80\udcf0 7d: %d\%`, Math.floor(sevenDay.used_percentage)));
   }
 }
 
