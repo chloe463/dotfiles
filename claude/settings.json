@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [],
     "deny": [
@@ -108,11 +109,22 @@
   "hooks": {
     "Notification": [
       {
-        "matcher": "*",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "osascript -e 'display notification \"Claude Codeが許可を求めています\" with title \"Claude Code\" subtitle \"確認待ち\" sound name \"Glass\"'"
+            "command": "bun ~/.claude/scripts/notification.ts"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ~/.claude/scripts/notification.ts stop"
           }
         ]
       }
@@ -136,14 +148,18 @@
       }
     }
   },
+  "language": "Japanese",
+  "effortLevel": "high",
+  "autoUpdatesChannel": "latest",
+  "theme": "dark-ansi",
+  "editorMode": "vim",
+  "prefersReducedMotion": true,
   "mcpServers": {
     "any-script": {
       "command": "npx",
-      "args": ["any-script-mcp"]
+      "args": [
+        "any-script-mcp"
+      ]
     }
-  },
-  "language": "Japanese",
-  "autoUpdatesChannel": "latest",
-  "theme": "dark-ansi",
-  "effortLevel": "high"
+  }
 }
