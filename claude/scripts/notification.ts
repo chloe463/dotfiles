@@ -75,7 +75,7 @@ async function sendNotificationAlert(data: NotificationInput) {
     "--",
     data.message,
     subtitle,
-    "Glass",
+    "Purr",
   ]);
 }
 
