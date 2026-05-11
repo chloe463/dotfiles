@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export CLAUDE_HOOK_TEST=1
 readonly SCRIPT=(bun "${HOME}/.claude/scripts/notification.ts")
 PASS=0
 FAIL=0
@@ -45,7 +46,7 @@ run_test "stop (valid)" \
   0 \
   "stop"
 
-# stop: stop_hook_active true, exits 0
+# stop: stop_hook_active true, exits 0 without sending notification (hook still running)
 run_test "stop (stop_hook_active: true)" \
   '{"hook_event_name":"Stop","stop_hook_active":true,"last_assistant_message":"Interrupted.","session_id":"abc123","transcript_path":"/tmp/test.jsonl","cwd":"/tmp","permission_mode":"default","effort":"high"}' \
   0 \

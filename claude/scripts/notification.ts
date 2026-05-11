@@ -2,20 +2,22 @@
 
 import { execFile } from "node:child_process";
 import { mkdirSync, appendFileSync } from "node:fs";
+import { homedir, userInfo } from "node:os";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-const LOG_DIR = `${process.env.HOME}/.claude/logs`;
-const LOG_FILE = `${LOG_DIR}/${process.env.USER}-hook-notification.log`;
+const LOG_DIR = `${homedir()}/.claude/logs`;
+const LOG_FILE = `${LOG_DIR}/${userInfo().username}-hook-notification.log`;
 
 function writeLog(message: string) {
   const timestamp = new Date().toISOString();
   try {
     mkdirSync(LOG_DIR, { recursive: true });
     appendFileSync(LOG_FILE, `${timestamp} ${message}\n`);
-  } catch {
-    // log write failure is non-fatal
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    process.stderr.write(`[notification] writeLog failed: ${msg}\n`);
   }
 }
 
@@ -26,6 +28,7 @@ const OSASCRIPT_DISPLAY_NOTIFICATION = `
 `;
 
 async function notifyError(message: string) {
+  if (process.env.CLAUDE_HOOK_TEST) return;
   await execFileAsync("osascript", [
     "-e",
     OSASCRIPT_DISPLAY_NOTIFICATION,
@@ -33,7 +36,10 @@ async function notifyError(message: string) {
     message,
     "Hook Error",
     "Pop",
-  ]).catch(() => {});
+  ]).catch((e: unknown) => {
+    const msg = e instanceof Error ? e.message : String(e);
+    writeLog(`[error] notifyError failed: ${msg}`);
+  });
 }
 
 function capitalize(msg: string) {
@@ -144,12 +150,14 @@ async function main() {
     if (mode === "stop") {
       if (!isValidStopInput(data)) {
         writeLog("[error] invalid stop input");
+        await notifyError("Invalid stop input");
         process.exit(1);
       }
       await sendStopAlert(data);
     } else {
       if (!isValidNotificationInput(data)) {
         writeLog("[error] invalid notification input");
+        await notifyError("Invalid notification input");
         process.exit(1);
       }
       if (isIdlePrompt(data)) return;
@@ -164,10 +172,10 @@ async function main() {
 }
 
 if (import.meta.main) {
-  main().catch(async (error) => {
+  main().catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
     writeLog(`[error] unexpected error: ${message}`);
-    await notifyError(`Unexpected error: ${message}`);
+    process.stderr.write(`[notification] FATAL: ${message}\n`);
     process.exit(1);
   });
 }
