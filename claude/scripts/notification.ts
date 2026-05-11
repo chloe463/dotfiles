@@ -2,7 +2,6 @@
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { appendFileSync } from "node:fs";
 
 const execFileAsync = promisify(execFile);
 
@@ -31,6 +30,11 @@ interface NotificationInput extends BaseInput {
   title?: string;
 }
 
+interface StopInput extends BaseInput {
+  stop_hook_active: boolean;
+  last_assistant_message: string;
+}
+
 function isValidNotificationInput(input: unknown): input is NotificationInput {
   if (typeof input !== "object" || input === null || Array.isArray(input)) {
     return false;
@@ -41,46 +45,79 @@ function isValidNotificationInput(input: unknown): input is NotificationInput {
   );
 }
 
+function isValidStopInput(input: unknown): input is StopInput {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    return false;
+  }
+  const obj = input as Record<string, unknown>;
+  return (
+    typeof obj.stop_hook_active === "boolean" &&
+    typeof obj.last_assistant_message === "string"
+  );
+}
+
 function isIdlePrompt(data: NotificationInput) {
   return data.notification_type === "idle_prompt";
 }
 
+const OSASCRIPT_DISPLAY_NOTIFICATION = `
+  on run argv
+    display notification (item 1 of argv) with title "Claude Code" subtitle (item 2 of argv) sound name (item 3 of argv)
+  end run
+`;
+
+async function sendNotificationAlert(data: NotificationInput) {
+  const subtitle =
+    data.title || capitalize(data.notification_type.replace("_", " "));
+  await execFileAsync("osascript", [
+    "-e",
+    OSASCRIPT_DISPLAY_NOTIFICATION,
+    "--",
+    data.message,
+    subtitle,
+    "Glass",
+  ]);
+}
+
+async function sendStopAlert(data: StopInput) {
+  const message = data.last_assistant_message || "Task completed";
+  await execFileAsync("osascript", [
+    "-e",
+    OSASCRIPT_DISPLAY_NOTIFICATION,
+    "--",
+    message,
+    "Claude stopped",
+    "Blow",
+  ]);
+}
+
 async function main() {
+  const mode = (process.argv[2] ?? "notification") as "notification" | "stop";
+
   let input: string;
   try {
     input = await Bun.stdin.text();
-    // appendFileSync("/tmp/claude-notification-log.txt", input + "\n", {
-    //   encoding: "utf-8",
-    // });
-  } catch (error) {
+  } catch {
     process.exit(1);
   }
 
   let data: unknown;
   try {
     data = JSON.parse(input);
-  } catch (error) {
+  } catch {
     process.exit(1);
   }
-
-  if (!isValidNotificationInput(data)) {
-    process.exit(1);
-  }
-
-  if (isIdlePrompt(data)) return;
-
-  const script = `
-    on run argv
-      display notification (item 1 of argv) with title "Claude Code" subtitle (item 2 of argv) sound name "Glass"
-    end run
-  `;
 
   try {
-    // argv[0]=message body, argv[1]=subtitle (title is hardcoded to "Claude Code")
-    const title =
-      data.title || capitalize(data.notification_type.replace("_", " "));
-    await execFileAsync("osascript", ["-e", script, "--", data.message, title]);
-  } catch (error) {
+    if (mode === "stop") {
+      if (!isValidStopInput(data)) process.exit(1);
+      await sendStopAlert(data);
+    } else {
+      if (!isValidNotificationInput(data)) process.exit(1);
+      if (isIdlePrompt(data)) return;
+      await sendNotificationAlert(data);
+    }
+  } catch {
     process.exit(1);
   }
 }
