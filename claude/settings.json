@@ -153,6 +153,7 @@
   "autoUpdatesChannel": "latest",
   "theme": "dark-ansi",
   "editorMode": "vim",
+  "prefersReducedMotion": true,
   "mcpServers": {
     "any-script": {
       "command": "npx",
