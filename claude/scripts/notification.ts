@@ -68,7 +68,7 @@ const OSASCRIPT_DISPLAY_NOTIFICATION = `
 
 async function sendNotificationAlert(data: NotificationInput) {
   const subtitle =
-    data.title || capitalize(data.notification_type.replace("_", " "));
+    data.title || capitalize(data.notification_type.replaceAll("_", " "));
   await execFileAsync("osascript", [
     "-e",
     OSASCRIPT_DISPLAY_NOTIFICATION,
@@ -80,6 +80,7 @@ async function sendNotificationAlert(data: NotificationInput) {
 }
 
 async function sendStopAlert(data: StopInput) {
+  if (data.stop_hook_active) return;
   const message = data.last_assistant_message || "Task completed";
   await execFileAsync("osascript", [
     "-e",

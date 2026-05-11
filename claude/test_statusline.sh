@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 echo "=== 30% === "
 bun run claude/statusline.ts <<< '{"model":{"id":"claude-sonnet-4-6","display_name":"Claude Sonnet 4.6"},"workspace":{"current_dir":"/Users/tsuyoshi/dotfiles"},"context_window":{"context_window_size":100000,"current_usage":{"input_tokens":30000}},"rate_limits":{"five_hour":{"used_percentage":30,"resets_at":1746700000},"seven_day":{"used_percentage":30,"resets_at":1746700000}}}'
 echo ""

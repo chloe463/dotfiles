@@ -74,7 +74,7 @@ run_test "missing message field" \
   '{"hook_event_name":"Notification","notification_type":"permission_prompt","title":"Permission needed"}' \
   1
 
-# missing required field (title): exits 1
+# title is optional: falls back to capitalized notification_type, exits 0
 run_test "missing title field" \
   '{"hook_event_name":"Notification","notification_type":"permission_prompt","message":"Some message"}' \
   0
