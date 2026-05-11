@@ -1,9 +1,40 @@
 #!/usr/bin/env bun
 
 import { execFile } from "node:child_process";
+import { mkdirSync, appendFileSync } from "node:fs";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
+
+const LOG_DIR = `${process.env.HOME}/.claude/logs`;
+const LOG_FILE = `${LOG_DIR}/${process.env.USER}-hook-notification.log`;
+
+function writeLog(message: string) {
+  const timestamp = new Date().toISOString();
+  try {
+    mkdirSync(LOG_DIR, { recursive: true });
+    appendFileSync(LOG_FILE, `${timestamp} ${message}\n`);
+  } catch {
+    // log write failure is non-fatal
+  }
+}
+
+const OSASCRIPT_DISPLAY_NOTIFICATION = `
+  on run argv
+    display notification (item 1 of argv) with title "Claude Code" subtitle (item 2 of argv) sound name (item 3 of argv)
+  end run
+`;
+
+async function notifyError(message: string) {
+  await execFileAsync("osascript", [
+    "-e",
+    OSASCRIPT_DISPLAY_NOTIFICATION,
+    "--",
+    message,
+    "Hook Error",
+    "Pop",
+  ]).catch(() => {});
+}
 
 function capitalize(msg: string) {
   return msg.charAt(0).toUpperCase() + msg.substring(1);
@@ -60,12 +91,6 @@ function isIdlePrompt(data: NotificationInput) {
   return data.notification_type === "idle_prompt";
 }
 
-const OSASCRIPT_DISPLAY_NOTIFICATION = `
-  on run argv
-    display notification (item 1 of argv) with title "Claude Code" subtitle (item 2 of argv) sound name (item 3 of argv)
-  end run
-`;
-
 async function sendNotificationAlert(data: NotificationInput) {
   const subtitle =
     data.title || capitalize(data.notification_type.replaceAll("_", " "));
@@ -98,35 +123,51 @@ async function main() {
   let input: string;
   try {
     input = await Bun.stdin.text();
-  } catch {
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    writeLog(`[error] failed to read stdin: ${msg}`);
+    await notifyError(`Failed to read stdin: ${msg}`);
     process.exit(1);
   }
 
   let data: unknown;
   try {
     data = JSON.parse(input);
-  } catch {
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    writeLog(`[error] failed to parse JSON: ${msg}`);
+    await notifyError(`Failed to parse JSON: ${msg}`);
     process.exit(1);
   }
 
   try {
     if (mode === "stop") {
-      if (!isValidStopInput(data)) process.exit(1);
+      if (!isValidStopInput(data)) {
+        writeLog("[error] invalid stop input");
+        process.exit(1);
+      }
       await sendStopAlert(data);
     } else {
-      if (!isValidNotificationInput(data)) process.exit(1);
+      if (!isValidNotificationInput(data)) {
+        writeLog("[error] invalid notification input");
+        process.exit(1);
+      }
       if (isIdlePrompt(data)) return;
       await sendNotificationAlert(data);
     }
-  } catch {
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    writeLog(`[error] failed to send notification: ${msg}`);
+    await notifyError(`Failed to send notification: ${msg}`);
     process.exit(1);
   }
 }
 
 if (import.meta.main) {
-  main().catch((error) => {
+  main().catch(async (error) => {
     const message = error instanceof Error ? error.message : String(error);
-    process.stderr.write(`notification: unexpected error: ${message}\n`);
+    writeLog(`[error] unexpected error: ${message}`);
+    await notifyError(`Unexpected error: ${message}`);
     process.exit(1);
   });
 }
