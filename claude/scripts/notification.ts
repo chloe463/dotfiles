@@ -2,25 +2,33 @@
 
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { appendFileSync } from "node:fs";
 
 const execFileAsync = promisify(execFile);
 
-interface BaseInput {
-  type: "command" | "http" | "mcp_tool" | "prompt" | "agent";
-  if: string;
-  timeout: number;
-  statusMessage: string;
-  once: boolean;
+function capitalize(msg: string) {
+  return msg.charAt(0).toUpperCase() + msg.substring(1);
 }
 
-interface NotificationInput extends BaseInput {
-  hook_event_name: "Notification";
-  notification_type: string;
-  message: string;
-  title: string;
+interface BaseInput {
   session_id: string;
   transcript_path: string;
   cwd: string;
+  permission_mode:
+    | "default"
+    | "plan"
+    | "acceptEdits"
+    | "auto"
+    | "dontAsk"
+    | "bypassPermissions";
+  effort: "low" | "medium" | "high" | "xhigh" | "max";
+  hook_event_name: string;
+}
+
+interface NotificationInput extends BaseInput {
+  notification_type: string;
+  message: string;
+  title?: string;
 }
 
 function isValidNotificationInput(input: unknown): input is NotificationInput {
@@ -29,8 +37,7 @@ function isValidNotificationInput(input: unknown): input is NotificationInput {
   }
   const obj = input as Record<string, unknown>;
   return (
-    typeof obj.notification_type === "string" &&
-    typeof obj.message === "string"
+    typeof obj.notification_type === "string" && typeof obj.message === "string"
   );
 }
 
@@ -42,6 +49,9 @@ async function main() {
   let input: string;
   try {
     input = await Bun.stdin.text();
+    // appendFileSync("/tmp/claude-notification-log.txt", input + "\n", {
+    //   encoding: "utf-8",
+    // });
   } catch (error) {
     process.exit(1);
   }
@@ -61,13 +71,15 @@ async function main() {
 
   const script = `
     on run argv
-      display notification (item 1 of argv) with title "Claude Code" subtitle (item 2 of argv)
+      display notification (item 1 of argv) with title "Claude Code" subtitle (item 2 of argv) sound name "Glass"
     end run
   `;
 
   try {
     // argv[0]=message body, argv[1]=subtitle (title is hardcoded to "Claude Code")
-    await execFileAsync("osascript", ["-e", script, "--", data.message, data.title || "Permission needed"]);
+    const title =
+      data.title || capitalize(data.notification_type.replace("_", " "));
+    await execFileAsync("osascript", ["-e", script, "--", data.message, title]);
   } catch (error) {
     process.exit(1);
   }

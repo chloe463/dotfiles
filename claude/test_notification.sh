@@ -44,7 +44,7 @@ run_test "missing message field" \
 # missing required field (title): exits 1
 run_test "missing title field" \
   '{"hook_event_name":"Notification","notification_type":"permission_prompt","message":"Some message"}' \
-  1
+  0
 
 # invalid JSON: exits 1
 run_test "invalid JSON" \
