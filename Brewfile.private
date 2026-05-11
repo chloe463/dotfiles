@@ -4,8 +4,15 @@
 # Load shared packages
 instance_eval(File.read("Brewfile.shared"))
 
-# Private-specific packages (add your personal tools here)
-# Example:
-# brew "personal-tool"
-# cask "spotify"
-# cask "steam"
+# Private-specific brews
+brew "cffi"
+brew "cryptography"
+brew "nkf"
+brew "pycparser"
+brew "python@3.12"
+brew "python@3.8"
+
+# Private-specific casks
+
+# Private-specific VSCode extensions
+
