@@ -116,15 +116,6 @@
             "command": "bun ~/.claude/scripts/notification.ts"
           }
         ]
-      },
-      {
-        "matcher": "permission_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "afplay '/System/Library/Sounds/Glass.aiff'"
-          }
-        ]
       }
     ],
     "Stop": [
@@ -169,6 +160,5 @@
         "any-script-mcp"
       ]
     }
-  },
-  "model": "sonnet"
+  }
 }
