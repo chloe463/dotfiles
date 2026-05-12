@@ -107,7 +107,6 @@
       "Bash(curl:*)",
       "Bash(wget:*)",
       "Bash(nc:*)",
-      "Bash(gh:*)",
       "Bash(npm install:*)",
       "Bash(yarn install:*)",
       "Bash(pnpm install:*)",
