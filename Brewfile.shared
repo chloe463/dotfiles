@@ -84,6 +84,7 @@ brew "tailspin"
 brew "the_silver_searcher"
 brew "tmux"
 brew "tree"
+brew "tree-sitter-cli"
 brew "watch"
 brew "yarn"
 brew "datawire/blackbird/telepresence", link: false
