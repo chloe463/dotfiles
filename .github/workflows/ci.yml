@@ -12,6 +12,7 @@ jobs:
     outputs:
       brewfile: ${{ steps.filter.outputs.brewfile }}
     steps:
+      - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: filter
         with:
