@@ -82,10 +82,11 @@ function install_homebrew()
   fi
 
   echo "brew bundle --file=Brewfile.shared"
-  brew bundle --file=Brewfile.shared
-
-  if [ $? -eq 0 ]; then
-    echo "brew bundle --file=Brewfile.private or brew bundle --file=Brewfile.work to install more dependencies."
+  if brew bundle --file=Brewfile.shared; then
+    echo "Done. Run 'brew bundle --file=Brewfile.private' or 'brew bundle --file=Brewfile.work' to install more dependencies."
+  else
+    echo "ERROR: 'brew bundle --file=Brewfile.shared' failed." >&2
+    return 1
   fi
 }
 

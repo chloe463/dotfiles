@@ -12,17 +12,16 @@ jobs:
     outputs:
       brewfile: ${{ steps.filter.outputs.brewfile }}
     steps:
-      - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
             brewfile:
-              - 'Brewfile*'
+              - 'Brewfile.shared'
 
   test-brew-install:
     needs: detect-changes
-    if: needs.detect-changes.outputs.brewfile == 'true'
+    if: needs.detect-changes.result == 'success' && needs.detect-changes.outputs.brewfile == 'true'
     name: brew install
     runs-on: macos-latest
     steps:
