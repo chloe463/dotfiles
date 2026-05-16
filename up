@@ -81,8 +81,12 @@ function install_homebrew()
     brew update
   fi
 
-  echo "brew bundle"
-  brew bundle
+  echo "brew bundle --file=Brewfile.shared"
+  brew bundle --file=Brewfile.shared
+
+  if [ $? -eq 0 ]; then
+    echo "brew bundle --file=Brewfile.private or brew bundle --file=Brewfile.work to install more dependencies."
+  fi
 }
 
 function install_global_npm_packages()
