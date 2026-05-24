@@ -1,9 +1,23 @@
 ####################################################################################################
-# Prezto
+# Sheldon
 ####################################################################################################
-if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
-  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
-fi
+eval "$(sheldon source)"
+
+####################################################################################################
+# Zsh options (previously managed by Prezto modules)
+####################################################################################################
+# editor module: emacs key bindings
+bindkey -e
+
+# directory module: cd convenience options
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt PUSHD_SILENT
+
+# environment module
+setopt COMBINING_CHARS
+setopt INTERACTIVE_COMMENTS
 
 ####################################################################################################
 # Other util settings
