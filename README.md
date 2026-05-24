@@ -78,7 +78,7 @@ git checkout main
 git checkout -b feature/add-config
 
 # Make changes
-nvim zsh/.zshrc
+nvim zsh/.config/zsh/.zshrc
 
 # Commit and create PR
 git add .
@@ -174,7 +174,7 @@ If stow reports conflicts:
 cat /tmp/stow.log
 
 # Remove conflicting files
-rm ~/.zshrc  # or backup first
+rm ~/.config/zsh/.zshrc  # or backup first
 
 # Re-run stow
 ./up dot

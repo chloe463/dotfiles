@@ -18,10 +18,10 @@ setopt INTERACTIVE_COMMENTS
 # Other util settings
 ####################################################################################################
 # Credentials, such as GitHub token, must be written in the following file
-[ -f ~/.credentials.zsh ] && source ~/.credentials.zsh
+[ -f "$ZDOTDIR/credentials.zsh" ] && source "$ZDOTDIR/credentials.zsh"
 
 # Configure fzf.
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f "$XDG_CONFIG_HOME/fzf/fzf.zsh" ] && source "$XDG_CONFIG_HOME/fzf/fzf.zsh"
 
 ####################################################################################################
 # Aliases
@@ -38,7 +38,7 @@ alias top='btop'
 ####################################################################################################
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
-export BUN_INSTALL="$HOME/.bun"
+export BUN_INSTALL="$XDG_DATA_HOME/bun"
 
 # For ffi
 export LIBFFI_ROOT=$(brew --prefix libffi)
@@ -94,6 +94,8 @@ path_append "$HOME/.cargo/bin"
 export PATH
 
 # History
+export HISTFILE="$XDG_STATE_HOME/zsh/history"
+mkdir -p "$XDG_STATE_HOME/zsh"
 setopt inc_append_history
 setopt share_history
 
@@ -118,21 +120,22 @@ eval "$(goenv init -)"
 ####################################################################################################
 # Completion
 # You need to run the following commands
-# gh completion -s zsh > $HOME/.my_completions/_gh
-# kube completion zsh > $HOME/.my_completions/_kube
+# gh completion -s zsh > $XDG_DATA_HOME/zsh/completions/_gh
+# kube completion zsh > $XDG_DATA_HOME/zsh/completions/_kube
 ####################################################################################################
 
-COMPLETION_DIR=$HOME/.my_completions
-if [ -d $COMPLETION_DIR ]; then
+COMPLETION_DIR="$XDG_DATA_HOME/zsh/completions"
+if [ -d "$COMPLETION_DIR" ]; then
   fpath=($COMPLETION_DIR $fpath)
 fi
 
 # bun completions
-[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
 
 # For completion
 autoload -U compinit
-compinit -i
+mkdir -p "$XDG_CACHE_HOME/zsh"
+compinit -i -d "$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
 
 ####################################################################################################
 # Sheldon
