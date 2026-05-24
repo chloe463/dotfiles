@@ -21,7 +21,15 @@ setopt INTERACTIVE_COMMENTS
 [ -f "$ZDOTDIR/credentials.zsh" ] && source "$ZDOTDIR/credentials.zsh"
 
 # Configure fzf (shell integration generated on the fly; no stored ~/.fzf.zsh).
-command -v fzf > /dev/null && source <(fzf --zsh)
+# `fzf --zsh` requires fzf >= 0.48.0; warn instead of failing silently on older versions.
+if command -v fzf > /dev/null 2>&1; then
+  if fzf_init=$(fzf --zsh 2>/dev/null); then
+    source <(print -r -- "$fzf_init")
+  else
+    print -u2 "[zshrc] WARNING: 'fzf --zsh' failed (requires fzf >= 0.48.0); fzf integration not loaded."
+  fi
+  unset fzf_init
+fi
 
 ####################################################################################################
 # Aliases
@@ -94,8 +102,9 @@ path_append "$HOME/.cargo/bin"
 export PATH
 
 # History
-export HISTFILE="$XDG_STATE_HOME/zsh/history"
-mkdir -p "$XDG_STATE_HOME/zsh"
+mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/zsh" \
+  || print -u2 "[zshrc] WARNING: could not create ${XDG_STATE_HOME:-$HOME/.local/state}/zsh; history will not be saved."
+export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
 setopt inc_append_history
 setopt share_history
 
@@ -124,7 +133,7 @@ eval "$(goenv init -)"
 # kube completion zsh > $XDG_DATA_HOME/zsh/completions/_kube
 ####################################################################################################
 
-COMPLETION_DIR="$XDG_DATA_HOME/zsh/completions"
+COMPLETION_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/completions"
 if [ -d "$COMPLETION_DIR" ]; then
   fpath=($COMPLETION_DIR $fpath)
 fi
@@ -134,8 +143,9 @@ fi
 
 # For completion
 autoload -U compinit
-mkdir -p "$XDG_CACHE_HOME/zsh"
-compinit -i -d "$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh" \
+  || print -u2 "[zshrc] WARNING: could not create ${XDG_CACHE_HOME:-$HOME/.cache}/zsh; completion cache will not be written."
+compinit -i -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION"
 
 ####################################################################################################
 # Sheldon

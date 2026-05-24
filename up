@@ -39,8 +39,9 @@ function install_sheldon_plugins()
 }
 
 # One-time migration of machine-local files into XDG locations.
-# Idempotent: the move runs only when the legacy path exists and the XDG
-# destination does not, so re-running is a no-op.
+# The `mkdir -p` runs every invocation (idempotent); the credentials move runs
+# only when the legacy file exists and no regular file is already at the XDG
+# destination, so re-running after a successful migration is a no-op.
 function migrate_to_xdg()
 {
     local xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -52,9 +53,16 @@ function migrate_to_xdg()
     mkdir -p "$xdg_config/zsh"
 
     # credentials: ~/.credentials.zsh -> $ZDOTDIR/credentials.zsh
-    if [ -f "$HOME/.credentials.zsh" ] && [ ! -e "$xdg_config/zsh/credentials.zsh" ]; then
+    # Use `-f` (not `-e`) on the destination so a broken symlink there does not
+    # mask the migration.
+    if [ -f "$HOME/.credentials.zsh" ] && [ ! -f "$xdg_config/zsh/credentials.zsh" ]; then
         echo "Migrating ~/.credentials.zsh -> $xdg_config/zsh/credentials.zsh"
-        mv "$HOME/.credentials.zsh" "$xdg_config/zsh/credentials.zsh"
+        mv "$HOME/.credentials.zsh" "$xdg_config/zsh/credentials.zsh" || {
+            echo "ERROR: Failed to migrate ~/.credentials.zsh -> $xdg_config/zsh/credentials.zsh" >&2
+            echo "       Your credentials file is still at ~/.credentials.zsh — no data was lost." >&2
+            echo "       Check permissions on $xdg_config/zsh/ and retry." >&2
+            return 1
+        }
     fi
 }
 
@@ -89,7 +97,8 @@ function run_stow()
         echo "🎉 Done!"
         echo
     else
-        echo "Install stow first!"
+        echo "ERROR: stow is not installed. Run: ./up brew" >&2
+        return 1
     fi
 }
 
