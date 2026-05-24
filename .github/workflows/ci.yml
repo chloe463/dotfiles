@@ -45,8 +45,12 @@ jobs:
           cp zsh/.config/sheldon/plugins.toml ~/.config/sheldon/plugins.toml
           # Unset insteadOf to allow sheldon to clone plugins via HTTPS
           # (insteadOf redirects https://github.com/ to SSH, which has no key in CI)
-          git config --global --unset 'url.ssh://git@github.com/.insteadOf' || true
+          if git config --global --get 'url.ssh://git@github.com/.insteadOf' > /dev/null 2>&1; then
+            git config --global --unset 'url.ssh://git@github.com/.insteadOf'
+          fi
           ./up sheldon
+      - name: Verify sheldon source is valid zsh syntax
+        run: sheldon source | zsh -n
   test-dots-syms:
     name: Make symlinks
     runs-on: macos-latest

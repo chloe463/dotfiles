@@ -33,7 +33,8 @@ function install_sheldon_plugins()
         echo 'Installing sheldon plugins...'
         sheldon lock
     else
-        echo 'Install sheldon first! Run: up brew'
+        echo 'ERROR: sheldon is not installed. Run: ./up brew' >&2
+        return 1
     fi
 }
 
