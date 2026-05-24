@@ -20,8 +20,8 @@ setopt INTERACTIVE_COMMENTS
 # Credentials, such as GitHub token, must be written in the following file
 [ -f "$ZDOTDIR/credentials.zsh" ] && source "$ZDOTDIR/credentials.zsh"
 
-# Configure fzf.
-[ -f "$XDG_CONFIG_HOME/fzf/fzf.zsh" ] && source "$XDG_CONFIG_HOME/fzf/fzf.zsh"
+# Configure fzf (shell integration generated on the fly; no stored ~/.fzf.zsh).
+command -v fzf > /dev/null && source <(fzf --zsh)
 
 ####################################################################################################
 # Aliases
@@ -38,7 +38,7 @@ alias top='btop'
 ####################################################################################################
 export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
-export BUN_INSTALL="$XDG_DATA_HOME/bun"
+export BUN_INSTALL="$HOME/.bun"
 
 # For ffi
 export LIBFFI_ROOT=$(brew --prefix libffi)
@@ -130,7 +130,7 @@ if [ -d "$COMPLETION_DIR" ]; then
 fi
 
 # bun completions
-[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
+[ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
 # For completion
 autoload -U compinit

@@ -39,12 +39,11 @@ function install_sheldon_plugins()
 }
 
 # One-time migration of machine-local files into XDG locations.
-# Idempotent: each move runs only when the legacy path exists and the XDG
+# Idempotent: the move runs only when the legacy path exists and the XDG
 # destination does not, so re-running is a no-op.
 function migrate_to_xdg()
 {
     local xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
-    local xdg_data="${XDG_DATA_HOME:-$HOME/.local/share}"
 
     # Ensure ~/.config/zsh is a real directory before stow runs. Without this,
     # stow tree-folds the new package and links ~/.config/zsh straight to the
@@ -52,24 +51,10 @@ function migrate_to_xdg()
     # inside the dotfiles checkout.
     mkdir -p "$xdg_config/zsh"
 
-    # bun: ~/.bun -> $XDG_DATA_HOME/bun
-    if [ -d "$HOME/.bun" ] && [ ! -e "$xdg_data/bun" ]; then
-        echo "Migrating ~/.bun -> $xdg_data/bun"
-        mkdir -p "$xdg_data"
-        mv "$HOME/.bun" "$xdg_data/bun"
-    fi
-
     # credentials: ~/.credentials.zsh -> $ZDOTDIR/credentials.zsh
     if [ -f "$HOME/.credentials.zsh" ] && [ ! -e "$xdg_config/zsh/credentials.zsh" ]; then
         echo "Migrating ~/.credentials.zsh -> $xdg_config/zsh/credentials.zsh"
         mv "$HOME/.credentials.zsh" "$xdg_config/zsh/credentials.zsh"
-    fi
-
-    # fzf: ~/.fzf.zsh -> $XDG_CONFIG_HOME/fzf/fzf.zsh
-    if [ -f "$HOME/.fzf.zsh" ] && [ ! -e "$xdg_config/fzf/fzf.zsh" ]; then
-        echo "Migrating ~/.fzf.zsh -> $xdg_config/fzf/fzf.zsh"
-        mkdir -p "$xdg_config/fzf"
-        mv "$HOME/.fzf.zsh" "$xdg_config/fzf/fzf.zsh"
     fi
 }
 
