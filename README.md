@@ -54,13 +54,13 @@ git checkout work
 ### Setup Commands
 
 ```bash
-# Full setup (brew + dotfiles + zprezto + npm + tmux)
+# Full setup (brew + dotfiles + sheldon + npm + tmux)
 ./up
 
 # Individual components
 ./up brew      # Install Homebrew packages
 ./up dot       # Create symlinks only
-./up zprezto   # Install Zsh framework
+./up sheldon   # Install Zsh plugins
 ./up npm       # Install global npm packages
 ./up tmux      # Install tmux plugins
 
