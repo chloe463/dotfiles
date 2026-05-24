@@ -1,9 +1,18 @@
 ####################################################################################################
-# Prezto
+# Zsh options (previously managed by Prezto modules)
 ####################################################################################################
-if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
-  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
-fi
+# editor module: emacs key bindings
+bindkey -e
+
+# directory module: cd convenience options
+setopt AUTO_CD
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt PUSHD_SILENT
+
+# environment module
+setopt COMBINING_CHARS
+setopt INTERACTIVE_COMMENTS
 
 ####################################################################################################
 # Other util settings
@@ -124,6 +133,16 @@ fi
 # For completion
 autoload -U compinit
 compinit -i
+
+####################################################################################################
+# Sheldon
+# Must be loaded after compinit (required by zsh-syntax-highlighting)
+####################################################################################################
+if command -v sheldon > /dev/null 2>&1; then
+  eval "$(sheldon source)"
+else
+  echo '[zshrc] WARNING: sheldon not found. Run: ./up sheldon' >&2
+fi
 
 ####################################################################################################
 # Utility functions

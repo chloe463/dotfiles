@@ -27,11 +27,15 @@ BASE_DIR=`pwd -P`
 # echo $(dirname $RESULT)
 # BASE_DIR=$(dirname $RESULT)
 
-function install_zprezto()
+function install_sheldon_plugins()
 {
-    # https://github.com/sorin-ionescu/prezto#installation
-    git clone --recursive https://github.com/sorin-ionescu/prezto.git $HOME/.zprezto
-    # chsh -s /bin/zsh
+    if type sheldon > /dev/null 2>&1; then
+        echo 'Installing sheldon plugins...'
+        sheldon lock
+    else
+        echo 'ERROR: sheldon is not installed. Run: ./up brew' >&2
+        return 1
+    fi
 }
 
 function run_stow()
@@ -127,8 +131,8 @@ function install_tmux_plugins()
 function main()
 {
     case $1 in
-        "zprezto")
-            install_zprezto
+        "sheldon")
+            install_sheldon_plugins
             ;;
         "dot" | "dots" | "stow")
             run_stow
@@ -144,8 +148,8 @@ function main()
             ;;
         *)
             install_homebrew
-            install_zprezto
-            make_dot_files_symlinks
+            install_sheldon_plugins
+            run_stow
             install_global_npm_packages
             install_tmux_plugins
             ;;
