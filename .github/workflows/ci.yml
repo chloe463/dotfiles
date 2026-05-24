@@ -40,6 +40,9 @@ jobs:
         run: brew install sheldon
       - name: Test setup scripts
         run: |
+          # Copy plugins.toml to the expected location (stow is not run in CI)
+          mkdir -p ~/.config/sheldon
+          cp zsh/.config/sheldon/plugins.toml ~/.config/sheldon/plugins.toml
           # Unset insteadOf to allow sheldon to clone plugins via HTTPS
           # (insteadOf redirects https://github.com/ to SSH, which has no key in CI)
           git config --global --unset 'url.ssh://git@github.com/.insteadOf' || true
