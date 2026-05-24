@@ -57,8 +57,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Install stow
+        run: brew install stow
       - name: Test setup scripts
-        run: ./up stow
+        run: |
+          # Run against a pristine HOME so stow has no conflicts with the
+          # runner's pre-existing dotfiles (e.g. ~/.config/gh), and so the job
+          # actually exercises symlink creation instead of short-circuiting on
+          # a missing stow.
+          export HOME="$RUNNER_TEMP/stow-home"
+          mkdir -p "$HOME/Library/Application Support/Code/User" \
+                   "$HOME/Library/Application Support/Cursor/User" \
+                   "$HOME/.claude"
+          ./up stow
   typecheck:
     name: TypeScript type check
     runs-on: ubuntu-latest
