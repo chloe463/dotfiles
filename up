@@ -38,6 +38,34 @@ function install_sheldon_plugins()
     fi
 }
 
+# One-time migration of machine-local files into XDG locations.
+# The `mkdir -p` runs every invocation (idempotent); the credentials move runs
+# only when the legacy file exists and no regular file is already at the XDG
+# destination, so re-running after a successful migration is a no-op.
+function migrate_to_xdg()
+{
+    local xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+    # Ensure ~/.config/zsh is a real directory before stow runs. Without this,
+    # stow tree-folds the new package and links ~/.config/zsh straight to the
+    # repo, causing machine-local files (e.g. credentials.zsh) to be written
+    # inside the dotfiles checkout.
+    mkdir -p "$xdg_config/zsh"
+
+    # credentials: ~/.credentials.zsh -> $ZDOTDIR/credentials.zsh
+    # Use `-f` (not `-e`) on the destination so a broken symlink there does not
+    # mask the migration.
+    if [ -f "$HOME/.credentials.zsh" ] && [ ! -f "$xdg_config/zsh/credentials.zsh" ]; then
+        echo "Migrating ~/.credentials.zsh -> $xdg_config/zsh/credentials.zsh"
+        mv "$HOME/.credentials.zsh" "$xdg_config/zsh/credentials.zsh" || {
+            echo "ERROR: Failed to migrate ~/.credentials.zsh -> $xdg_config/zsh/credentials.zsh" >&2
+            echo "       Your credentials file is still at ~/.credentials.zsh — no data was lost." >&2
+            echo "       Check permissions on $xdg_config/zsh/ and retry." >&2
+            return 1
+        }
+    fi
+}
+
 function run_stow()
 {
     if type stow > /dev/null 2>&1; then
@@ -69,7 +97,8 @@ function run_stow()
         echo "🎉 Done!"
         echo
     else
-        echo "Install stow first!"
+        echo "ERROR: stow is not installed. Run: ./up brew" >&2
+        return 1
     fi
 }
 
@@ -135,6 +164,7 @@ function main()
             install_sheldon_plugins
             ;;
         "dot" | "dots" | "stow")
+            migrate_to_xdg
             run_stow
             ;;
         "brew")
@@ -149,6 +179,7 @@ function main()
         *)
             install_homebrew
             install_sheldon_plugins
+            migrate_to_xdg
             run_stow
             install_global_npm_packages
             install_tmux_plugins

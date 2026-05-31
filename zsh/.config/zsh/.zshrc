@@ -18,10 +18,18 @@ setopt INTERACTIVE_COMMENTS
 # Other util settings
 ####################################################################################################
 # Credentials, such as GitHub token, must be written in the following file
-[ -f ~/.credentials.zsh ] && source ~/.credentials.zsh
+[ -f "$ZDOTDIR/credentials.zsh" ] && source "$ZDOTDIR/credentials.zsh"
 
-# Configure fzf.
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# Configure fzf (shell integration generated on the fly; no stored ~/.fzf.zsh).
+# `fzf --zsh` requires fzf >= 0.48.0; warn instead of failing silently on older versions.
+if command -v fzf > /dev/null 2>&1; then
+  if fzf_init=$(fzf --zsh 2>/dev/null); then
+    source <(print -r -- "$fzf_init")
+  else
+    print -u2 "[zshrc] WARNING: 'fzf --zsh' failed (requires fzf >= 0.48.0); fzf integration not loaded."
+  fi
+  unset fzf_init
+fi
 
 ####################################################################################################
 # Aliases
@@ -94,6 +102,9 @@ path_append "$HOME/.cargo/bin"
 export PATH
 
 # History
+mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/zsh" \
+  || print -u2 "[zshrc] WARNING: could not create ${XDG_STATE_HOME:-$HOME/.local/state}/zsh; history will not be saved."
+export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
 setopt inc_append_history
 setopt share_history
 
@@ -118,12 +129,12 @@ eval "$(goenv init -)"
 ####################################################################################################
 # Completion
 # You need to run the following commands
-# gh completion -s zsh > $HOME/.my_completions/_gh
-# kube completion zsh > $HOME/.my_completions/_kube
+# gh completion -s zsh > $XDG_DATA_HOME/zsh/completions/_gh
+# kube completion zsh > $XDG_DATA_HOME/zsh/completions/_kube
 ####################################################################################################
 
-COMPLETION_DIR=$HOME/.my_completions
-if [ -d $COMPLETION_DIR ]; then
+COMPLETION_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/zsh/completions"
+if [ -d "$COMPLETION_DIR" ]; then
   fpath=($COMPLETION_DIR $fpath)
 fi
 
@@ -132,7 +143,9 @@ fi
 
 # For completion
 autoload -U compinit
-compinit -i
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh" \
+  || print -u2 "[zshrc] WARNING: could not create ${XDG_CACHE_HOME:-$HOME/.cache}/zsh; completion cache will not be written."
+compinit -i -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION"
 
 ####################################################################################################
 # Sheldon
