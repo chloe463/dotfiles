@@ -12,6 +12,7 @@
       "Read(.envrc)",
       "Read(id_rsa)",
       "Read(**/.credentials.zsh)",
+      "Read(**/credentials.zsh)",
       "Read(**/*token*)",
       "Read(**/*key*)",
       "Read(**/*secret*)",
