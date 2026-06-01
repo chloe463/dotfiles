@@ -125,6 +125,17 @@
     ]
   },
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"If the latest user prompt is written in English, then before addressing the request, first review the English: list (1) grammar mistakes, (2) unnatural phrasing, and (3) a more natural rewrite. Present this short review first, then answer the request normally. If the prompt is not written in English, skip the review entirely and just answer.\"}}'"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",
