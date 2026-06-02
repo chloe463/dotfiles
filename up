@@ -89,7 +89,6 @@ function run_stow()
           nvim \
           starship \
           tmux \
-          vim \
           zsh
 
         stow -R -vvv -t "$HOME/Library/Application Support/Code/User" vscode
