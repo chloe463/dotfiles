@@ -64,6 +64,14 @@ function migrate_to_xdg()
             return 1
         }
     fi
+
+    # Sweep a stale ~/.tmux.conf symlink left over from the pre-XDG tmux layout.
+    # Only act on a dangling symlink (broken target) so we never touch a real
+    # file the user might still want.
+    if [ -L "$HOME/.tmux.conf" ] && [ ! -e "$HOME/.tmux.conf" ]; then
+        echo "Removing dangling symlink ~/.tmux.conf (stale from pre-XDG layout)"
+        rm -f "$HOME/.tmux.conf"
+    fi
 }
 
 function run_stow()
@@ -141,19 +149,29 @@ function install_global_npm_packages()
 
 function install_tmux_plugins()
 {
+  local tpm_dir="$HOME/.tmux/plugins/tpm"
   if type tmux > /dev/null 2>&1 ; then
-    if [ -d ~/.tmux/plugins/tpm ]; then
+    if [ -d "$tpm_dir" ]; then
       echo 'tpm is already installed!'
     else
-      echo 'install tpm'
+      echo "install tpm to $tpm_dir"
       # https://github.com/tmux-plugins/tpm
-      git clone https://github.com/tmux-plugins/tpm.git ~/.tmux/plugins/tpm
+      mkdir -p "$(dirname "$tpm_dir")" || {
+        echo "ERROR: Failed to create $(dirname "$tpm_dir")" >&2
+        return 1
+      }
+      git clone https://github.com/tmux-plugins/tpm.git "$tpm_dir" || {
+        echo "ERROR: Failed to clone tpm into $tpm_dir" >&2
+        echo "       Check network connectivity and that the directory does not already exist." >&2
+        return 1
+      }
 
       echo 'Create tmux session and run the following command in the session.'
       echo 'prefix + I (ctrl + t → I)'
     fi
   else
-    echo 'Install tmux first!'
+    echo 'ERROR: tmux is not installed. Run: ./up brew' >&2
+    return 1
   fi
 }
 
@@ -174,6 +192,7 @@ function main()
             install_global_npm_packages
             ;;
         "tmux")
+            migrate_to_xdg
             install_tmux_plugins
             ;;
         *)

@@ -59,7 +59,7 @@ git pull origin main
 git checkout -b feature/add-tmux-plugin
 
 # Make changes
-# Edit tmux/.tmux.conf or any shared config
+# Edit tmux/.config/tmux/tmux.conf or any shared config
 
 # Commit
 git add .
@@ -187,7 +187,7 @@ brew bundle --file=Brewfile.work
 ### What Goes in Each Branch?
 
 **main branch** (shared):
-- Core shell configs: `.zshrc`, `.zshenv`, `.tmux.conf`
+- Core shell configs: `.zshrc`, `.zshenv`, `tmux.conf`
 - Editor configs: `nvim/`, `vscode/`
 - Tool configs: `alacritty/`, `starship/`, `bat/`
 - Shared Brewfile: `Brewfile.shared`
