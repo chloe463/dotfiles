@@ -100,6 +100,13 @@ function run_stow()
         fi
         stow -R -vvv -t "$HOME/scripts" scripts
 
+        mkdir -p "$HOME/.local/bin"
+        if ! stow -R -vvv bin; then
+            echo "ERROR: 'stow -R bin' failed." >&2
+            echo "       Check for conflicting files in ~/.local/bin/ and remove them." >&2
+            return 1
+        fi
+
         echo
         echo "🎉 Done!"
         echo

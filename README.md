@@ -87,7 +87,7 @@ git push -u origin feature/add-config
 gh pr create
 
 # After PR merge, sync to machine branches
-./scripts/sync-branches.sh
+sync-branches
 ```
 
 #### Adding Machine-Specific Configuration
@@ -135,18 +135,33 @@ brew bundle --file=Brewfile.work
 - Git: `brew install git` (or comes with Xcode tools)
 - GNU Stow: `brew install stow`
 
+## Package Structure
+
+| Package | Stow target | Purpose |
+|---------|-------------|---------|
+| `alacritty`, `bat`, `gh`, `git`, `nvim`, `starship`, `tmux`, `zsh` | `$HOME` | Shell and tool configs |
+| `any-script-mcp` | `$HOME` | Claude Code MCP tool config (`~/.config/any-script-mcp/`) |
+| `claude` | `$HOME/.claude` | Claude Code settings, commands, skills |
+| `vscode` | `~/Library/Application Support/Code/User` | VS Code settings |
+| `cursor` | `~/Library/Application Support/Cursor/User` | Cursor settings |
+| `scripts` | `~/scripts` | Implementation scripts |
+| `bin` | `$HOME` | Public CLI commands (symlinked into `~/.local/bin`) |
+
+The `bin` package exposes user-facing commands via `~/.local/bin` (XDG-compliant), keeping the public interface stable and separate from internal implementation under `scripts/`.
+
 ## Tools & Workflows
 
 ### Git Sync Script
 Automatically sync main/master and cleanup merged branches:
 ```bash
-git sync  # Runs ~/scripts/git_sync.sh
+git-sync        # Runs ~/.local/bin/git-sync
+git sync        # Git alias (same script)
 ```
 
 ### Branch Sync Script
 Sync main branch changes to machine branches:
 ```bash
-./scripts/sync-branches.sh
+sync-branches   # Runs ~/.local/bin/sync-branches
 ```
 
 ### Brewfile Management
