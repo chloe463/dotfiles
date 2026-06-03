@@ -100,6 +100,9 @@ function run_stow()
         fi
         stow -R -vvv -t "$HOME/scripts" scripts
 
+        mkdir -p "$HOME/.local/bin"
+        stow -R -vvv bin
+
         echo
         echo "🎉 Done!"
         echo
