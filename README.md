@@ -87,7 +87,7 @@ git push -u origin feature/add-config
 gh pr create
 
 # After PR merge, sync to machine branches
-./scripts/sync-branches.sh
+sync-branches
 ```
 
 #### Adding Machine-Specific Configuration
@@ -140,11 +140,12 @@ brew bundle --file=Brewfile.work
 | Package | Stow target | Purpose |
 |---------|-------------|---------|
 | `alacritty`, `bat`, `gh`, `git`, `nvim`, `starship`, `tmux`, `zsh` | `$HOME` | Shell and tool configs |
-| `any-script-mcp`, `claude` | `$HOME/.claude` | Claude Code config |
+| `any-script-mcp` | `$HOME` | Claude Code MCP tool config (`~/.config/any-script-mcp/`) |
+| `claude` | `$HOME/.claude` | Claude Code settings, commands, skills |
 | `vscode` | `~/Library/Application Support/Code/User` | VS Code settings |
 | `cursor` | `~/Library/Application Support/Cursor/User` | Cursor settings |
 | `scripts` | `~/scripts` | Implementation scripts |
-| `bin` | `$HOME` → `~/.local/bin` | Public CLI commands |
+| `bin` | `$HOME` | Public CLI commands (symlinked into `~/.local/bin`) |
 
 The `bin` package exposes user-facing commands via `~/.local/bin` (XDG-compliant), keeping the public interface stable and separate from internal implementation under `scripts/`.
 

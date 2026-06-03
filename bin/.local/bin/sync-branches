@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec bash "${HOME}/dotfiles/scripts/sync-branches.sh" "$@"
+SCRIPT="${HOME}/dotfiles/scripts/sync-branches.sh"
+if [[ ! -f "${SCRIPT}" ]]; then
+    echo "sync-branches: target script not found: ${SCRIPT}" >&2
+    echo "Ensure dotfiles is cloned at ~/dotfiles and run: ./up dot" >&2
+    exit 1
+fi
+
+exec bash "${SCRIPT}" "$@"

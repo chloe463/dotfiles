@@ -1,4 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec bun "${HOME}/dotfiles/scripts/git_sync.ts" "$@"
+if ! command -v bun > /dev/null 2>&1; then
+    echo "git-sync: 'bun' is not installed or not on PATH." >&2
+    echo "Install it with: curl -fsSL https://bun.sh/install | bash" >&2
+    exit 127
+fi
+
+SCRIPT="${HOME}/dotfiles/scripts/git_sync.ts"
+if [[ ! -f "${SCRIPT}" ]]; then
+    echo "git-sync: target script not found: ${SCRIPT}" >&2
+    echo "Ensure dotfiles is cloned at ~/dotfiles and run: ./up dot" >&2
+    exit 1
+fi
+
+exec bun "${SCRIPT}" "$@"
