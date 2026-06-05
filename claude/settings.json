@@ -134,7 +134,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'if [ ${#CLAUDE_USER_PROMPT} -ge 30 ]; then echo \"{\\\"hookSpecificOutput\\\":{\\\"hookEventName\\\":\\\"UserPromptSubmit\\\",\\\"additionalContext\\\":\\\"If the latest user prompt is written in English, then before addressing the request, first review the English: list (1) grammar mistakes, (2) unnatural phrasing, and (3) a more natural rewrite. Always write this review in Japanese, even though the prompt itself is in English. Present this short Japanese review first, then answer the request normally. If the prompt is not written in English, skip the review entirely and just answer.\\\"}}\"; fi'"
+            "command": "bun ~/.claude/scripts/english-review-hook.ts"
           }
         ]
       }
