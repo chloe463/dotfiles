@@ -5,9 +5,45 @@ const ENGLISH_REVIEW_CONTEXT =
 
 const MIN_PROMPT_LENGTH = 30;
 
-function main() {
-  const prompt = process.env.CLAUDE_USER_PROMPT ?? "";
-  if (prompt.length < MIN_PROMPT_LENGTH) {
+interface UserPromptSubmitData {
+  session_id: string;
+  transcript_path: string;
+  cwd: string;
+  permission_mode: string;
+  hook_event_name: "UserPromptSubmit";
+  prompt: string;
+}
+
+function isValidUserPromptSubmitData(input: unknown): input is UserPromptSubmitData {
+  if (typeof input !== "object" || input === null || Array.isArray(input)) {
+    return false;
+  }
+  const obj = input as Record<string, unknown>;
+  return (
+    obj.hook_event_name === "UserPromptSubmit" && typeof obj.prompt === "string"
+  );
+}
+
+async function main() {
+  let input: string;
+  try {
+    input = await Bun.stdin.text();
+  } catch (error) {
+    process.exit(0);
+  }
+
+  let data: unknown;
+  try {
+    data = JSON.parse(input);
+  } catch (error) {
+    process.exit(0);
+  }
+
+  if (!isValidUserPromptSubmitData(data)) {
+    process.exit(0);
+  }
+
+  if (data.prompt.length < MIN_PROMPT_LENGTH) {
     process.exit(0);
   }
 
