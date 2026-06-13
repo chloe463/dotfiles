@@ -142,11 +142,26 @@ fi
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-# For completion
+
+####################################################################################################
+# Completion
+####################################################################################################
+zmodload zsh/complist
 autoload -U compinit
 mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh" \
   || print -u2 "[zshrc] WARNING: could not create ${XDG_CACHE_HOME:-$HOME/.cache}/zsh; completion cache will not be written."
 compinit -i -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump-$ZSH_VERSION"
+
+####################################################################################################
+# Menu selection
+####################################################################################################
+zstyle ':completion:*' menu select
+
+# Vim like keybinds to select an item from the menu
+bindkey -M menuselect 'h' vi-backward-char
+bindkey -M menuselect 'j' vi-down-line-or-history
+bindkey -M menuselect 'k' vi-up-line-or-history
+bindkey -M menuselect 'l' vi-forward-char
 
 ####################################################################################################
 # Sheldon
