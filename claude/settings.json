@@ -5,7 +5,9 @@
       "Bash(gh pr view:*)",
       "Bash(gh pr list:*)",
       "Bash(gh pr checks:*)",
-      "Bash(gh pr diff:*)"
+      "Bash(gh pr diff:*)",
+      "Bash(gh issue list:*)",
+      "Bash(gh issue view:*)"
     ],
     "deny": [
       "Read(.env*)",
@@ -124,6 +126,7 @@
       "Bash(bun install:*)"
     ]
   },
+  "model": "opus",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -131,7 +134,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"If the latest user prompt is written in English, then before addressing the request, first review the English: list (1) grammar mistakes, (2) unnatural phrasing, and (3) a more natural rewrite. Always write this review in Japanese, even though the prompt itself is in English. Present this short Japanese review first, then answer the request normally. If the prompt is not written in English, skip the review entirely and just answer.\"}}'"
+            "command": "bun ~/.claude/scripts/english-review-hook.ts"
           }
         ]
       }
@@ -180,9 +183,9 @@
   "language": "Japanese",
   "effortLevel": "high",
   "autoUpdatesChannel": "latest",
+  "prefersReducedMotion": true,
   "theme": "dark-ansi",
   "editorMode": "vim",
-  "prefersReducedMotion": true,
   "mcpServers": {
     "any-script": {
       "command": "npx",
