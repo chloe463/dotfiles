@@ -142,10 +142,6 @@ fi
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
 
-
-####################################################################################################
-# Completion
-####################################################################################################
 zmodload zsh/complist
 autoload -U compinit
 mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh" \
