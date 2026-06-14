@@ -107,6 +107,8 @@ mkdir -p "${XDG_STATE_HOME:-$HOME/.local/state}/zsh" \
 export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history"
 setopt inc_append_history
 setopt share_history
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
 
 export HISTSIZE=100000
 export SAVEHIST=100000
@@ -126,6 +128,18 @@ eval "$(direnv hook zsh)"
 
 export GOENV_ROOT="$HOME/.goenv"
 eval "$(goenv init -)"
+
+####################################################################################################
+# Sheldon
+# Must be loaded before compinit so fpath additions (e.g. zsh-completions) are visible to it
+####################################################################################################
+if command -v sheldon > /dev/null 2>&1; then
+  eval "$(sheldon source)"
+else
+  echo '[zshrc] WARNING: sheldon not found. Run: ./up sheldon' >&2
+fi
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
 
 ####################################################################################################
 # Completion
@@ -158,16 +172,6 @@ bindkey -M menuselect 'h' vi-backward-char
 bindkey -M menuselect 'j' vi-down-line-or-history
 bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
-
-####################################################################################################
-# Sheldon
-# Must be loaded after compinit (required by zsh-syntax-highlighting)
-####################################################################################################
-if command -v sheldon > /dev/null 2>&1; then
-  eval "$(sheldon source)"
-else
-  echo '[zshrc] WARNING: sheldon not found. Run: ./up sheldon' >&2
-fi
 
 ####################################################################################################
 # Utility functions
