@@ -4,6 +4,11 @@
 # editor module: emacs key bindings
 bindkey -e
 
+# Some terminals (e.g. herdr) send raw ESC[1;3D / ESC[1;3C for Option+Left/Right
+# instead of moving by word. https://herdr.dev/ja/docs/troubleshooting/
+bindkey $'\e[1;3D' backward-word
+bindkey $'\e[1;3C' forward-word
+
 # directory module: cd convenience options
 setopt AUTO_CD
 setopt AUTO_PUSHD
