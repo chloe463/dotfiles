@@ -1,0 +1,13 @@
+onboarding = false
+
+[keys]
+prefix = "ctrl+t"
+rename_tab = "prefix+,"
+detach = ["prefix+d", "prefix+q"]
+
+[theme]
+name = "nord"
+auto_switch = false
+
+[ui]
+agent_panel_sort = "spaces"
