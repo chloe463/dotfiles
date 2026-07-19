@@ -1,4 +1,4 @@
-theme = "nord" 
+theme = "nord"
 mode = "auto"
 vcs = "git"
 watch = true

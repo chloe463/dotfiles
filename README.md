@@ -142,6 +142,7 @@ brew bundle --file=Brewfile.work
 | `alacritty`, `bat`, `gh`, `git`, `nvim`, `starship`, `tmux`, `zsh` | `$HOME` | Shell and tool configs |
 | `any-script-mcp` | `$HOME` | Claude Code MCP tool config (`~/.config/any-script-mcp/`) |
 | `claude` | `$HOME/.claude` | Claude Code settings, commands, skills |
+| `hunk` | `$HOME` | hunk diff viewer config (`~/.config/hunk/config.toml`) |
 | `vscode` | `~/Library/Application Support/Code/User` | VS Code settings |
 | `cursor` | `~/Library/Application Support/Cursor/User` | Cursor settings |
 | `scripts` | `~/scripts` | Implementation scripts |

@@ -87,6 +87,7 @@ function run_stow()
           gh \
           git \
           herdr \
+          hunk \
           nvim \
           starship \
           tmux \
