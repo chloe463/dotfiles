@@ -148,7 +148,7 @@
             "type": "command"
           }
         ],
-        "matcher": "*"
+        "matcher": ""
       }
     ],
     "Notification": [
