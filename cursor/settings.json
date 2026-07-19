@@ -450,5 +450,7 @@
         "yaml"
     ],
     "editor.minimap.enabled": true,
-    "biome.requireConfiguration": true
+    "biome.requireConfiguration": true,
+    "workbench.preferredDarkColorTheme": "Nord",
+    "workbench.preferredLightColorTheme": "Nord"
 }

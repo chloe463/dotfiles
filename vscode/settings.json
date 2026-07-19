@@ -446,7 +446,6 @@
   "window.zoomLevel": 1,
   "editor.unicodeHighlight.nonBasicASCII": false,
   "claudeCode.preferredLocation": "panel",
-  "chat.viewSessions.orientation": "stacked",
   "json.schemaDownload.trustedDomains": {
     "https://schemastore.azurewebsites.net/": true,
     "https://raw.githubusercontent.com/": true,
