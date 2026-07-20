@@ -1,8 +1,7 @@
-tap "rerost/tools"
-tap "teamookla/speedtest"
-tap "uzimaru0000/tap"
-tap "ynqa/tap"
-tap "yoheimuta/protolint"
+tap "rerost/tools", trusted: true
+tap "uzimaru0000/tap", trusted: true
+tap "ynqa/tap", trusted: true
+tap "yoheimuta/protolint", trusted: true
 brew "actionlint"
 brew "giflib"
 brew "libpng"
@@ -77,7 +76,6 @@ brew "tree-sitter-cli"
 brew "watch"
 brew "yarn"
 brew "rerost/tools/giro"
-brew "teamookla/speedtest/speedtest"
 brew "uzimaru0000/tap/tv"
 brew "ynqa/tap/jnv"
 brew "yoheimuta/protolint/protolint"
