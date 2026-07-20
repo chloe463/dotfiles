@@ -19,7 +19,22 @@
       "Bash(hunk session comment apply:*)",
       "Bash(hunk session comment list:*)",
       "Bash(hunk session comment rm:*)",
-      "Bash(hunk session comment clear:*)"
+      "Bash(hunk session comment clear:*)",
+      "Bash(herdr --help)",
+      "Bash(herdr --version)",
+      "Bash(herdr status:*)",
+      "Bash(herdr config check)",
+      "Bash(herdr api *)",
+      "Bash(herdr pane *)",
+      "Bash(herdr workspace *)",
+      "Bash(herdr tab *)",
+      "Bash(herdr worktree *)",
+      "Bash(herdr wait *)",
+      "Bash(herdr session *)",
+      "Bash(herdr notification *)",
+      "Bash(herdr integration *)",
+      "Bash(herdr agent *)",
+      "Bash(herdr terminal *)"
     ],
     "deny": [
       "Read(.env*)",
