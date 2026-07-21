@@ -190,14 +190,14 @@
     ],
     "SessionStart": [
       {
+        "matcher": "",
         "hooks": [
           {
+            "type": "command",
             "command": "bash ~/.claude/scripts/herdr-agent-state.sh",
-            "timeout": 10,
-            "type": "command"
+            "timeout": 10
           }
-        ],
-        "matcher": ""
+        ]
       }
     ],
     "Notification": [
@@ -242,7 +242,7 @@
     }
   },
   "language": "Japanese",
-  "effortLevel": "high",
+  "effortLevel": "xhigh",
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "prefersReducedMotion": true,
