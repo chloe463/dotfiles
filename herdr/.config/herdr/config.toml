@@ -20,7 +20,8 @@ auto_switch = false
 # Override individual color tokens on top of the base theme.
 # Accepts: hex (#rrggbb), named colors, rgb(r,g,b), or panel_bg = "reset"
 [theme.custom]
-overlay0 = "#eeeeee"
+overlay0 = "#d8dee9"
+surface_dim = "#434c5e"
 # panel_bg = "reset"
 # accent = "#f5c2e7"
 # red = "#ff6188"
@@ -69,8 +70,8 @@ prefix = "ctrl+t"
 detach = "prefix+d"
 # reload_config = "prefix+shift+r"
 # open_notification_target = "prefix+o"
-# workspace_picker = "prefix+w"
-# goto = "prefix+g"
+workspace_picker = ""
+goto = "prefix+w"
 # new_workspace = "prefix+shift+n"
 # new_worktree = "prefix+shift+g"
 # open_worktree = ""    # optional, unset by default
