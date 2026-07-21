@@ -172,6 +172,9 @@ async function main() {
 }
 
 if (import.meta.main) {
+  if (process.env.HERDR_ENV === "1") {
+    process.exit(0);
+  }
   main().catch((error) => {
     const message = error instanceof Error ? error.message : String(error);
     writeLog(`[error] unexpected error: ${message}`);
