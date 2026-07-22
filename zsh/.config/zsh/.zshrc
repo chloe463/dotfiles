@@ -195,7 +195,7 @@ function pwb() {
   return 0
 }
 
-# Setup 4 panes (Herdr when HERDR_ENV=1)
+# Setup 4 Herdr panes (no-op unless HERDR_ENV=1)
 function four-panes() {
   if [ "${HERDR_ENV:-}" = "1" ]; then
     local current_id="${HERDR_PANE_ID}"
