@@ -54,7 +54,7 @@ git checkout work
 ### Setup Commands
 
 ```bash
-# Full setup (brew + dotfiles + sheldon + npm + tmux)
+# Full setup (brew + dotfiles + sheldon + npm)
 ./up
 
 # Individual components
@@ -62,7 +62,6 @@ git checkout work
 ./up dot       # Create symlinks only
 ./up sheldon   # Install Zsh plugins
 ./up npm       # Install global npm packages
-./up tmux      # Install tmux plugins
 
 # Debug mode (verbose stow output)
 STOW_VERBOSE=1 ./up dot
@@ -139,7 +138,7 @@ brew bundle --file=Brewfile.work
 
 | Package | Stow target | Purpose |
 |---------|-------------|---------|
-| `alacritty`, `bat`, `gh`, `git`, `nvim`, `starship`, `tmux`, `zsh` | `$HOME` | Shell and tool configs |
+| `alacritty`, `bat`, `gh`, `git`, `nvim`, `starship`, `zsh` | `$HOME` | Shell and tool configs |
 | `any-script-mcp` | `$HOME` | Claude Code MCP tool config (`~/.config/any-script-mcp/`) |
 | `claude` | `$HOME/.claude` | Claude Code settings, commands, skills |
 | `hunk` | `$HOME` | hunk diff viewer config (`~/.config/hunk/config.toml`) |

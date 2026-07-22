@@ -56,17 +56,17 @@ git checkout main
 git pull origin main
 
 # Create feature branch
-git checkout -b feature/add-tmux-plugin
+git checkout -b feature/add-herdr-config
 
 # Make changes
-# Edit tmux/.config/tmux/tmux.conf or any shared config
+# Edit herdr/.config/herdr/config.toml or any shared config
 
 # Commit
 git add .
-git commit -m "feat(tmux): add new plugin"
+git commit -m "feat(herdr): add new setting"
 
 # Push and create PR
-git push -u origin feature/add-tmux-plugin
+git push -u origin feature/add-herdr-config
 gh pr create --base main
 
 # After PR is merged, sync to machine branches
@@ -158,7 +158,7 @@ If there are merge conflicts, it will stop and ask you to resolve them manually.
 
 ### Brewfile Strategy
 
-- `Brewfile.shared` - Core packages for all machines (git, neovim, tmux, etc.)
+- `Brewfile.shared` - Core packages for all machines (git, neovim, herdr, etc.)
 - `Brewfile.private` - Private machine packages (extends shared)
 - `Brewfile.work` - Work machine packages (extends shared)
 - `Brewfile` - Main Brewfile (currently set to shared, can be symlinked per branch)
@@ -187,7 +187,7 @@ brew bundle --file=Brewfile.work
 ### What Goes in Each Branch?
 
 **main branch** (shared):
-- Core shell configs: `.zshrc`, `.zshenv`, `tmux.conf`
+- Core shell configs: `.zshrc`, `.zshenv`
 - Editor configs: `nvim/`, `vscode/`
 - Tool configs: `alacritty/`, `starship/`, `bat/`
 - Shared Brewfile: `Brewfile.shared`
