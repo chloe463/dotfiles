@@ -230,16 +230,7 @@
   },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": true,
-    "pr-review-toolkit@claude-plugins-official": true,
-    "tmux-agent-sidebar@hiroppy": true
-  },
-  "extraKnownMarketplaces": {
-    "hiroppy": {
-      "source": {
-        "source": "directory",
-        "path": "~/.tmux/plugins/tmux-agent-sidebar"
-      }
-    }
+    "pr-review-toolkit@claude-plugins-official": true
   },
   "language": "Japanese",
   "effortLevel": "xhigh",

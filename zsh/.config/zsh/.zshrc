@@ -195,15 +195,7 @@ function pwb() {
   return 0
 }
 
-# Setup tmux panes (3 panes)
-function ide() {
-  tmux split-window -v -l 30%
-  tmux split-window -h -l 66%
-  tmux split-window -h -l 50%
-  tmux select-pane -t 0
-}
-
-# Setup 4 panes (tmux, or Herdr when HERDR_ENV=1)
+# Setup 4 Herdr panes (no-op unless HERDR_ENV=1)
 function four-panes() {
   if [ "${HERDR_ENV:-}" = "1" ]; then
     local current_id="${HERDR_PANE_ID}"
@@ -216,12 +208,6 @@ function four-panes() {
     herdr pane rename "${top_right_id}" "hunk"
     herdr pane rename "${bottom_left_id}" "claude-reviewer"
     herdr pane rename "${bottom_right_id}" "work-space-for-human"
-  else
-    tmux split-window -h -l 50%
-    tmux select-pane -t 0
-    tmux split-window -v -l 50%
-    tmux select-pane -t 2
-    tmux split-window -v -l 50%
   fi
 }
 
