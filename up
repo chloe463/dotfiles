@@ -128,6 +128,28 @@ function install_homebrew()
     echo "ERROR: 'brew bundle --file=Brewfile.shared' failed." >&2
     return 1
   fi
+
+  install_vscode_extensions
+}
+
+# Install VS Code extensions one at a time instead of via `brew bundle`'s
+# vscode entries, which install concurrently and race on ~/.vscode/extensions/
+# (see https://github.com/chloe463/dotfiles/issues/172).
+function install_vscode_extensions()
+{
+  if ! type code > /dev/null 2>&1; then
+    echo "ERROR: 'code' command not found. Run: ./up brew" >&2
+    return 1
+  fi
+
+  echo 'Installing VS Code extensions...'
+  while IFS= read -r extension; do
+    [ -z "$extension" ] && continue
+    echo "Installing extension: $extension"
+    code --install-extension "$extension" --force || {
+      echo "WARNING: Failed to install extension: $extension" >&2
+    }
+  done < "$BASE_DIR/vscode-extensions.txt"
 }
 
 function install_global_npm_packages()

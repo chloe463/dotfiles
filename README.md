@@ -179,6 +179,10 @@ brew bundle --file=Brewfile.work
 brew bundle dump --force
 ```
 
+VS Code extensions are listed in `vscode-extensions.txt` and installed one at
+a time by `./up brew` (not via `brew bundle`'s `vscode` entries, which install
+concurrently and race on `~/.vscode/extensions/` — see #172).
+
 ## Troubleshooting
 
 ### Stow Conflicts
