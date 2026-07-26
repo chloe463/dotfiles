@@ -64,5 +64,15 @@ y = 0
 
 [[keyboard.bindings]]
 key = "Return"
+mods = "Control"
+chars = "\r"
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Command"
+chars = "\r"
+
+[[keyboard.bindings]]
+key = "Return"
 mods = "Shift"
 chars = "\u001B\r"
