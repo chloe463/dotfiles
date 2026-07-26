@@ -49,9 +49,10 @@ function run_stow()
         # straight to the repo, causing machine-local or runtime-generated files to
         # be written physically inside the dotfiles checkout — e.g. zsh/credentials.zsh,
         # gh/hosts.yml (holds auth tokens), alacritty's auto-generated .bak files, or
-        # herdr/hunk's session and log files. None of gh/herdr/hunk's runtime files
-        # are covered by a gitignore rule (unlike zsh's credentials.zsh or alacritty's
-        # *.bak), so a tree-fold there would leave them tracked-checkout-visible.
+        # herdr/hunk's session and log files. gh's hosts.yml is covered by a gitignore
+        # rule (**/.config/gh/hosts.yml), but zsh's credentials.zsh and herdr/hunk's
+        # runtime files are not, so a tree-fold there would leave them sitting in the
+        # checkout as regular tracked-looking files.
         local xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
         mkdir -p "$xdg_config/zsh" "$xdg_config/gh" "$xdg_config/alacritty" "$xdg_config/herdr" "$xdg_config/hunk"
 
