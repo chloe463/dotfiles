@@ -44,11 +44,17 @@ function run_stow()
         echo "Making symlinks of dot files..."
         echo
 
-        # Ensure ~/.config/zsh is a real directory before stow runs. Without this,
-        # stow tree-folds the new package and links ~/.config/zsh straight to the
-        # repo, causing machine-local files (e.g. credentials.zsh) to be written
-        # inside the dotfiles checkout.
-        mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+        # Ensure these config directories are real directories before stow runs.
+        # Without this, stow tree-folds the package and links the whole directory
+        # straight to the repo, causing machine-local or runtime-generated files to
+        # be written physically inside the dotfiles checkout — e.g. zsh/credentials.zsh,
+        # gh/hosts.yml (holds auth tokens), alacritty's auto-generated .bak files, or
+        # herdr/hunk's session and log files. gh's hosts.yml is covered by a gitignore
+        # rule (**/.config/gh/hosts.yml), but zsh's credentials.zsh and herdr/hunk's
+        # runtime files are not, so a tree-fold there would leave them sitting in the
+        # checkout as regular tracked-looking files.
+        local xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
+        mkdir -p "$xdg_config/zsh" "$xdg_config/gh" "$xdg_config/alacritty" "$xdg_config/herdr" "$xdg_config/hunk"
 
         stow -R -vvv \
           alacritty \
