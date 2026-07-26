@@ -46,11 +46,14 @@ function run_stow()
 
         # Ensure these config directories are real directories before stow runs.
         # Without this, stow tree-folds the package and links the whole directory
-        # straight to the repo, causing machine-local or runtime-generated files
-        # to be written inside the dotfiles checkout — e.g. zsh/credentials.zsh,
-        # gh/hosts.yml (holds auth tokens), or alacritty's auto-generated .bak files.
+        # straight to the repo, causing machine-local or runtime-generated files to
+        # be written physically inside the dotfiles checkout — e.g. zsh/credentials.zsh,
+        # gh/hosts.yml (holds auth tokens), alacritty's auto-generated .bak files, or
+        # herdr/hunk's session and log files. None of gh/herdr/hunk's runtime files
+        # are covered by a gitignore rule (unlike zsh's credentials.zsh or alacritty's
+        # *.bak), so a tree-fold there would leave them tracked-checkout-visible.
         local xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
-        mkdir -p "$xdg_config/zsh" "$xdg_config/gh" "$xdg_config/alacritty"
+        mkdir -p "$xdg_config/zsh" "$xdg_config/gh" "$xdg_config/alacritty" "$xdg_config/herdr" "$xdg_config/hunk"
 
         stow -R -vvv \
           alacritty \
