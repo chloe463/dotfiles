@@ -44,6 +44,12 @@ function run_stow()
         echo "Making symlinks of dot files..."
         echo
 
+        # Ensure ~/.config/zsh is a real directory before stow runs. Without this,
+        # stow tree-folds the new package and links ~/.config/zsh straight to the
+        # repo, causing machine-local files (e.g. credentials.zsh) to be written
+        # inside the dotfiles checkout.
+        mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+
         stow -R -vvv \
           alacritty \
           any-script-mcp \
