@@ -176,7 +176,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "UserPromptSubmit": [
       {
