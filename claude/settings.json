@@ -173,7 +173,8 @@
       "Bash(yarn install:*)",
       "Bash(pnpm install:*)",
       "Bash(bun install:*)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "model": "sonnet",
   "hooks": {
@@ -229,7 +230,7 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "example-skills@anthropic-agent-skills": true,
+    "example-skills@anthropic-agent-skills": false,
     "pr-review-toolkit@claude-plugins-official": true
   },
   "language": "Japanese",
