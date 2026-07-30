@@ -81,7 +81,6 @@
       "Read(id_rsa)",
       "Read(**/.credentials.zsh)",
       "Read(**/credentials.zsh)",
-      "Read(**/*key*)",
       "Read(**/*secret*)",
       "Read(**/*password*)",
       "Read(**/.aws/**)",
@@ -173,9 +172,10 @@
       "Bash(yarn install:*)",
       "Bash(pnpm install:*)",
       "Bash(bun install:*)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
-  "model": "sonnet",
+  "model": "opus",
   "hooks": {
     "UserPromptSubmit": [
       {
@@ -229,7 +229,7 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "example-skills@anthropic-agent-skills": true,
+    "example-skills@anthropic-agent-skills": false,
     "pr-review-toolkit@claude-plugins-official": true
   },
   "language": "Japanese",
