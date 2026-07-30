@@ -81,7 +81,6 @@
       "Read(id_rsa)",
       "Read(**/.credentials.zsh)",
       "Read(**/credentials.zsh)",
-      "Read(**/*key*)",
       "Read(**/*secret*)",
       "Read(**/*password*)",
       "Read(**/.aws/**)",
