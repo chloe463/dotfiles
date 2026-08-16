@@ -68,8 +68,18 @@ function run_stow()
           starship \
           zsh
 
-        stow -R -vvv -t "$HOME/Library/Application Support/Code/User" vscode
-        stow -R -vvv -t "$HOME/Library/Application Support/Cursor/User" cursor
+        # stow fails outright when a -t target does not exist, and under `set -e`
+        # that aborts run_stow with every package after it left unstowed. VS Code
+        # and Cursor are not installed on every machine, and ~/.claude only shows
+        # up once Claude Code has run, so create the targets first — the same way
+        # $HOME/scripts and ~/.local/bin are handled below. Without this, a
+        # machine missing Cursor silently ends up with no ~/.claude symlinks.
+        local vscode_user="$HOME/Library/Application Support/Code/User"
+        local cursor_user="$HOME/Library/Application Support/Cursor/User"
+        mkdir -p "$vscode_user" "$cursor_user" "$HOME/.claude"
+
+        stow -R -vvv -t "$vscode_user" vscode
+        stow -R -vvv -t "$cursor_user" cursor
         stow -R -vvv -t "$HOME/.claude" claude
 
         if [ ! -d $HOME/scripts ]; then
