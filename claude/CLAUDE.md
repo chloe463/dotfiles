@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working across 
 ## 📚 AI Assistant Guidelines
 
 - **YOU MUST: Output plan and temporary files to .ai_logs of working repository**
-  (conventions and workflow: see the `ai-logs-workflow` skill)
+  (path: `.ai_logs/YYYY/MM/YYYYMMDD_<topic>.md`; workflow: see the `ai-logs-workflow` skill)
 
 ## 📘 TypeScript Development
 
@@ -64,7 +64,6 @@ git commit -m "refactor(core): extract validation logic"
 ### PR Guidelines
 - Focus on high-level problem and solution
 - Never mention tools used (no co-authored-by)
-- Add specific reviewers as configured
 - Include performance impact if relevant
 
 Posting PR review comments via `gh api`: see the `gh-pr-review-comments` skill.
