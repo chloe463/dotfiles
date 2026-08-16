@@ -73,7 +73,10 @@
       "Bash(herdr agent wait *)",
       "Bash(herdr agent explain *)",
       "Bash(herdr terminal title set *)",
-      "Bash(herdr terminal title clear)"
+      "Bash(herdr terminal title clear)",
+      "Bash(ax --help)",
+      "Bash(ax agent-context)",
+      "Bash(ax https:*)"
     ],
     "deny": [
       "Read(.env*)",
@@ -160,6 +163,7 @@
       "Bash(git rebase:*)",
       "Bash(curl:*)",
       "Bash(wget:*)",
+      "Bash(ax:*)",
       "Bash(nc:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh pr close:*)",

@@ -2,6 +2,7 @@ tap "rerost/tools", trusted: true
 tap "uzimaru0000/tap", trusted: true
 tap "ynqa/tap", trusted: true
 tap "yoheimuta/protolint", trusted: true
+tap "yusukebe/tap", trusted: true
 brew "actionlint"
 brew "giflib"
 brew "libpng"
@@ -79,6 +80,7 @@ brew "rerost/tools/giro"
 brew "uzimaru0000/tap/tv"
 brew "ynqa/tap/jnv"
 brew "yoheimuta/protolint/protolint"
+brew "yusukebe/tap/ax"
 cask "alacritty"
 cask "chromedriver"
 cask "docker"
