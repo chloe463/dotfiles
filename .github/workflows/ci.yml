@@ -64,11 +64,11 @@ jobs:
           # Run against a pristine HOME so stow has no conflicts with the
           # runner's pre-existing dotfiles (e.g. ~/.config/gh), and so the job
           # actually exercises symlink creation instead of short-circuiting on
-          # a missing stow.
+          # a missing stow. Only $HOME itself is created here: `up` owns the
+          # creation of every stow target, and pre-creating them in CI hid the
+          # missing-target abort that breaks a machine without VS Code/Cursor.
           export HOME="$RUNNER_TEMP/stow-home"
-          mkdir -p "$HOME/Library/Application Support/Code/User" \
-                   "$HOME/Library/Application Support/Cursor/User" \
-                   "$HOME/.claude"
+          mkdir -p "$HOME"
           ./up stow
   typecheck:
     name: TypeScript type check
