@@ -153,6 +153,8 @@ All `.ai_logs` files should follow this hierarchical format:
 - Easier to find documents by date range
 - Cleaner directory listings
 
+**Version control:** `.ai_logs/` is covered by the global gitignore (`~/.config/git/ignore`), so these documents stay out of every repository. Never `git add` a file under `.ai_logs/` — not even when its content is being used in a commit message or PR description.
+
 ## Best Practices
 
 ### Task Parsing Flexibility
