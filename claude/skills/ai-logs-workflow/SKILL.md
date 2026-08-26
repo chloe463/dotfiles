@@ -78,6 +78,8 @@ What would you like to work on?
 
 Wait for the user to specify which task to work on, then proceed with implementation. Update the document as work progresses.
 
+**Do not leak the `.ai_logs` path into code comments, commit messages, or issue/PR text** — see [Visibility Boundaries](#visibility-boundaries).
+
 ## Plan New Work Workflow
 
 Use this workflow when the user wants to create a new planning document in `.ai_logs`.
@@ -154,6 +156,18 @@ All `.ai_logs` files should follow this hierarchical format:
 - Cleaner directory listings
 
 **Version control:** `.ai_logs/` is covered by the global gitignore (`~/.config/git/ignore`), so these documents stay out of every repository. Never `git add` a file under `.ai_logs/` — not even when its content is being used in a commit message or PR description.
+
+## Visibility Boundaries
+
+`.ai_logs/` exists only on this local machine. It is never committed, pushed, or visible to any other engineer, CI system, or reviewer.
+
+**Never write an `.ai_logs` path into anything another engineer will read**, including:
+- Source code comments
+- Commit messages
+- Issue comments (GitHub/GitLab/etc.)
+- Pull request titles, descriptions, and review comments
+
+A reference like `// see .ai_logs/2026/02/20260208_api_refactoring.md` is meaningless to anyone else — the file doesn't exist outside this machine. If context, rationale, or a decision recorded in an `.ai_logs` document needs to reach other people, copy the relevant substance directly into the comment, commit message, or PR description as prose. Point at the reasoning, not at the file.
 
 ## Best Practices
 
