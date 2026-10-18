@@ -165,7 +165,6 @@ Feat(auth): Add login.
 
 - Claude Code adds co-authored tag automatically
 - Keep the tag for commits (helps track AI assistance)
-- Remove tool mentions from PR descriptions (see the `create-pr` skill)
 
 ## Notes
 
