@@ -76,7 +76,10 @@
       "Bash(herdr terminal title clear)",
       "Bash(ax --help)",
       "Bash(ax agent-context)",
-      "Bash(ax https:*)"
+      "Bash(ax https:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)"
     ],
     "deny": [
       "Read(.env*)",
@@ -157,8 +160,12 @@
       "Edit(~/.ssh/*_ed25519)"
     ],
     "ask": [
-      "Bash(git push:*)",
-      "Bash(git commit:*)",
+      "Bash(git push *--force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * -f*)",
+      "Bash(git push * +*)",
+      "Bash(git commit *--amend*)",
+      "Bash(git commit *--no-verify*)",
       "Bash(git reset:*)",
       "Bash(git rebase:*)",
       "Bash(curl:*)",
@@ -167,7 +174,6 @@
       "Bash(nc:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh pr close:*)",
-      "Bash(gh pr create:*)",
       "Bash(gh pr review:*)",
       "Bash(gh release create:*)",
       "Bash(gh workflow run:*)",
@@ -179,7 +185,6 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus",
   "hooks": {
     "UserPromptSubmit": [
       {
