@@ -214,6 +214,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ~/.claude/scripts/block-push-to-main.ts"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",
