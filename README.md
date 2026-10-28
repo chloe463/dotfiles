@@ -183,6 +183,11 @@ VS Code extensions are listed in `vscode-extensions.txt` and installed one at
 a time by `./up brew` (not via `brew bundle`'s `vscode` entries, which install
 concurrently and race on `~/.vscode/extensions/` — see #172).
 
+Alacritty is not in `Brewfile.shared`: Homebrew disabled the `alacritty` cask
+on 2026-09-01 because it doesn't pass the Gatekeeper check. Install it from the
+[GitHub releases](https://github.com/alacritty/alacritty/releases) instead; the
+`alacritty` stow package still provides its config.
+
 ## Troubleshooting
 
 ### Stow Conflicts
