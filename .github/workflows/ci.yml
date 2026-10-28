@@ -28,6 +28,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      # The runner image ships the Go `yq`, which conflicts with `python-yq`
+      # from Brewfile.shared (both install a `yq` executable).
+      - name: Unlink preinstalled yq
+        run: |
+          if brew list --formula yq > /dev/null 2>&1; then
+            brew unlink yq
+          fi
       - name: Test setup scripts
         run: ./up brew
   test-sheldon:
