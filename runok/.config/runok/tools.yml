@@ -1,0 +1,83 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fohte/runok/main/schema/runok.schema.json
+
+# Rules for individual CLIs: package managers, databases, infra and the
+# terminal tools Claude Code drives (herdr, hunk, ax).
+
+rules:
+  # ── Package managers ──
+  - deny: 'npm|yarn|pnpm|bun|cargo|deno publish *'
+    message: 'Publishing packages is not allowed. Ask the user to publish.'
+    tests:
+      - deny: 'npm publish'
+      - deny: 'cargo publish --dry-run'
+  - deny: 'npm uninstall|remove *'
+    message: 'Removing dependencies is not allowed. Ask the user first.'
+  - deny: 'yarn|pnpm|bun remove *'
+    message: 'Removing dependencies is not allowed. Ask the user first.'
+    tests:
+      - deny: 'bun remove chalk'
+  - ask: 'npm|yarn|pnpm|bun install *'
+    tests:
+      - ask: 'bun install'
+      - ask: 'npm install lodash'
+
+  # ── Databases / infra ──
+  - deny: 'psql *'
+    message: 'Direct database access is not allowed.'
+  - deny: 'mysql *'
+    message: 'Direct database access is not allowed.'
+  - deny: 'mongod *'
+    message: 'Direct database access is not allowed.'
+  # `kube` is a company-internal CLI, not a typo of kubectl
+  - deny: 'kube *'
+    message: 'The kube CLI is not allowed.'
+  - deny: 'kubectl delete *'
+    message: 'Deleting Kubernetes resources is not allowed.'
+  - deny: 'terraform destroy *'
+    message: 'terraform destroy is not allowed.'
+  - deny: 'docker system prune *'
+    message: 'Pruning Docker data is not allowed.'
+  - deny: 'docker rm|rmi -f|--force *'
+    message: 'Force-removing containers or images is not allowed.'
+  - deny: 'docker volume rm *'
+    message: 'Removing Docker volumes is not allowed.'
+
+  # ── ax (web fetch CLI, see the ax skill) ──
+  # Fetching a URL is the point of the tool, but it still reaches the network,
+  # so it is confirmed like curl. `ask` outranks `allow`, so the local-only
+  # subcommand is carved out with a negation instead of a separate allow.
+  - ask: 'ax !agent-context *'
+    tests:
+      - ask: 'ax https://example.com'
+  - allow: 'ax agent-context'
+    tests:
+      - allow: 'ax agent-context'
+      - allow: 'ax --help'
+
+  # ── hunk (diff review sessions) ──
+  - allow: 'hunk skill path *'
+  - allow: 'hunk session list|get|context|review|navigate|reload *'
+  - allow: 'hunk session comment add|apply|list|rm|clear *'
+    tests:
+      - allow: 'hunk session list'
+      - allow: 'hunk session comment add --file a.ts --line 1 --body x'
+
+  # ── herdr (terminal multiplexer for agents) ──
+  - allow: 'herdr status|notification *'
+  - allow: 'herdr config check'
+  - allow: 'herdr api snapshot|schema *'
+  - allow: 'herdr pane list|current|get|layout|process-info|neighbor|edges|focus|resize|zoom|rename|read|split|swap|move *'
+  - allow: 'herdr pane report-agent|report-agent-session|release-agent|report-metadata *'
+  - allow: 'herdr workspace list|create|get|focus|rename|report-metadata *'
+  - allow: 'herdr tab list|create|get|focus|rename *'
+  - allow: 'herdr worktree list|create|open *'
+  - allow: 'herdr wait output|agent-status *'
+  - allow: 'herdr session list|attach *'
+  - allow: 'herdr integration status *'
+  - allow: 'herdr agent list|get|read|rename|focus|wait|explain *'
+  - allow: 'herdr terminal title set|clear *'
+    tests:
+      - allow: 'herdr pane list'
+      - allow: 'herdr pane read p1 --lines 50'
+      - allow: 'herdr agent wait a1'
+      - pass: 'herdr pane close p1'
