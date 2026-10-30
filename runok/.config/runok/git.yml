@@ -1,8 +1,9 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fohte/runok/main/schema/runok.schema.json
 
-# git / gh rules. Everyday commit, push and PR creation run without prompts;
-# anything that rewrites history, skips hooks, deletes remote refs or targets
-# main/master is asked or denied.
+# git / gh rules. Everyday commits and pushes run without prompts; creating a
+# PR is asked, as the user's single approval point. Anything that rewrites
+# history, skips hooks, deletes remote refs or targets main/master is asked or
+# denied.
 #
 # Pushes that target main/master only implicitly (`git push` while main is
 # checked out) can't be seen from the command string; those are denied by
@@ -110,9 +111,13 @@ rules:
     tests:
       - ask: 'gh api -X POST repos/o/r/issues'
       - allow: 'gh api repos/o/r/pulls'
-  - allow: 'gh [-R *] pr create *'
+  # Creating the PR is the user's single approval point for the work.
+  # Issue-closing keywords in the body are denied by
+  # ~/.claude/scripts/block-issue-close-keywords.ts (it reads --body-file).
+  - ask: 'gh [-R *] pr create *'
     tests:
-      - allow: 'gh pr create --title "feat: x" --body "y"'
+      - ask: 'gh pr create --title "feat: x" --body "y"'
+      - ask: 'gh -R o/r pr create --fill'
   - allow: 'gh [-R *] pr checks|diff *'
     tests:
       - allow: 'gh pr checks 123'
