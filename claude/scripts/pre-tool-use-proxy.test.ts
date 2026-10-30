@@ -72,6 +72,14 @@ afterAll(() => {
 });
 
 describe("Bash", () => {
+  it("denies an issue-closing commit message without consulting runok", () => {
+    stubRunok(`echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'`);
+    const output = JSON.parse(run(bash("git commit -F - <<'EOF'\nfeat: x\n\nFixes #12\nEOF")));
+    expect(output.hookSpecificOutput.permissionDecision).toBe("deny");
+    expect(output.hookSpecificOutput.permissionDecisionReason).toContain("Fixes #12");
+    expect(existsSync(runokCalled)).toBe(false);
+  });
+
   it("denies an implicit push to main without consulting runok", () => {
     stubRunok(`echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'`);
     const output = JSON.parse(run(bash("git push -u origin HEAD")));
