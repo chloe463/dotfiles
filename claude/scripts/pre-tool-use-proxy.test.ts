@@ -2,7 +2,7 @@ import { expect, describe, it, beforeAll, afterAll } from "bun:test";
 import { execFileSync } from "node:child_process";
 import { chmodSync, existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 // Runs the real proxy with a stub `runok` on PATH, so the routing and the
 // handling of runok's output can be checked without runok installed.
@@ -13,6 +13,7 @@ let root: string;
 let repo: string;
 let binDir: string;
 let runokCalled: string;
+let runokConfig: string;
 
 // PATH containing the tools the proxy needs, plus the runok stub in binDir.
 // Built from symlinks so a runok installed on the machine isn't picked up.
@@ -46,12 +47,21 @@ function run(payload: Record<string, unknown>, { runok = true } = {}): string {
 
 const bash = (command: string) => ({ tool_name: "Bash", tool_input: { command } });
 
+function expectAsk(stdout: string, reason: string) {
+  const output = JSON.parse(stdout).hookSpecificOutput;
+  expect(output.permissionDecision).toBe("ask");
+  expect(output.permissionDecisionReason).toContain(reason);
+}
+
 beforeAll(() => {
   root = realpathSync(mkdtempSync(join(tmpdir(), "pre-tool-use-proxy-")));
   repo = join(root, "repo");
   binDir = join(root, "bin");
   runokCalled = join(root, "runok-called");
+  runokConfig = join(root, ".config", "runok", "runok.yml");
   mkdirSync(binDir);
+  mkdirSync(dirname(runokConfig), { recursive: true });
+  writeFileSync(runokConfig, "");
   execFileSync("git", ["init", "-q", "-b", "main", repo]);
 });
 afterAll(() => {
@@ -78,15 +88,34 @@ describe("Bash", () => {
     expect(existsSync(runokCalled)).toBe(true);
   });
 
-  it("prints nothing when runok fails or prints non-JSON", () => {
+  it("asks when runok fails, even if it printed a decision", () => {
     stubRunok(`echo '{"hookSpecificOutput":{"permissionDecision":"allow"}}'; exit 1`);
-    expect(run(bash("ls"))).toBe("");
-    stubRunok("echo garbage");
-    expect(run(bash("ls"))).toBe("");
+    expectAsk(run(bash("ls")), "runok hook exited with 1");
   });
 
-  it("prints nothing when runok is not installed", () => {
-    expect(run(bash("ls"), { runok: false })).toBe("");
+  it("asks when runok prints non-JSON", () => {
+    stubRunok("echo garbage");
+    expectAsk(run(bash("ls")), "non-JSON");
+  });
+
+  it("asks when runok is not installed", () => {
+    expectAsk(run(bash("ls"), { runok: false }), "runok not found");
+  });
+
+  it("asks without consulting runok when the config is missing", () => {
+    stubRunok("true");
+    rmSync(runokConfig);
+    try {
+      expectAsk(run(bash("ls")), "runok config not found");
+      expect(existsSync(runokCalled)).toBe(false);
+    } finally {
+      writeFileSync(runokConfig, "");
+    }
+  });
+
+  it("still denies an implicit push to main when runok is not installed", () => {
+    const output = JSON.parse(run(bash("git push -u origin HEAD"), { runok: false }));
+    expect(output.hookSpecificOutput.permissionDecision).toBe("deny");
   });
 });
 
@@ -103,13 +132,15 @@ describe("other tools", () => {
     expect(run({ tool_name: "Read", tool_input: { file_path: join(repo, "a.ts") } })).toBe("");
     expect(existsSync(runokCalled)).toBe(false);
   });
+});
 
-  it("prints nothing for invalid JSON", () => {
+describe("invalid hook input", () => {
+  it("asks", () => {
     const output = execFileSync("bash", [proxy], {
       input: "not json",
       encoding: "utf8",
       env: { HOME: root, PATH: pathWith(true) },
     });
-    expect(output).toBe("");
+    expectAsk(output, "failed to parse hook input");
   });
 });
