@@ -17,11 +17,11 @@ let runokConfig: string;
 
 // PATH containing the tools the proxy needs, plus the runok stub in binDir.
 // Built from symlinks so a runok installed on the machine isn't picked up.
-function pathWith(includeRunok: boolean): string {
-  const dir = join(root, includeRunok ? "path-with-runok" : "path-without-runok");
+function pathWith(includeRunok: boolean, includeBun = true): string {
+  const dir = join(root, `path-${includeRunok ? "with" : "without"}-runok-${includeBun ? "with" : "without"}-bun`);
   if (!existsSync(dir)) {
     mkdirSync(dir);
-    for (const tool of ["bash", "bun", "jq", "git", "cat", "dirname", "date", "id", "mkdir", "touch"]) {
+    for (const tool of ["bash", "jq", "git", "cat", "dirname", "date", "id", "mkdir", "touch", ...(includeBun ? ["bun"] : [])]) {
       const target = execFileSync("bash", ["-c", `command -v ${tool}`], { encoding: "utf8" }).trim();
       symlinkSync(target, join(dir, tool));
     }
@@ -37,11 +37,11 @@ function stubRunok(script: string) {
   rmSync(runokCalled, { force: true });
 }
 
-function run(payload: Record<string, unknown>, { runok = true } = {}): string {
+function run(payload: Record<string, unknown>, { runok = true, bun = true } = {}): string {
   return execFileSync("bash", [proxy], {
     input: JSON.stringify({ hook_event_name: "PreToolUse", cwd: repo, ...payload }),
     encoding: "utf8",
-    env: { HOME: root, PATH: pathWith(runok) },
+    env: { HOME: root, PATH: pathWith(runok, bun) },
   });
 }
 
@@ -117,12 +117,32 @@ describe("Bash", () => {
     const output = JSON.parse(run(bash("git push -u origin HEAD"), { runok: false }));
     expect(output.hookSpecificOutput.permissionDecision).toBe("deny");
   });
+
+  it("asks without consulting runok when the push guard fails", () => {
+    stubRunok(`echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'`);
+    expectAsk(run({ ...bash("git push"), cwd: 1 }), "block-push-to-main exited with 1");
+    expect(existsSync(runokCalled)).toBe(false);
+  });
+
+  it("asks when bun is not installed", () => {
+    expectAsk(run(bash("git push"), { bun: false }), "block-push-to-main exited with 127");
+  });
 });
 
 describe("edit tools", () => {
+  const write = { tool_name: "Write", tool_input: { file_path: "/tmp/a.ts" } };
+
   it("denies edits on main", () => {
     const output = JSON.parse(run({ tool_name: "Write", tool_input: { file_path: join(repo, "a.ts") } }));
     expect(output.hookSpecificOutput.permissionDecision).toBe("deny");
+  });
+
+  it("asks when the edit guard fails", () => {
+    expectAsk(run({ ...write, hook_event_name: "Other" }), "block-edit-on-main exited with 1");
+  });
+
+  it("asks when bun is not installed", () => {
+    expectAsk(run(write, { bun: false }), "block-edit-on-main exited with 127");
   });
 });
 

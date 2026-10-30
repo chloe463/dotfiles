@@ -1,5 +1,5 @@
 import { expect, describe, it, beforeAll, afterAll } from "bun:test";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -117,8 +117,13 @@ describe("with a real repository", () => {
     expect(run("Write", join(root, "home", "notes.md"))).toBe("");
   });
 
-  it("prints nothing for invalid JSON", () => {
-    expect(execFileSync("bun", [script], { input: "not json", encoding: "utf8" })).toBe("");
+  it.each([
+    ["invalid JSON", "not json"],
+    ["unexpected hook input", JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Edit" })],
+  ])("exits non-zero with no decision for %s", (_, input) => {
+    const result = spawnSync("bun", [script], { input, encoding: "utf8" });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
   });
 
   // Last: leaves the repository on the feature branch

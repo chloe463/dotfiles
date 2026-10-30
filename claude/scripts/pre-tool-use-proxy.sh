@@ -32,34 +32,37 @@ ask_and_exit() {
   exit 0
 }
 
+# Runs a hook on the input. A decision is printed and ends the proxy; empty
+# stdout means the hook has no opinion, and the proxy moves on.
+run_hook() {
+  local name="$1" output status
+  shift
+  output=$("$@" <<<"${input}")
+  status=$?
+  ((status == 0)) || ask_and_exit "${name} exited with ${status}"
+  [[ -n "${output}" ]] || return 0
+  jq -e . >/dev/null 2>&1 <<<"${output}" || ask_and_exit "${name} printed non-JSON output"
+  printf '%s\n' "${output}"
+  exit 0
+}
+
 input=$(cat)
 tool_name=$(jq -r '.tool_name // empty' <<<"${input}" 2>/dev/null) || ask_and_exit "failed to parse hook input"
 
 case "${tool_name}" in
   Edit | Write | MultiEdit | NotebookEdit)
-    exec bun "${SCRIPT_DIR}/block-edit-on-main.ts" <<<"${input}"
+    run_hook "block-edit-on-main" bun "${SCRIPT_DIR}/block-edit-on-main.ts"
     ;;
   Bash)
     # Pushes that implicitly target main/master can't be expressed as runok
     # rules (they depend on the checked-out branch), so this runs first.
-    deny=$(bun "${SCRIPT_DIR}/block-push-to-main.ts" <<<"${input}")
-    if [[ -n "${deny}" ]]; then
-      printf '%s\n' "${deny}"
-      exit 0
-    fi
+    run_hook "block-push-to-main" bun "${SCRIPT_DIR}/block-push-to-main.ts"
 
     command -v runok >/dev/null 2>&1 || ask_and_exit "runok not found"
     # Without a config runok exits 0 with no output, which looks like `pass`.
     [[ -f "${RUNOK_CONFIG}" ]] || ask_and_exit "runok config not found"
 
-    output=$(runok hook --agent claude-code <<<"${input}")
-    status=$?
-    ((status == 0)) || ask_and_exit "runok hook exited with ${status}"
-    # Empty stdout means `pass` (no rule matched).
-    if [[ -n "${output}" ]]; then
-      jq -e . >/dev/null 2>&1 <<<"${output}" || ask_and_exit "runok hook printed non-JSON output"
-      printf '%s\n' "${output}"
-    fi
+    run_hook "runok hook" runok hook --agent claude-code
     ;;
 esac
 exit 0
