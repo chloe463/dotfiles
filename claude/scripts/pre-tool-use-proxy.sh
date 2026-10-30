@@ -57,6 +57,9 @@ case "${tool_name}" in
     # Pushes that implicitly target main/master can't be expressed as runok
     # rules (they depend on the checked-out branch), so this runs first.
     run_hook "block-push-to-main" bun "${SCRIPT_DIR}/block-push-to-main.ts"
+    # Message files and here-documents are invisible to runok's command-line
+    # rules, so issue-closing keywords are checked here.
+    run_hook "block-issue-close-keywords" bun "${SCRIPT_DIR}/block-issue-close-keywords.ts"
 
     command -v runok >/dev/null 2>&1 || ask_and_exit "runok not found"
     # Without a config runok exits 0 with no output, which looks like `pass`.
