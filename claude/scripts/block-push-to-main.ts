@@ -8,7 +8,7 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, appendFileSync } from "node:fs";
 import { homedir, userInfo } from "node:os";
-import { resolve } from "node:path";
+import { parseGit, resolveCommands } from "./lib/shell";
 
 const LOG_DIR = `${homedir()}/.claude/logs`;
 const LOG_FILE = `${LOG_DIR}/${userInfo().username}-hook-block-push-to-main.log`;
@@ -53,66 +53,6 @@ export function isValidPreToolUseData(input: unknown): input is PreToolUseData {
   );
 }
 
-// Splits a shell command into simple commands (separated by ; && || | & or
-// newlines), each as a list of words with quotes removed. Not a full shell
-// parser: subshells, substitutions and redirections are not interpreted.
-export function splitCommands(command: string): string[][] {
-  const commands: string[][] = [];
-  let words: string[] = [];
-  let word = "";
-  let inWord = false;
-  let quote: "'" | '"' | null = null;
-
-  const endWord = () => {
-    if (inWord) words.push(word);
-    word = "";
-    inWord = false;
-  };
-  const endCommand = () => {
-    endWord();
-    if (words.length > 0) commands.push(words);
-    words = [];
-  };
-
-  for (let i = 0; i < command.length; i++) {
-    const c = command[i];
-    if (quote) {
-      if (c === quote) {
-        quote = null;
-      } else if (c === "\\" && quote === '"' && i + 1 < command.length) {
-        word += command[++i];
-      } else {
-        word += c;
-      }
-    } else if (c === "'" || c === '"') {
-      quote = c;
-      inWord = true;
-    } else if (c === "\\" && i + 1 < command.length) {
-      word += command[++i];
-      inWord = true;
-    } else if (c === ";" || c === "&" || c === "|" || c === "\n") {
-      endCommand();
-    } else if (c === " " || c === "\t") {
-      endWord();
-    } else {
-      word += c;
-      inWord = true;
-    }
-  }
-  endCommand();
-  return commands;
-}
-
-// git options that take their value as the next word
-const GIT_GLOBAL_OPTIONS_WITH_VALUE = new Set([
-  "-C",
-  "-c",
-  "--git-dir",
-  "--work-tree",
-  "--namespace",
-  "--exec-path",
-  "--config-env",
-]);
 const PUSH_OPTIONS_WITH_VALUE = new Set([
   "--repo",
   "-o",
@@ -130,29 +70,15 @@ interface PushInvocation {
 // Returns the push invocation if `words` is a `git push` command, resolving
 // `git -C <dir>` against `cwd`.
 export function parseGitPush(words: string[], cwd: string): PushInvocation | null {
-  let i = 0;
-  while (i < words.length && /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[i])) i++;
-  if (words[i] !== "git") return null;
-  i++;
+  const git = parseGit(words, cwd);
+  if (!git || git.args[0] !== "push") return null;
 
-  let dir = cwd;
-  while (i < words.length && words[i].startsWith("-")) {
-    const opt = words[i];
-    if (GIT_GLOBAL_OPTIONS_WITH_VALUE.has(opt)) {
-      if (opt === "-C" && i + 1 < words.length) dir = resolve(dir, words[i + 1]);
-      i += 2;
-    } else {
-      i++;
-    }
-  }
-  if (words[i] !== "push") return null;
-  i++;
-
+  const { dir, args } = git;
   const positionals: string[] = [];
-  for (; i < words.length; i++) {
-    const arg = words[i];
+  for (let i = 1; i < args.length; i++) {
+    const arg = args[i];
     if (arg === "--") {
-      positionals.push(...words.slice(i + 1));
+      positionals.push(...args.slice(i + 1));
       break;
     }
     if (arg.startsWith("-")) {
@@ -185,12 +111,6 @@ export function pushDestinations(positionals: string[], currentBranch: string): 
   });
 }
 
-function expandHome(path: string): string {
-  if (path === "~") return homedir();
-  if (path.startsWith("~/")) return `${homedir()}${path.slice(1)}`;
-  return path;
-}
-
 // Returns a deny reason if `command` pushes to a protected branch, else null.
 // `getCurrentBranch` returns "" outside a repository or on a detached HEAD.
 export function findProtectedPush(
@@ -198,12 +118,7 @@ export function findProtectedPush(
   cwd: string,
   getCurrentBranch: (dir: string) => string,
 ): string | null {
-  let dir = cwd;
-  for (const words of splitCommands(command)) {
-    if (words[0] === "cd") {
-      if (words[1]) dir = resolve(dir, expandHome(words[1]));
-      continue;
-    }
+  for (const { words, cwd: dir } of resolveCommands(command, cwd)) {
     const push = parseGitPush(words, dir);
     if (!push) continue;
 

@@ -8,30 +8,9 @@ import {
   isValidPreToolUseData,
   parseGitPush,
   pushDestinations,
-  splitCommands,
 } from "./block-push-to-main";
 
 const onBranch = (branch: string) => () => branch;
-
-describe("splitCommands", () => {
-  it("splits on shell operators", () => {
-    expect(splitCommands("git add . && git commit -m x; git push | cat")).toEqual([
-      ["git", "add", "."],
-      ["git", "commit", "-m", "x"],
-      ["git", "push"],
-      ["cat"],
-    ]);
-  });
-  it("keeps quoted operators inside a word", () => {
-    expect(splitCommands(`git commit -m "a && git push"`)).toEqual([
-      ["git", "commit", "-m", "a && git push"],
-    ]);
-    expect(splitCommands("echo 'x; git push'")).toEqual([["echo", "x; git push"]]);
-  });
-  it("splits on newlines", () => {
-    expect(splitCommands("cd repo\ngit push")).toEqual([["cd", "repo"], ["git", "push"]]);
-  });
-});
 
 describe("parseGitPush", () => {
   it("returns null for non-push commands", () => {
@@ -103,6 +82,18 @@ describe("findProtectedPush", () => {
 
   it("allows non-push git commands on main", () => {
     expect(findProtectedPush("git status && git log", "/r", onBranch("main"))).toBeNull();
+  });
+
+  it.each([
+    "git commit -F - <<'EOF'\nfix: stop running git push origin main\nEOF",
+    "cat <<EOF > notes.md\ngit push\nEOF\ngit status",
+    'git commit -m "$(cat <<\'EOF\'\ngit push origin main\nEOF\n)"',
+  ])("ignores git push inside here-documents: %p", (command) => {
+    expect(findProtectedPush(command, "/r", onBranch("main"))).toBeNull();
+  });
+
+  it("still checks commands after a here-document", () => {
+    expect(findProtectedPush("cat <<EOF > a\nx\nEOF\ngit push", "/r", onBranch("main"))).not.toBeNull();
   });
 
   it("allows a detached HEAD", () => {
