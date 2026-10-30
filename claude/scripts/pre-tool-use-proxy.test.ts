@@ -17,15 +17,18 @@ let runokConfig: string;
 
 // PATH containing the tools the proxy needs, plus the runok stub in binDir.
 // Built from symlinks so a runok installed on the machine isn't picked up.
-function pathWith(includeRunok: boolean, includeBun = true): string {
-  const dir = join(root, `path-${includeRunok ? "with" : "without"}-runok-${includeBun ? "with" : "without"}-bun`);
+function pathWith({ runok = true, bun = true, jq = true } = {}): string {
+  const dir = join(root, `path-runok-${runok}-bun-${bun}-jq-${jq}`);
   if (!existsSync(dir)) {
     mkdirSync(dir);
-    for (const tool of ["bash", "jq", "git", "cat", "dirname", "date", "id", "mkdir", "touch", ...(includeBun ? ["bun"] : [])]) {
+    const tools = ["bash", "git", "cat", "dirname", "date", "id", "mkdir", "touch"];
+    if (bun) tools.push("bun");
+    if (jq) tools.push("jq");
+    for (const tool of tools) {
       const target = execFileSync("bash", ["-c", `command -v ${tool}`], { encoding: "utf8" }).trim();
       symlinkSync(target, join(dir, tool));
     }
-    if (includeRunok) symlinkSync(join(binDir, "runok"), join(dir, "runok"));
+    if (runok) symlinkSync(join(binDir, "runok"), join(dir, "runok"));
   }
   return dir;
 }
@@ -37,11 +40,11 @@ function stubRunok(script: string) {
   rmSync(runokCalled, { force: true });
 }
 
-function run(payload: Record<string, unknown>, { runok = true, bun = true } = {}): string {
+function run(payload: Record<string, unknown>, tools: Parameters<typeof pathWith>[0] = {}): string {
   return execFileSync("bash", [proxy], {
     input: JSON.stringify({ hook_event_name: "PreToolUse", cwd: repo, ...payload }),
     encoding: "utf8",
-    env: { HOME: root, PATH: pathWith(runok, bun) },
+    env: { HOME: root, PATH: pathWith(tools) },
   });
 }
 
@@ -127,6 +130,12 @@ describe("Bash", () => {
   it("asks when bun is not installed", () => {
     expectAsk(run(bash("git push"), { bun: false }), "block-push-to-main exited with 127");
   });
+
+  it("asks with valid JSON when jq is not installed", () => {
+    stubRunok(`echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'`);
+    expectAsk(run(bash("ls"), { jq: false }), "failed to parse hook input");
+    expect(existsSync(runokCalled)).toBe(false);
+  });
 });
 
 describe("edit tools", () => {
@@ -159,7 +168,7 @@ describe("invalid hook input", () => {
     const output = execFileSync("bash", [proxy], {
       input: "not json",
       encoding: "utf8",
-      env: { HOME: root, PATH: pathWith(true) },
+      env: { HOME: root, PATH: pathWith() },
     });
     expectAsk(output, "failed to parse hook input");
   });
