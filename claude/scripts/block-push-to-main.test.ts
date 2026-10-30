@@ -1,5 +1,5 @@
 import { expect, describe, it, beforeAll, afterAll } from "bun:test";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -171,7 +171,12 @@ describe("hook script", () => {
     expect(run("git status")).toBe("");
   });
 
-  it("prints nothing for invalid JSON", () => {
-    expect(execFileSync("bun", [script], { input: "not json", encoding: "utf8" })).toBe("");
+  it.each([
+    ["invalid JSON", "not json"],
+    ["unexpected hook input", JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Bash" })],
+  ])("exits non-zero with no decision for %s", (_, input) => {
+    const result = spawnSync("bun", [script], { input, encoding: "utf8" });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
   });
 });

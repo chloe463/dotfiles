@@ -16,7 +16,8 @@ const LOG_FILE = `${LOG_DIR}/${userInfo().username}-hook-block-edit-on-main.log`
 const PROTECTED_BRANCHES = ["main", "master"];
 const EDIT_TOOLS = ["Edit", "Write", "MultiEdit", "NotebookEdit"];
 
-// Hook stderr is discarded, so errors go to a log file instead
+// Hook stderr is discarded, so errors go to a log file instead. The exit status
+// tells pre-tool-use-proxy.sh that this guard couldn't evaluate the tool call.
 function writeLog(message: string) {
   const timestamp = new Date().toISOString();
   try {
@@ -110,7 +111,7 @@ async function main() {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     writeLog(`[error] failed to read stdin: ${msg}`);
-    process.exit(0);
+    process.exit(1);
   }
 
   let data: unknown;
@@ -119,11 +120,12 @@ async function main() {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     writeLog(`[error] failed to parse JSON: ${msg}`);
-    process.exit(0);
+    process.exit(1);
   }
 
   if (!isValidPreToolUseData(data)) {
-    process.exit(0);
+    writeLog("[error] unexpected hook input");
+    process.exit(1);
   }
 
   const path = targetPath(data);
@@ -151,6 +153,6 @@ if (import.meta.main) {
   main().catch((error) => {
     const msg = error instanceof Error ? error.message : String(error);
     writeLog(`[error] unexpected error: ${msg}`);
-    process.exit(0);
+    process.exit(1);
   });
 }
