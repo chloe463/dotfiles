@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fohte/runok/main/schema/runok.schema.json
+
+# Bash permission rules for Claude Code, evaluated by `runok hook` from
+# ~/.claude/scripts/pre-tool-use-proxy.sh. Commands no rule matches fall
+# through (`pass`) to Claude Code's own permission flow (auto mode).
+#
+# Verify changes with `runok test` (inline `tests:` below) and
+# `runok check -- <command>`.
+
+extends:
+  # Read-only unix/git/gh commands and wrapper definitions (sudo, bash -c, ...)
+  - 'github:fohte/runok-presets/base@v1'
+  - './git.yml'
+  - './tools.yml'
+
+defaults:
+  action: pass
+
+rules:
+  # Destructive filesystem / system commands
+  - deny: 'sudo *'
+    message: 'sudo is not allowed. Ask the user to run privileged commands themselves.'
+    tests:
+      - deny: 'sudo ls'
+      - deny: 'bash -c "sudo ls"'
+  - deny: 'rm *'
+    message: 'rm is not allowed. Ask the user to delete files, or use `git rm` for tracked files.'
+    fix_suggestion: 'git rm <path>'
+    tests:
+      - deny: 'rm -rf node_modules'
+      - deny: 'rm file.txt'
+      - deny: 'ls && rm file.txt'
+  - deny: 'dd *'
+    message: 'dd can overwrite disks and is not allowed.'
+  - deny: 'mkfs *'
+    message: 'Formatting filesystems is not allowed.'
+  - deny: 'fdisk *'
+    message: 'Partitioning disks is not allowed.'
+  - deny: 'chmod [-R] 777 /*'
+    message: 'Making system paths world-writable is not allowed.'
+    tests:
+      - deny: 'chmod 777 /etc'
+      - deny: 'chmod -R 777 /usr/local'
+  - deny: 'chown root:* *'
+    message: 'Changing ownership to root is not allowed.'
+
+  # Network access: confirm before fetching arbitrary URLs
+  - ask: 'curl *'
+  - ask: 'wget *'
+  - ask: 'nc *'
+    tests:
+      - ask: 'curl https://example.com'
+      - ask: 'nc -l 8080'
+
+tests:
+  cases:
+    - allow: 'git status'
+    - allow: 'git log --oneline | head -20'
+    - pass: 'make build'
