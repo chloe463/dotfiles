@@ -89,8 +89,9 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Type check
         run: bun typecheck
-  test-claude-statusline:
-    name: Test statusline
+  # Runs every *.test.ts: the statusline and the Claude Code hook scripts
+  test-bun:
+    name: Test TypeScript scripts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -101,3 +102,29 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Run test
         run: bun test
+  test-runok-rules:
+    name: Test runok rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      # The Claude Code integration this config relies on (`runok hook`,
+      # `defaults.action: pass`) isn't released yet, so build main like
+      # `brew "fohte/tap/runok", args: ["HEAD"]` does. Testing against the
+      # latest main also surfaces upstream changes that break the rules.
+      - name: Resolve runok revision
+        id: runok
+        run: echo "sha=$(git ls-remote https://github.com/fohte/runok.git refs/heads/main | cut -f1)" >> "$GITHUB_OUTPUT"
+      - name: Cache runok
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/runok
+          key: runok-${{ runner.os }}-${{ steps.runok.outputs.sha }}
+      - name: Install runok
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          RUNOK_SHA: ${{ steps.runok.outputs.sha }}
+        run: cargo install --locked --git https://github.com/fohte/runok.git --rev "$RUNOK_SHA"
+      - name: Run rule tests
+        run: runok test -c runok/.config/runok/runok.yml
