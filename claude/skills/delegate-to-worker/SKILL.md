@@ -20,7 +20,7 @@ The design session (this session) handles design, task briefs and diff review, a
 
 - **Before investigating, bring your local checkout up to date**: `git fetch origin main`, then `git merge --ff-only origin/main` if the working tree is clean. If it isn't clean, inspect origin/main with `git show origin/main:<path>` or `git grep <pattern> origin/main`. This avoids missing changes from a PR that was just merged
 
-- Location: `.ai_logs/projects/<project>/tasks/<id>-<topic>.md` (see "Project layout" in the `ai-logs-workflow` skill). Projects started before that layout keep `.ai_logs/YYYY/MM/YYYYMMDD_<project>_task-<id>-<topic>.md`
+- Location: `.ai_logs/projects/<project>/tasks/YYYYMMDD_<id>-<topic>.md` (see "Project layout" in the `ai-logs-workflow` skill). Projects started before that layout keep `.ai_logs/YYYY/MM/YYYYMMDD_<project>_task-<id>-<topic>.md`
 - If a common rules file exists (e.g. `.ai_logs/YYYY/MM/tools/worker-common-rules.md`), **link it with "must read" instead of copying its contents**. If there isn't one, propose creating it
 - What to write in each brief:
   - Requester, date, background material, start conditions (e.g. a base PR), other tasks running in parallel

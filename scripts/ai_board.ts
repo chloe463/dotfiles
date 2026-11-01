@@ -5,16 +5,17 @@
 // written down anywhere, so it can't go stale. Only the mapping from tasks to
 // PRs is stored, in the plan's task table.
 
-import { existsSync, readFileSync, realpathSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 
 const DEFAULT_INTERVAL_SECONDS = 60;
-const PLAN_PATH = '.ai_logs/current/plan.md';
+const PROJECT_DIR = '.ai_logs/current';
 
 export type Ball = 'human' | 'ai' | 'waiting';
 
 export interface PullRequest {
   number: number;
+  url: string;
   title: string;
   body: string;
   headRefName: string;
@@ -64,6 +65,12 @@ export function classify(pr: PullRequest, defaultBranch: string, openPrs: PullRe
     return { ball: 'waiting', label: 'レビュー待ち' };
   }
   return { ball: 'human', label: 'マージ可' };
+}
+
+// The plan is `plan.md` or `YYYYMMDD_plan.md`. The newest dated one wins, and
+// `plan.md` sorts after any date.
+export function findPlanFile(fileNames: string[]): string | undefined {
+  return fileNames.filter((name) => /^(\d{8}_)?plan\.md$/.test(name)).sort().at(-1);
 }
 
 // Task rows look like `| 1-3-2 | topic | #123 |`. The last cell holds the PR
@@ -141,6 +148,8 @@ export function renderPullRequests(
       const task = tasks.find((candidate) => candidate.prNumbers.includes(pr.number));
       const row = `  #${pr.number} ${task ? `${task.id} ` : ''}${status.label}  ${pr.title}`;
       lines.push(truncate(row, width));
+      // On its own line and never truncated, so the terminal can open it.
+      lines.push(`    ${pr.url}`);
     }
   }
   return lines;
@@ -178,7 +187,7 @@ function fetchPullRequests(owner: string, name: string): { defaultBranch: string
       defaultBranchRef { name }
       pullRequests(states: OPEN, first: 100, orderBy: { field: UPDATED_AT, direction: DESC }) {
         nodes {
-          number title body headRefName baseRefName isDraft reviewDecision mergeable
+          number url title body headRefName baseRefName isDraft reviewDecision mergeable
           author { login }
           reviewRequests { totalCount }
           reviewThreads(first: 100) { nodes { isResolved } }
@@ -193,6 +202,7 @@ function fetchPullRequests(owner: string, name: string): { defaultBranch: string
       .filter((node) => node.author?.login === data.viewer.login)
       .map((node) => ({
         number: node.number,
+        url: node.url,
         title: node.title,
         body: node.body,
         headRefName: node.headRefName,
@@ -230,15 +240,16 @@ function render(width: number): string {
   };
   const { defaultBranch, prs } = fetchPullRequests(owner.login, name);
 
-  const planPath = join(mainCheckout(), PLAN_PATH);
-  const tasks = existsSync(planPath) ? parsePlan(readFileSync(planPath, 'utf8')) : [];
+  const projectDir = join(mainCheckout(), PROJECT_DIR);
+  const planFile = existsSync(projectDir) ? findPlanFile(readdirSync(projectDir)) : undefined;
+  const tasks = planFile ? parsePlan(readFileSync(join(projectDir, planFile), 'utf8')) : [];
   const open = new Set(prs.map((pr) => pr.number));
   const others = [...new Set(tasks.flatMap((task) => task.prNumbers))].filter((number) => !open.has(number));
   const merged = fetchMerged(owner.login, name, others);
 
   const lines = renderPullRequests(prs, defaultBranch, tasks, width);
-  if (existsSync(planPath)) {
-    lines.push('', ...renderPlan(basename(dirname(realpathSync(planPath))), tasks, merged));
+  if (planFile) {
+    lines.push('', ...renderPlan(basename(realpathSync(projectDir)), tasks, merged));
   }
   return lines.join('\n');
 }
@@ -250,7 +261,7 @@ Usage:
 Options:
     --watch, -w     redraw every ${DEFAULT_INTERVAL_SECONDS} seconds, or the given number of seconds
     --help, -h      print this
-The plan is read from ${PLAN_PATH} in the main checkout.`);
+The plan is read from plan.md or YYYYMMDD_plan.md in ${PROJECT_DIR} in the main checkout.`);
   process.exit(0);
 }
 

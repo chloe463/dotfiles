@@ -2,6 +2,7 @@ import { expect, describe, it } from 'bun:test';
 import {
   classify,
   countUncheckedTestPlanItems,
+  findPlanFile,
   parsePlan,
   renderPlan,
   renderPullRequests,
@@ -11,6 +12,7 @@ import {
 function pr(overrides: Partial<PullRequest> = {}): PullRequest {
   return {
     number: 1,
+    url: 'https://github.com/o/r/pull/1',
     title: 'title',
     body: '',
     headRefName: 'feature',
@@ -87,6 +89,20 @@ describe('classify', () => {
   });
 });
 
+describe('findPlanFile', () => {
+  it('finds an undated plan', () => {
+    expect(findPlanFile(['tasks', 'plan.md', 'notes.md'])).toBe('plan.md');
+  });
+
+  it('finds a dated plan, preferring the newest', () => {
+    expect(findPlanFile(['20261101_plan.md', '20261201_plan.md', 'tasks'])).toBe('20261201_plan.md');
+  });
+
+  it('ignores other files', () => {
+    expect(findPlanFile(['20261101_plan.md.bak', 'old_plan.md', '2026_plan.md'])).toBeUndefined();
+  });
+});
+
 describe('parsePlan', () => {
   const plan = `# Plan
 
@@ -139,18 +155,21 @@ describe('renderPlan', () => {
 describe('renderPullRequests', () => {
   it('groups by whose turn it is, with the task ID when the plan has one', () => {
     const prs = [
-      pr({ number: 3, reviewDecision: 'REVIEW_REQUIRED', title: 'waits' }),
-      pr({ number: 2, ciState: 'FAILURE', title: 'broken' }),
+      pr({ number: 3, url: 'https://github.com/o/r/pull/3', reviewDecision: 'REVIEW_REQUIRED', title: 'waits' }),
+      pr({ number: 2, url: 'https://github.com/o/r/pull/2', ciState: 'FAILURE', title: 'broken' }),
       pr({ number: 1, title: 'ready' }),
     ];
     const tasks = parsePlan('| 1-3-2 | topic | #1 |');
     expect(renderPullRequests(prs, 'main', tasks, 80)).toEqual([
       '▶ あなたの番 (1)',
       '  #1 1-3-2 マージ可  ready',
+      '    https://github.com/o/r/pull/1',
       '▶ AI の番 (1)',
       '  #2 CI 失敗  broken',
+      '    https://github.com/o/r/pull/2',
       '▶ 待ち (1)',
       '  #3 レビュー待ち  waits',
+      '    https://github.com/o/r/pull/3',
     ]);
   });
 
@@ -158,6 +177,12 @@ describe('renderPullRequests', () => {
     const [, row] = renderPullRequests([pr({ title: 'あ'.repeat(50) })], 'main', [], 30);
     expect(Bun.stringWidth(row)).toBeLessThanOrEqual(30);
     expect(row.endsWith('…')).toBe(true);
+  });
+
+  it('never truncates the URL', () => {
+    const url = 'https://github.com/owner/a-very-long-repository-name/pull/123';
+    const [, , line] = renderPullRequests([pr({ url })], 'main', [], 20);
+    expect(line).toBe(`    ${url}`);
   });
 
   it('says so when there are no PRs', () => {
