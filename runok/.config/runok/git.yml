@@ -1,0 +1,124 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fohte/runok/main/schema/runok.schema.json
+
+# git / gh rules. Everyday commits and pushes run without prompts; creating a
+# PR is asked, as the user's single approval point. Anything that rewrites
+# history, skips hooks, deletes remote refs or targets main/master is asked or
+# denied.
+#
+# Pushes that target main/master only implicitly (`git push` while main is
+# checked out) can't be seen from the command string; those are denied by
+# ~/.claude/scripts/block-push-to-main.ts instead.
+
+rules:
+  # ── Protected branches ──
+  # Destination of each refspec: `main`, `+main`, `HEAD:main`,
+  # `src:refs/heads/main`, `:main` (delete). Anchored so `main-fix` passes.
+  - deny: 'git [-C *] push *'
+    when: >-
+      args.exists(a, a.matches('^[+]?([^:]*:)?(refs/heads/)?(main|master)$'))
+    message: 'Pushing to main/master is not allowed. Push a feature branch and open a pull request instead.'
+    fix_suggestion: 'git push -u origin HEAD'
+    tests:
+      - deny: 'git push origin main'
+      - deny: 'git push -u origin master'
+      - deny: 'git push origin HEAD:main'
+      - deny: 'git push origin feature:refs/heads/main'
+      - deny: 'git push origin +main'
+      - deny: 'git push -f origin main'
+      - deny: 'git push --force-with-lease origin master'
+      - deny: 'git -C /tmp push origin main'
+      - allow: 'git push origin main-fix'
+      - allow: 'git push origin HEAD:feature'
+      - allow: 'git push -u origin HEAD'
+
+  # ── History rewriting / hook skipping (confirm) ──
+  - ask: 'git [-C *] commit --amend *'
+    tests:
+      - ask: 'git commit --amend'
+      - ask: 'git commit -m "fix" --amend'
+      - ask: 'git -C /tmp commit --amend --no-edit'
+  # `-n*` also catches combined short flags such as `-nm` (runok doesn't
+  # split them). `-anm`, where n isn't first, is a known gap.
+  - ask: 'git [-C *] commit -n*|--no-verify *'
+    tests:
+      - ask: 'git commit -n -m "x"'
+      - ask: 'git commit -nm "x"'
+      - ask: 'git commit --no-verify -m "x"'
+      - allow: 'git commit -m "x" --no-edit'
+      - allow: 'git commit -m "fix -n flag"'
+  - ask: 'git [-C *] push -f|--force|--force-with-lease|--force-if-includes *'
+    tests:
+      - ask: 'git push -f'
+      - ask: 'git push --force origin feature'
+      - ask: 'git push origin feature --force-with-lease'
+      - ask: 'git push --force-with-lease=feature:abc123 origin feature'
+  - ask: 'git [-C *] push * +*'
+    tests:
+      - ask: 'git push origin +feature'
+  - ask: 'git [-C *] push --no-verify *'
+    tests:
+      - ask: 'git push --no-verify'
+  - ask: 'git [-C *] reset *'
+    tests:
+      - ask: 'git reset --hard HEAD~1'
+      - ask: 'git reset HEAD file.txt'
+  - ask: 'git [-C *] rebase *'
+    tests:
+      - ask: 'git rebase origin/main'
+
+  # ── Remote ref deletion (confirm) ──
+  - ask: 'git [-C *] push * -d|--delete *'
+    tests:
+      - ask: 'git push origin --delete feature'
+      - ask: 'git push -d origin feature'
+  - ask: 'git [-C *] push * :*'
+    tests:
+      - ask: 'git push origin :feature'
+  - ask: 'git [-C *] push --mirror|--prune *'
+    tests:
+      - ask: 'git push --mirror origin'
+      - ask: 'git push --prune origin'
+
+  # ── Everyday operations ──
+  - allow: 'git [-C *] add *'
+    tests:
+      - allow: 'git add -A'
+      - allow: 'git add . && git commit -m "x" && git push'
+  - allow: 'git [-C *] commit *'
+    tests:
+      - allow: 'git commit -m "feat: add feature"'
+      - allow: 'git -C /tmp commit -F msg.txt'
+  - allow: 'git [-C *] push *'
+    tests:
+      - allow: 'git push'
+      - allow: 'git push -u origin feature'
+
+  # ── gh ──
+  - deny: 'gh repo delete *'
+    message: 'Deleting repositories is not allowed.'
+  - deny: 'gh release delete *'
+    message: 'Deleting releases is not allowed.'
+  - deny: 'gh auth logout *'
+    message: 'Logging out of gh is not allowed.'
+  - ask: 'gh [-R *] pr merge|close|review *'
+    tests:
+      - ask: 'gh pr merge 123 --squash'
+      - ask: 'gh pr review 123 --approve'
+  - ask: 'gh [-R *] release create *'
+  - ask: 'gh [-R *] workflow run *'
+  # Write requests through the API. Read-only GETs are allowed by the base preset.
+  - ask: 'gh [-R *] api * -X|--method POST|PUT|PATCH|DELETE *'
+    tests:
+      - ask: 'gh api -X POST repos/o/r/issues'
+      - allow: 'gh api repos/o/r/pulls'
+  # Creating the PR is the user's single approval point for the work.
+  # Issue-closing keywords in the body are denied by
+  # ~/.claude/scripts/block-issue-close-keywords.ts (it reads --body-file).
+  - ask: 'gh [-R *] pr create *'
+    tests:
+      - ask: 'gh pr create --title "feat: x" --body "y"'
+      - ask: 'gh -R o/r pr create --fill'
+  - allow: 'gh [-R *] pr checks|diff *'
+    tests:
+      - allow: 'gh pr checks 123'
+      - allow: 'gh pr diff 123'

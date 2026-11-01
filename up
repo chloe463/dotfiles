@@ -54,7 +54,7 @@ function run_stow()
         # runtime files are not, so a tree-fold there would leave them sitting in the
         # checkout as regular tracked-looking files.
         local xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
-        mkdir -p "$xdg_config/zsh" "$xdg_config/gh" "$xdg_config/alacritty" "$xdg_config/herdr" "$xdg_config/hunk"
+        mkdir -p "$xdg_config/zsh" "$xdg_config/gh" "$xdg_config/alacritty" "$xdg_config/herdr" "$xdg_config/hunk" "$xdg_config/runok"
 
         stow -R -vvv \
           alacritty \
@@ -65,6 +65,7 @@ function run_stow()
           herdr \
           hunk \
           nvim \
+          runok \
           starship \
           zsh
 

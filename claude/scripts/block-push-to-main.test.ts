@@ -1,5 +1,5 @@
 import { expect, describe, it, beforeAll, afterAll } from "bun:test";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -8,30 +8,9 @@ import {
   isValidPreToolUseData,
   parseGitPush,
   pushDestinations,
-  splitCommands,
 } from "./block-push-to-main";
 
 const onBranch = (branch: string) => () => branch;
-
-describe("splitCommands", () => {
-  it("splits on shell operators", () => {
-    expect(splitCommands("git add . && git commit -m x; git push | cat")).toEqual([
-      ["git", "add", "."],
-      ["git", "commit", "-m", "x"],
-      ["git", "push"],
-      ["cat"],
-    ]);
-  });
-  it("keeps quoted operators inside a word", () => {
-    expect(splitCommands(`git commit -m "a && git push"`)).toEqual([
-      ["git", "commit", "-m", "a && git push"],
-    ]);
-    expect(splitCommands("echo 'x; git push'")).toEqual([["echo", "x; git push"]]);
-  });
-  it("splits on newlines", () => {
-    expect(splitCommands("cd repo\ngit push")).toEqual([["cd", "repo"], ["git", "push"]]);
-  });
-});
 
 describe("parseGitPush", () => {
   it("returns null for non-push commands", () => {
@@ -105,6 +84,18 @@ describe("findProtectedPush", () => {
     expect(findProtectedPush("git status && git log", "/r", onBranch("main"))).toBeNull();
   });
 
+  it.each([
+    "git commit -F - <<'EOF'\nfix: stop running git push origin main\nEOF",
+    "cat <<EOF > notes.md\ngit push\nEOF\ngit status",
+    'git commit -m "$(cat <<\'EOF\'\ngit push origin main\nEOF\n)"',
+  ])("ignores git push inside here-documents: %p", (command) => {
+    expect(findProtectedPush(command, "/r", onBranch("main"))).toBeNull();
+  });
+
+  it("still checks commands after a here-document", () => {
+    expect(findProtectedPush("cat <<EOF > a\nx\nEOF\ngit push", "/r", onBranch("main"))).not.toBeNull();
+  });
+
   it("allows a detached HEAD", () => {
     expect(findProtectedPush("git push", "/r", onBranch(""))).toBeNull();
   });
@@ -171,7 +162,12 @@ describe("hook script", () => {
     expect(run("git status")).toBe("");
   });
 
-  it("prints nothing for invalid JSON", () => {
-    expect(execFileSync("bun", [script], { input: "not json", encoding: "utf8" })).toBe("");
+  it.each([
+    ["invalid JSON", "not json"],
+    ["unexpected hook input", JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Bash" })],
+  ])("exits non-zero with no decision for %s", (_, input) => {
+    const result = spawnSync("bun", [script], { input, encoding: "utf8" });
+    expect(result.status).toBe(1);
+    expect(result.stdout).toBe("");
   });
 });
