@@ -71,6 +71,11 @@ rules:
       - allow: 'hunk session list'
       - allow: 'hunk session comment add --file a.ts --line 1 --body x'
 
+  # ── ai-board (read-only PR and plan status) ──
+  - allow: 'ai-board *'
+    tests:
+      - allow: 'ai-board'
+
   # ── herdr (terminal multiplexer for agents) ──
   - allow: 'herdr status|notification *'
   - allow: 'herdr config check'
