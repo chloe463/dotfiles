@@ -1,7 +1,7 @@
 import { expect, describe, it, beforeAll, afterAll } from "bun:test";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir, userInfo } from "node:os";
 import { join } from "node:path";
 import {
   findProtectedPush,
@@ -132,13 +132,19 @@ describe("isValidPreToolUseData", () => {
 describe("hook script", () => {
   const script = join(import.meta.dir, "block-push-to-main.ts");
   let repo: string;
+  let home: string;
+
+  // The script logs under $HOME, which must not be the real one.
+  const env = () => ({ ...process.env, HOME: home });
 
   beforeAll(() => {
     repo = mkdtempSync(join(tmpdir(), "block-push-to-main-"));
+    home = mkdtempSync(join(tmpdir(), "block-push-to-main-home-"));
     execFileSync("git", ["init", "-q", "-b", "main", repo]);
   });
   afterAll(() => {
     rmSync(repo, { recursive: true, force: true });
+    rmSync(home, { recursive: true, force: true });
   });
 
   const run = (command: string) =>
@@ -150,12 +156,19 @@ describe("hook script", () => {
         cwd: repo,
       }),
       encoding: "utf8",
+      env: env(),
     });
 
   it("prints a deny decision for git push on main", () => {
     const output = JSON.parse(run("git push -u origin HEAD"));
     expect(output.hookSpecificOutput.hookEventName).toBe("PreToolUse");
     expect(output.hookSpecificOutput.permissionDecision).toBe("deny");
+  });
+
+  it("logs under $HOME", () => {
+    run("git push -u origin HEAD");
+    const log = join(home, ".claude", "logs", `${userInfo().username}-hook-block-push-to-main.log`);
+    expect(readFileSync(log, "utf8")).toContain("[deny] git push -u origin HEAD");
   });
 
   it("prints nothing for other commands", () => {
@@ -166,7 +179,7 @@ describe("hook script", () => {
     ["invalid JSON", "not json"],
     ["unexpected hook input", JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Bash" })],
   ])("exits non-zero with no decision for %s", (_, input) => {
-    const result = spawnSync("bun", [script], { input, encoding: "utf8" });
+    const result = spawnSync("bun", [script], { input, encoding: "utf8", env: env() });
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
   });
