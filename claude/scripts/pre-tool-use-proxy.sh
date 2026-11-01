@@ -46,6 +46,31 @@ run_hook() {
   exit 0
 }
 
+# Runs `runok hook` and names the matched rules when it asks without a reason,
+# since runok only reports a rule's `message` and the prompt would otherwise be
+# generic. The rules come from --verbose's human-readable stderr. If that format
+# changes nothing matches and the prompt falls back to the generic text; the
+# decision itself is never touched. A multi-line command can echo a look-alike
+# line, which can add to the list but can't hide a rule that really matched.
+runok_hook() {
+  local stderr_file output status
+  stderr_file=$(mktemp) || return 1
+  output=$(runok hook --agent claude-code --verbose 2>"${stderr_file}")
+  status=$?
+  # On a jq error, print runok's output as is and let run_hook judge it.
+  jq -c --arg q "'" --rawfile verbose "${stderr_file}" '
+    [$verbose | split("\n")[] | capture("^\\s*├─ ask  \($q)(?<rule>.*)\($q)(  \\(tokens: .*\\))?$").rule] as $rules
+    | if .hookSpecificOutput.permissionDecision == "ask"
+        and .hookSpecificOutput.permissionDecisionReason == null
+        and ($rules | length) > 0
+      then .hookSpecificOutput.permissionDecisionReason =
+        "runok ask: " + ($rules | unique | map($q + . + $q) | join(", "))
+      else . end
+  ' 2>/dev/null <<<"${output}" || printf '%s\n' "${output}"
+  rm -f "${stderr_file}"
+  return "${status}"
+}
+
 input=$(cat)
 tool_name=$(jq -r '.tool_name // empty' <<<"${input}" 2>/dev/null) || ask_and_exit "failed to parse hook input"
 
@@ -65,7 +90,7 @@ case "${tool_name}" in
     # Without a config runok exits 0 with no output, which looks like `pass`.
     [[ -f "${RUNOK_CONFIG}" ]] || ask_and_exit "runok config not found"
 
-    run_hook "runok hook" runok hook --agent claude-code
+    run_hook "runok hook" runok_hook
     ;;
 esac
 exit 0
