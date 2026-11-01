@@ -195,22 +195,6 @@ function pwb() {
   return 0
 }
 
-# Setup 4 Herdr panes (no-op unless HERDR_ENV=1)
-function four-panes() {
-  if [ "${HERDR_ENV:-}" = "1" ]; then
-    local current_id="${HERDR_PANE_ID}"
-    local top_right_id bottom_left_id bottom_right_id
-    top_right_id=$(herdr pane split --current --direction right --ratio 0.5 --no-focus | jq -r '.result.pane.pane_id')
-    bottom_left_id=$(herdr pane split --current --direction down --ratio 0.5 --no-focus | jq -r '.result.pane.pane_id')
-    bottom_right_id=$(herdr pane split --pane "${top_right_id}" --direction down --ratio 0.5 --no-focus | jq -r '.result.pane.pane_id')
-
-    herdr pane rename "${current_id}" "claude-worker"
-    herdr pane rename "${top_right_id}" "hunk"
-    herdr pane rename "${bottom_left_id}" "claude-reviewer"
-    herdr pane rename "${bottom_right_id}" "work-space-for-human"
-  fi
-}
-
 # Print 256 colors
 function 256colors() {
   for i in {0..255} ; do

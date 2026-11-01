@@ -20,7 +20,7 @@ The design session (this session) handles design, task briefs and diff review, a
 
 - **Before investigating, bring your local checkout up to date**: `git fetch origin main`, then `git merge --ff-only origin/main` if the working tree is clean. If it isn't clean, inspect origin/main with `git show origin/main:<path>` or `git grep <pattern> origin/main`. This avoids missing changes from a PR that was just merged
 
-- Location: `.ai_logs/YYYY/MM/YYYYMMDD_<project>_task-<id>-<topic>.md`
+- Location: `.ai_logs/projects/<project>/tasks/YYYYMMDD_<id>-<topic>.md` (see "Project layout" in the `ai-logs-workflow` skill). Projects started before that layout keep `.ai_logs/YYYY/MM/YYYYMMDD_<project>_task-<id>-<topic>.md`
 - If a common rules file exists (e.g. `.ai_logs/YYYY/MM/tools/worker-common-rules.md`), **link it with "must read" instead of copying its contents**. If there isn't one, propose creating it
 - What to write in each brief:
   - Requester, date, background material, start conditions (e.g. a base PR), other tasks running in parallel
@@ -90,6 +90,7 @@ herdr agent wait <name> --until idle --until done --until blocked --timeout 3600
 ## 6. Once the PR exists
 
 - Check **that the base is correct** with `gh pr list --head <branch> --json number,url,baseRefName` (for a stacked PR, it is the base PR's branch)
+- **Record the PR number in the task's row of the plan's task table right away** (`| 1-3-2 | topic | #123 |`). `ai-board` joins PRs to tasks through this table, so leaving it for cleanup makes the board wrong
 - Check the PR body and commits yourself too: the guard that denies issue-closing keywords can't see piped text or URL references (`Fixes https://github.com/o/r/issues/1`)
 - **Marking it ready**: the PR stays a draft until the user approves the work, then run `gh pr ready <PR>` (it asks). The first time you delegate in a repository, check whether its previews, CI and AI reviewers run on drafts. If they don't, ask the user to mark PRs ready as soon as they exist, since manual testing and AI review wait on them
 - If the project has PR previews, before manual testing have the user check that the commit hash in the preview comment matches the PR's head
@@ -132,4 +133,8 @@ Handle them as GitHub stacked PRs with `gh stack` (a GitHub CLI extension; see t
 - Once the PR is merged, with the user's agreement, remove the worktree with `herdr worktree remove --workspace <workspace_id>`
   - The links (e.g. `.husky/_`) remain as untracked files, so removal is refused with `dirty_worktree_requires_force`. Check with `git -C <worktree> status --short` that **only the links remain**, and that nothing is unpushed: `git -C <worktree> rev-parse HEAD` must equal the PR's `headRefOid` (`gh pr view <PR> --json headRefOid`). Don't use `@{u}..HEAD` here: after a merge the upstream branch is usually already deleted. Then remove with `--force` (removing links doesn't delete their targets)
   - If changes other than the links remain, don't remove it; tell the user
-- Update the brief's "Result" and the project index (progress, PR numbers)
+- Update the brief's "Result"
+
+## Proposing what to do next
+
+Before proposing the next task, run `ai-board` and base the proposal on it: first what is the user's turn, then what is the agent's turn, then the next task. If several PRs are already waiting on the user, say so instead of proposing to start a new task.
