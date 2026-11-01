@@ -21,7 +21,7 @@ function pathWith({ runok = true, bun = true, jq = true } = {}): string {
   const dir = join(root, `path-runok-${runok}-bun-${bun}-jq-${jq}`);
   if (!existsSync(dir)) {
     mkdirSync(dir);
-    const tools = ["bash", "git", "cat", "dirname", "date", "id", "mkdir", "touch"];
+    const tools = ["bash", "git", "cat", "dirname", "date", "id", "mkdir", "mktemp", "rm", "touch"];
     if (bun) tools.push("bun");
     if (jq) tools.push("jq");
     for (const tool of tools) {
@@ -91,6 +91,63 @@ describe("Bash", () => {
     stubRunok(`echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask"}}'`);
     const output = JSON.parse(run(bash("curl https://example.com")));
     expect(output.hookSpecificOutput.permissionDecision).toBe("ask");
+  });
+
+  describe("naming the matched rules on ask", () => {
+    const decision = (fields: Record<string, unknown>) =>
+      `echo '${JSON.stringify({ hookSpecificOutput: { hookEventName: "PreToolUse", ...fields } })}'`;
+    // Mirrors the stderr of `runok hook --verbose`.
+    const verbose = (...lines: string[]) => `cat >&2 <<'EOF'\n${lines.join("\n")}\nEOF`;
+    const ready = "      ├─ ask  'gh [-R *] pr ready *'  (tokens: 189)";
+
+    it("names the rule when runok gives no reason", () => {
+      stubRunok(`${verbose("  [1] gh pr ready 189", ready, "      └─ result: ask")}\n${decision({ permissionDecision: "ask" })}`);
+      const output = JSON.parse(run(bash("gh pr ready 189"))).hookSpecificOutput;
+      expect(output.permissionDecision).toBe("ask");
+      expect(output.permissionDecisionReason).toBe("runok ask: 'gh [-R *] pr ready *'");
+    });
+
+    it("names a rule matched without tokens", () => {
+      stubRunok(`${verbose("  ├─ ask  'herdr pane close'")}\n${decision({ permissionDecision: "ask" })}`);
+      expect(JSON.parse(run(bash("herdr pane close"))).hookSpecificOutput.permissionDecisionReason).toBe(
+        "runok ask: 'herdr pane close'",
+      );
+    });
+
+    it("lists each ask rule once and ignores allow rules", () => {
+      stubRunok(
+        `${verbose(ready, "      ├─ allow  'curl !-o *'  (tokens: x)", "      ├─ ask  'curl *'  (tokens: x)", ready)}\n${decision({ permissionDecision: "ask" })}`,
+      );
+      const output = JSON.parse(run(bash("gh pr ready 189 | gh pr ready 189; curl x"))).hookSpecificOutput;
+      expect(output.permissionDecisionReason).toBe("runok ask: 'curl *', 'gh [-R *] pr ready *'");
+    });
+
+    it("keeps a reason from runok", () => {
+      stubRunok(`${verbose(ready)}\n${decision({ permissionDecision: "ask", permissionDecisionReason: "from message" })}`);
+      expect(JSON.parse(run(bash("gh pr ready 189"))).hookSpecificOutput.permissionDecisionReason).toBe("from message");
+    });
+
+    it("keeps updatedInput", () => {
+      const updatedInput = { command: "runok exec -- gh pr ready 189" };
+      stubRunok(`${verbose(ready)}\n${decision({ permissionDecision: "ask", updatedInput })}`);
+      const output = JSON.parse(run(bash("gh pr ready 189"))).hookSpecificOutput;
+      expect(output.updatedInput).toEqual(updatedInput);
+      expect(output.permissionDecisionReason).toBe("runok ask: 'gh [-R *] pr ready *'");
+    });
+
+    it("leaves the ask as is when no rule can be read", () => {
+      stubRunok(`${verbose("an unknown format")}\n${decision({ permissionDecision: "ask" })}`);
+      const output = JSON.parse(run(bash("gh pr ready 189"))).hookSpecificOutput;
+      expect(output.permissionDecision).toBe("ask");
+      expect(output.permissionDecisionReason).toBeUndefined();
+    });
+
+    it("leaves other decisions as is", () => {
+      stubRunok(`${verbose(ready)}\n${decision({ permissionDecision: "allow" })}`);
+      const output = JSON.parse(run(bash("git status"))).hookSpecificOutput;
+      expect(output.permissionDecision).toBe("allow");
+      expect(output.permissionDecisionReason).toBeUndefined();
+    });
   });
 
   it("prints nothing when runok passes", () => {
