@@ -9,10 +9,10 @@
 #         --branch feat/foo --base origin/main --label "1-3-2 short-name"
 #
 # - Default links are node_modules and .husky/_ . Add more with --link; drop the defaults with --no-default-links
-# - A link source missing from the root is skipped with a warning (some repos have no .husky, etc.). Not an error
+# - A link source missing from the root, or a link that cannot be created, is skipped with a warning. Not an error
 # - Anything that already exists in the worktree is skipped, never overwritten
 # - The last line of stdout is the result as JSON: {"workspace_id","pane_id","path","branch","head","links":[...],"skipped":[...]}
-# - Exit codes: 0 = success / 1 = bad arguments / 2 = run outside herdr / 3 = base not found / 4 = worktree creation failed
+# - Exit codes: 0 = success / 1 = bad arguments or jq missing / 2 = run outside herdr / 3 = base not found / 4 = worktree creation failed
 
 set -euo pipefail
 
@@ -35,6 +35,8 @@ link_dirs() {
   shift 2
   local linked=() skipped=() rel src dest
   for rel in "$@"; do
+    # `ln -s src dest/` fails when dest does not exist yet, so drop a trailing slash.
+    rel="${rel%/}"
     src="$root/$rel"
     dest="$dest_root/$rel"
     if [ ! -e "$src" ]; then
@@ -47,8 +49,13 @@ link_dirs() {
       skipped+=("$rel (already exists in worktree)")
       continue
     fi
-    mkdir -p "$(dirname "$dest")"
-    ln -s "$src" "$dest"
+    # This function runs inside $(...) where `set -e` does not apply, so check explicitly:
+    # otherwise a failed mkdir/ln would still be reported as linked.
+    if ! { mkdir -p "$(dirname "$dest")" && ln -s "$src" "$dest"; }; then
+      echo "warning: failed to link $rel; skipping" >&2
+      skipped+=("$rel (link failed)")
+      continue
+    fi
     linked+=("$rel")
   done
   jq -cn \
@@ -107,7 +114,9 @@ fi
 
 # --- Verify the base (fetch first if it is origin/<branch>) ---
 if [[ "$base" == origin/* ]]; then
-  git -C "$repo" fetch -q origin "${base#origin/}" || true
+  # Working offline is fine, but make it visible that the base may be stale.
+  git -C "$repo" fetch -q origin "${base#origin/}" \
+    || echo "warning: fetch failed; using possibly stale $base" >&2
 fi
 if ! base_commit="$(git -C "$repo" rev-parse --verify -q "${base}^{commit}")"; then
   echo "base not found: $base" >&2
@@ -128,17 +137,25 @@ if [ "$dry_run" = true ]; then
 fi
 
 # --- Create the worktree ---
+# Check for jq first: once herdr has created the worktree, a missing jq would leave it orphaned.
+if ! command -v jq >/dev/null 2>&1; then
+  echo "jq is required but was not found in PATH" >&2
+  exit 1
+fi
+
 if ! created="$(herdr worktree create --cwd "$repo" --branch "$branch" --base "$base_commit" --label "$label" --no-focus)"; then
   echo "failed to create the worktree" >&2
   exit 4
 fi
 
-workspace_id="$(jq -r '.result.workspace.workspace_id' <<<"$created")"
-pane_id="$(jq -r '.result.root_pane.pane_id' <<<"$created")"
-path="$(jq -r '.result.worktree.path' <<<"$created")"
+# `// empty` turns a missing field into an empty string; `|| true` keeps a non-JSON
+# response from aborting here, so it is reported below together with the raw output.
+workspace_id="$(jq -r '.result.workspace.workspace_id // empty' <<<"$created" 2>/dev/null || true)"
+pane_id="$(jq -r '.result.root_pane.pane_id // empty' <<<"$created" 2>/dev/null || true)"
+path="$(jq -r '.result.worktree.path // empty' <<<"$created" 2>/dev/null || true)"
 
-if [ -z "$path" ] || [ "$path" = "null" ] || [ ! -d "$path" ]; then
-  echo "could not read the worktree path. herdr output:" >&2
+if [ -z "$workspace_id" ] || [ -z "$pane_id" ] || [ -z "$path" ] || [ ! -d "$path" ]; then
+  echo "could not read workspace_id, pane_id and the worktree path from the herdr response. herdr output:" >&2
   echo "$created" >&2
   exit 4
 fi

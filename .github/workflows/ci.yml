@@ -112,5 +112,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Show bash version
+        run: /bin/bash --version | head -1
       - name: Run test
-        run: ./claude/test_create_worktree.sh
+        # The test runs the script under test with the bash that runs the test itself,
+        # so using /bin/bash here means bash 3.2.57 on macOS (the shebang's `env bash`
+        # would pick whichever bash comes first on PATH).
+        run: /bin/bash ./claude/test_create_worktree.sh
