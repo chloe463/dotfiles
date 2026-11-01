@@ -74,7 +74,7 @@ describe('ai-layout', () => {
 
     run();
 
-    expect(calls().some((call) => call.startsWith('pane run new1 nvim -R') && call.endsWith('.ai_logs/current/plan.md'))).toBe(true);
+    expect(calls().some((call) => call.startsWith('pane run new1 AI_PLAN_VIEWER=1 nvim -M') && call.endsWith('.ai_logs/current/plan.md'))).toBe(true);
   });
 
   it('starts the viewer on a dated plan', () => {
@@ -83,7 +83,7 @@ describe('ai-layout', () => {
 
     run();
 
-    expect(calls().some((call) => call.startsWith('pane run new1 nvim -R') && call.endsWith('.ai_logs/current/20261101_plan.md'))).toBe(true);
+    expect(calls().some((call) => call.startsWith('pane run new1 AI_PLAN_VIEWER=1 nvim -M') && call.endsWith('.ai_logs/current/20261101_plan.md'))).toBe(true);
   });
 
   it('explains how to set the plan when there is none', () => {
