@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Opens a plan as a rendered, read-only preview: nvim with modifications turned
+# off (`-M`) and no swap file (`-n`), so opening a file being edited elsewhere
+# doesn't warn, re-checking the file every 2 seconds so it follows edits.
+# AI_PLAN_VIEWER enables the plugins only this viewer uses. It doesn't notice
+# `.ai_logs/current` pointing at another project, so reopen it after switching.
+set -euo pipefail
+
+usage() {
+    echo "Usage: ai-plan [file]"
+    echo "Without a file, opens the current project's plan: the newest"
+    echo "YYYYMMDD_plan.md, or plan.md, in .ai_logs/current of the main checkout."
+}
+
+case "${1:-}" in
+    -h | --help)
+        usage
+        exit 0
+        ;;
+esac
+if (($# > 1)); then
+    usage >&2
+    exit 1
+fi
+
+if (($# == 1)); then
+    file="$1"
+else
+    # `.ai_logs` lives in the main checkout, so resolve it from a worktree too.
+    if ! common_dir=$(git rev-parse --git-common-dir 2> /dev/null); then
+        echo "ai-plan: not inside a git repository. Pass a file instead." >&2
+        exit 1
+    fi
+    project_dir="$(cd "${common_dir}/.." && pwd)/.ai_logs/current"
+    plan=$(ls -1 "${project_dir}" 2> /dev/null | grep -E '^([0-9]{8}_)?plan\.md$' | sort | tail -n 1 || true)
+    if [[ -z "${plan}" ]]; then
+        echo "ai-plan: no plan found in ${project_dir}." >&2
+        echo "Point it at a project with: ln -sfn projects/<project> .ai_logs/current" >&2
+        exit 1
+    fi
+    file="${project_dir}/${plan}"
+fi
+
+if [[ ! -f "${file}" ]]; then
+    echo "ai-plan: file not found: ${file}" >&2
+    exit 1
+fi
+
+export AI_PLAN_VIEWER=1
+exec nvim -M -n -c 'set autoread' -c 'call timer_start(2000, {-> execute("checktime")}, {"repeat": -1})' "${file}"

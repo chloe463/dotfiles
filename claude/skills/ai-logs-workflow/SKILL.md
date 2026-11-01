@@ -141,7 +141,7 @@ Work split into numbered tasks gets a project directory, so its files don't scat
 .ai_logs/current -> projects/<project>                      the project being worked on
 ```
 
-Switch projects with `ln -sfn projects/<project> .ai_logs/current`. The `ai-board` command and the plan viewer pane from `ai-layout` both read the plan from `.ai_logs/current/`: the newest `YYYYMMDD_plan.md`, or `plan.md`. The date is when the file was created. The viewer follows edits to the plan, but has to be reopened after switching projects.
+Switch projects with `ln -sfn projects/<project> .ai_logs/current`. `ai-board` and `ai-plan` (the plan viewer, also started by `ai-layout`) both read the plan from `.ai_logs/current/`: the newest `YYYYMMDD_plan.md`, or `plan.md`. The date is when the file was created. The viewer follows edits to the plan, but has to be reopened after switching projects.
 
 The plan's task table is the only place that records which PR belongs to which task. Don't write PR status or progress into it: `ai-board` derives those from GitHub.
 

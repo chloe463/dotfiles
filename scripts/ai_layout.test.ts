@@ -66,31 +66,7 @@ describe('ai-layout', () => {
     expect(made).toContain('pane rename new2 workspace-for-human');
     expect(made).toContain('pane rename new3 ai-board');
     expect(made).toContain('pane run new3 ai-board --watch');
-  });
-
-  it('starts the viewer when the plan exists', () => {
-    mkdirSync(join(root, '.ai_logs/current'), { recursive: true });
-    writeFileSync(join(root, '.ai_logs/current/plan.md'), '# plan');
-
-    run();
-
-    expect(calls().some((call) => call.startsWith('pane run new1 AI_PLAN_VIEWER=1 nvim -M') && call.endsWith('.ai_logs/current/plan.md'))).toBe(true);
-  });
-
-  it('starts the viewer on a dated plan', () => {
-    mkdirSync(join(root, '.ai_logs/current'), { recursive: true });
-    writeFileSync(join(root, '.ai_logs/current/20261101_plan.md'), '# plan');
-
-    run();
-
-    expect(calls().some((call) => call.startsWith('pane run new1 AI_PLAN_VIEWER=1 nvim -M') && call.endsWith('.ai_logs/current/20261101_plan.md'))).toBe(true);
-  });
-
-  it('explains how to set the plan when there is none', () => {
-    const result = run();
-
-    expect(calls().some((call) => call.startsWith('pane run new1'))).toBe(false);
-    expect(result.stderr).toContain('ln -sfn projects/<project> .ai_logs/current');
+    expect(made).toContain('pane run new1 ai-plan');
   });
 
   it('refuses a tab that already has several panes', () => {
