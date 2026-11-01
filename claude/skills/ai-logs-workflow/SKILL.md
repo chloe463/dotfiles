@@ -130,9 +130,35 @@ mkdir -p .ai_logs/2026/02
 
 Confirm the file location to the user after creation.
 
+## Project layout
+
+Work split into numbered tasks gets a project directory, so its files don't scatter across dates:
+
+```
+.ai_logs/projects/<project>/plan.md                the plan, with the task table
+.ai_logs/projects/<project>/tasks/<id>-<topic>.md  task briefs for workers
+.ai_logs/projects/<project>/reviews/pr<n>.md       review comments and reply drafts
+.ai_logs/current -> projects/<project>             the project being worked on
+```
+
+Switch projects with `ln -sfn projects/<project> .ai_logs/current`. The `ai-board` command and the plan viewer pane from `ai-layout` both read `.ai_logs/current/plan.md`. The viewer follows edits to the plan, but has to be reopened after switching projects.
+
+The plan's task table is the only place that records which PR belongs to which task. Don't write PR status or progress into it: `ai-board` derives those from GitHub.
+
+```markdown
+| Task | Topic | PR |
+|---|---|---|
+| 1-3-1 | merged or open work | #123 #124 |
+| 1-3-2 | being implemented, no PR yet | wip |
+| 1-3-3 | finished without a PR | done |
+| 1-3-4 | not started | |
+```
+
+A task counts as done when all its PRs are merged. Projects started before this layout stay where they are.
+
 ## File Naming Convention
 
-All `.ai_logs` files should follow this hierarchical format:
+Files outside a project directory follow this hierarchical format:
 
 ```
 .ai_logs/YYYY/MM/YYYYMMDD_<topic>.md

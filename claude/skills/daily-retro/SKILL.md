@@ -11,7 +11,7 @@ Existing plans may use Japanese section titles (e.g. 「実績の記録」 for t
 
 ## 1. Gather the state (before asking the user)
 
-- PRs touched that day: `gh pr view <number> --json number,state,reviewDecision,headRefOid` (separate merged / awaiting review / awaiting manual testing)
+- Open PRs and plan progress: `ai-board`. PRs merged that day: `gh pr view <number> --json number,state,reviewDecision,headRefOid`
 - The day's entry in the index, and how the most recent rows of the plan's actuals log are written
 - Running worktrees and workers (waiting? OK to clean up?)
 - What was planned but not done (and why)
