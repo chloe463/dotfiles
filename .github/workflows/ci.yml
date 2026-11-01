@@ -101,3 +101,16 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Run test
         run: bun test
+  test-create-worktree:
+    # The script targets bash 3.2 (macOS /bin/bash), so run on macOS too.
+    name: Test create-worktree (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run test
+        run: ./claude/test_create_worktree.sh
