@@ -1,4 +1,3 @@
-tap "fohte/tap", trusted: true
 tap "uzimaru0000/tap", trusted: true
 tap "yusukebe/tap", trusted: true
 brew "actionlint"
@@ -29,8 +28,6 @@ brew "tree-sitter-cli"
 brew "uv"
 brew "watch"
 brew "yarn"
-# HEAD: Claude Code integration (`runok hook`, `defaults.action: pass`) is not in a release yet
-brew "fohte/tap/runok", args: ["HEAD"]
 brew "uzimaru0000/tap/tv"
 brew "yusukebe/tap/ax"
 cask "docker-desktop"
