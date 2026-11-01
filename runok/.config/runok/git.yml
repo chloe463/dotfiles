@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/fohte/runok/main/schema/runok.schema.json
 
-# git / gh rules. Everyday commits and pushes run without prompts; creating a
-# PR is asked, as the user's single approval point. Anything that rewrites
+# git / gh rules. Everyday commits, pushes and draft PRs run without prompts;
+# marking a PR ready is asked, as the user's approval point. Anything that rewrites
 # history, skips hooks, deletes remote refs or targets main/master is asked or
 # denied.
 #
@@ -92,6 +92,17 @@ rules:
     tests:
       - allow: 'git push'
       - allow: 'git push -u origin feature'
+  # Workers bring their branch up to date with these. `--upload-pack` runs a
+  # command, so it stays with the default flow.
+  - allow: 'git [-C *] fetch !--upload-pack *'
+    tests:
+      - allow: 'git fetch origin'
+      - allow: 'git -C /tmp fetch origin main'
+      - pass: 'git fetch --upload-pack=evil origin'
+  - allow: 'git [-C *] merge *'
+    tests:
+      - allow: 'git merge origin/main'
+      - allow: 'git merge --abort'
 
   # ── gh ──
   - deny: 'gh repo delete *'
@@ -111,13 +122,41 @@ rules:
     tests:
       - ask: 'gh api -X POST repos/o/r/issues'
       - allow: 'gh api repos/o/r/pulls'
-  # Creating the PR is the user's single approval point for the work.
+  # Field and input flags make `gh api` POST without an explicit method.
+  - ask: 'gh [-R *] api !graphql !-X|--method * -f|-F|--field|--raw-field|--input *'
+    tests:
+      - ask: 'gh api repos/o/r/pulls/1/merge -f merge_method=squash'
+      - ask: 'gh api repos/o/r/issues/1/comments -F body=@reply.md'
+      - ask: 'gh api repos/o/r/pulls/1/reviews --input review.json'
+      - allow: 'gh api -X GET repos/o/r/pulls -f state=open'
+  - ask: 'gh [-R *] api graphql *'
+    when: >-
+      args.exists(a, a.matches('^query=\\s*mutation'))
+    tests:
+      - ask: 'gh api graphql -f query="mutation { closeIssue }"'
+      - allow: 'gh api graphql -f query="query { viewer { login } }"'
+  # The payload file can't be inspected, so it could hide a mutation.
+  - ask: 'gh [-R *] api graphql --input *'
+    tests:
+      - ask: 'gh api graphql --input query.json'
+  # A draft isn't visible to reviewers yet, so the agent creates one without
+  # stopping and marking it ready is the user's approval point for the work.
   # Issue-closing keywords in the body are denied by
   # ~/.claude/scripts/block-issue-close-keywords.ts (it reads --body-file).
-  - ask: 'gh [-R *] pr create *'
+  - ask: 'gh [-R *] pr create !-d|--draft *'
     tests:
       - ask: 'gh pr create --title "feat: x" --body "y"'
       - ask: 'gh -R o/r pr create --fill'
+  - ask: 'gh [-R *] pr create --draft=false *'
+    tests:
+      - ask: 'gh pr create --draft=false --title x'
+  - allow: 'gh [-R *] pr create -d|--draft *'
+    tests:
+      - allow: 'gh pr create --draft --base main --title x --body-file b.md'
+      - allow: 'gh -R o/r pr create -d --fill'
+  - ask: 'gh [-R *] pr ready *'
+    tests:
+      - ask: 'gh pr ready 123'
   - allow: 'gh [-R *] pr checks|diff *'
     tests:
       - allow: 'gh pr checks 123'
