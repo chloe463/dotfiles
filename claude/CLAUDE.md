@@ -25,3 +25,7 @@
 - **YOU MUST: Run CI/CD checks before marking tasks complete**
 - **YOU MUST: Document breaking changes**
 - **YOU MUST: Use feature branches for all development**
+
+# graphify
+- **graphify** (`~/.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
+When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
