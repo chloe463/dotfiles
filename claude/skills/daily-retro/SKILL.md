@@ -41,3 +41,4 @@ Present all of the following in a single message:
 
 - Briefly list the files that were updated and what to do next (the first task of the next day)
 - If any worker or worktree is left waiting, add the reason to keep it (e.g. it will be used for review fixes)
+- Personal skills tracked in dotfiles are symlinks into that repository, so the skill edits from step 3 are uncommitted changes there. List those files so they get committed on a branch
