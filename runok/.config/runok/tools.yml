@@ -20,6 +20,15 @@ rules:
     tests:
       - ask: 'bun install'
       - ask: 'npm install lodash'
+  # The tests and type checks workers run after every change.
+  - allow: 'npm|yarn|pnpm|bun test *'
+    tests:
+      - allow: 'bun test'
+      - allow: 'pnpm test src/foo.test.ts'
+  - allow: 'npm|yarn|pnpm|bun run test|typecheck *'
+    tests:
+      - allow: 'npm run test'
+      - allow: 'bun run typecheck'
 
   # ── Databases / infra ──
   - deny: 'psql *'
@@ -74,10 +83,14 @@ rules:
   - allow: 'herdr wait output|agent-status *'
   - allow: 'herdr session list|attach *'
   - allow: 'herdr integration status *'
-  - allow: 'herdr agent list|get|read|rename|focus|wait|explain *'
+  # `send-keys` is left out on purpose: it could answer a worker's permission
+  # prompt, and only the user may do that.
+  - allow: 'herdr agent list|get|read|rename|focus|wait|explain|start|prompt *'
   - allow: 'herdr terminal title set|clear *'
     tests:
       - allow: 'herdr pane list'
       - allow: 'herdr pane read p1 --lines 50'
       - allow: 'herdr agent wait a1'
+      - allow: 'herdr agent prompt w1 "read the brief"'
+      - pass: 'herdr agent send-keys w1 1'
       - pass: 'herdr pane close p1'
