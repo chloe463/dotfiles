@@ -77,7 +77,10 @@
       "Bash(herdr terminal title clear)",
       "Bash(ax --help)",
       "Bash(ax agent-context)",
-      "Bash(ax https:*)"
+      "Bash(ax https:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)"
     ],
     "deny": [
       "Read(.env*)",
@@ -136,6 +139,14 @@
       "Bash(git push --force-with-lease origin master)",
       "Bash(git push -f origin main)",
       "Bash(git push -f origin master)",
+      "Bash(git push * main)",
+      "Bash(git push * main *)",
+      "Bash(git push *:main)",
+      "Bash(git push *:main *)",
+      "Bash(git push * master)",
+      "Bash(git push * master *)",
+      "Bash(git push *:master)",
+      "Bash(git push *:master *)",
       "Bash(docker system prune -af)",
       "Bash(docker rm -f:*)",
       "Bash(docker rmi -f:*)",
@@ -158,8 +169,21 @@
       "Edit(~/.ssh/*_ed25519)"
     ],
     "ask": [
-      "Bash(git push:*)",
-      "Bash(git commit:*)",
+      "Bash(git push *--force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * -f*)",
+      "Bash(git push * +*)",
+      "Bash(git push *--no-verify*)",
+      "Bash(git push *--delete*)",
+      "Bash(git push -d*)",
+      "Bash(git push * -d*)",
+      "Bash(git push * :*)",
+      "Bash(git push *--mirror*)",
+      "Bash(git push *--prune*)",
+      "Bash(git commit *--amend*)",
+      "Bash(git commit *--no-verify*)",
+      "Bash(git commit -n*)",
+      "Bash(git commit * -n*)",
       "Bash(git reset:*)",
       "Bash(git rebase:*)",
       "Bash(curl:*)",
@@ -168,7 +192,6 @@
       "Bash(nc:*)",
       "Bash(gh pr merge:*)",
       "Bash(gh pr close:*)",
-      "Bash(gh pr create:*)",
       "Bash(gh pr review:*)",
       "Bash(gh release create:*)",
       "Bash(gh workflow run:*)",
@@ -180,7 +203,6 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus",
   "disableClaudeAiConnectors": true,
   "hooks": {
     "UserPromptSubmit": [
@@ -190,6 +212,17 @@
           {
             "type": "command",
             "command": "bun ~/.claude/scripts/english-review-hook.ts"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun ~/.claude/scripts/block-push-to-main.ts"
           }
         ]
       }
