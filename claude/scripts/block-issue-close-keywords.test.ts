@@ -1,7 +1,7 @@
 import { expect, describe, it, beforeAll, afterAll } from "bun:test";
 import { execFileSync, spawnSync } from "node:child_process";
-import { mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir, userInfo } from "node:os";
 import { join } from "node:path";
 import {
   findClosingCommand,
@@ -121,6 +121,9 @@ describe("hook script", () => {
   const script = join(import.meta.dir, "block-issue-close-keywords.ts");
   let dir: string;
 
+  // The script logs under $HOME, which must not be the real one.
+  const env = () => ({ ...process.env, HOME: dir });
+
   beforeAll(() => {
     dir = realpathSync(mkdtempSync(join(tmpdir(), "block-issue-close-keywords-")));
     writeFileSync(join(dir, "msg.txt"), "feat: x\n\nFixes #12\n");
@@ -133,12 +136,19 @@ describe("hook script", () => {
     execFileSync("bun", [script], {
       input: JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Bash", tool_input: { command }, cwd: dir }),
       encoding: "utf8",
+      env: env(),
     });
 
   it("prints a deny decision with the reason", () => {
     const output = JSON.parse(run("git commit -F msg.txt")).hookSpecificOutput;
     expect(output.permissionDecision).toBe("deny");
     expect(output.permissionDecisionReason).toContain('"Fixes #12"');
+  });
+
+  it("logs under $HOME", () => {
+    run("git commit -F msg.txt");
+    const log = join(dir, ".claude", "logs", `${userInfo().username}-hook-block-issue-close-keywords.log`);
+    expect(readFileSync(log, "utf8")).toContain("[deny]");
   });
 
   it("prints nothing for a clean message", () => {
@@ -150,7 +160,7 @@ describe("hook script", () => {
     ["invalid JSON", "not json"],
     ["unexpected hook input", JSON.stringify({ hook_event_name: "PreToolUse", tool_name: "Bash" })],
   ])("exits non-zero with no decision for %s", (_, input) => {
-    const result = spawnSync("bun", [script], { input, encoding: "utf8" });
+    const result = spawnSync("bun", [script], { input, encoding: "utf8", env: env() });
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
   });
