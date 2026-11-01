@@ -5,14 +5,14 @@ description: Acting as the design session (manager), delegate implementation tas
 
 # Delegating work to workers
 
-The design session (this session) handles design, task briefs and diff review, and leaves implementation to a worker (Claude Code) running in a separate herdr worktree. The user handles design decisions, manual testing, and approving commits and PRs.
+The design session (this session) handles design, task briefs and diff review, and leaves implementation to a worker (Claude Code) running in a separate herdr worktree. The user handles design decisions, manual testing, and marking PRs ready.
 
 ## Prerequisites and rules
 
 - `test "${HERDR_ENV:-}" = 1` must pass. If it doesn't, stop and tell the user. For herdr command details, see the `herdr` skill
 - **If the project has a locking wrapper for heavy commands (tests, typecheck; e.g. `.ai_logs/YYYY/MM/tools/run-exclusive.sh`), make workers run those commands through it.** As long as this is followed, there is no upper limit on the number of worktrees running at the same time (the goal is only that heavy commands never run simultaneously; confirmed by the user on 2026-10-29). If the project has no such wrapper, limit the number of concurrent workers or ask the user
 - Let the user choose the worker's model before starting it (see 3)
-- The user presses the approval for `git commit`, `gh pr create` and `gh api`. **The design session never sends "Yes" on their behalf**. Declining a permission prompt (`2`) is fine
+- Commits, pushes to feature branches and draft PRs run without prompts. The user presses the approval for what still asks: `gh pr ready`, `gh api` writes, and anything that rewrites history. **The design session never sends "Yes" on their behalf**. Declining a permission prompt (`2`) is fine
 - Workers do not reply to PR comments. For replies to AI reviewers, the design session shows the draft to the user and posts it after approval. The user replies to human reviewers
 - Never delete files without the user's confirmation (this includes worktree cleanup: get the user's agreement first)
 
@@ -74,7 +74,7 @@ herdr agent wait <name> --until idle --until done --until blocked --timeout 3600
 ```
 
 - When it returns with `blocked`, look at the screen with `herdr agent read <name> --source visible`
-  - **Permission prompts for `git commit`, `gh pr create`, etc.**: tell the user "Press 1. Yes in workspace '<label>'" (**refer to it by the workspace label (the name given with `--label`) or the branch name. IDs like `w18` and agent/pane names do not appear on the user's screen**), check what the command contains (commit message, PR base and body) and add the key points. Then, in the background, run "wait until `working` → wait until it next stops"
+  - **Permission prompts for `gh api` writes, `git rebase`, etc.**: tell the user "Press 1. Yes in workspace '<label>'" (**refer to it by the workspace label (the name given with `--label`) or the branch name. IDs like `w18` and agent/pane names do not appear on the user's screen**), check what the command contains and add the key points. Then, in the background, run "wait until `working` → wait until it next stops"
   - **Prompts about a shell construct (zsh arrays, pipes, etc.) judged dangerous**: decline with `herdr agent send-keys <name> 2`, and tell the worker via prompt "run it again as a simple command that just lists the file paths"
 - When it returns with `idle` / `done`, read `herdr agent read <name> --source visible` and the brief's "Result" section (while `blocked`, you can't read `recent-unwrapped`)
   - **`done` doesn't always mean finished**: if `shell still running` is shown at the bottom of the screen or "Result" is still "not started", the worker is waiting for background tests. Wait again: first `--until working`, then `--until idle --until done --until blocked`
@@ -85,16 +85,17 @@ herdr agent wait <name> --until idle --until done --until blocked --timeout 3600
   - **Don't run anything that changes the index of the worker's worktree (`git add`, `git add -N`, `git reset`, `git stash`)**. It breaks renames etc. that the worker staged. List new untracked files with `git -C <worktree> status --short` and inspect them with Read
 - What to check: it matches the brief's "what is already decided", it doesn't violate the project's rules (e.g. `.claude/rules`, if present), the tests those rules require are present, spec changes are written in "Result", and there are no test failures other than known ones
 - If there are problems, tell the worker the concrete fix via prompt and go back to 4
-- If there are none, report a summary to the user (changes, what the worker verified, what to look at in manual testing) and tell the worker "commit, push, and create the PR with the create-pr skill" (don't include the links, specify the base, don't reply to PR comments)
+- If there are none, report a summary to the user (changes, what the worker verified, what to look at in manual testing) and tell the worker "commit, push, and create the PR as a draft with the create-pr skill, using `gh pr create --draft`" (don't include the links, specify the base, don't reply to PR comments)
 
 ## 6. Once the PR exists
 
 - Check **that the base is correct** with `gh pr list --head <branch> --json number,url,baseRefName` (for a stacked PR, it is the base PR's branch)
+- Check the PR body and commits yourself too: the guard that denies issue-closing keywords can't see piped text or URL references (`Fixes https://github.com/o/r/issues/1`)
+- **Marking it ready**: the PR stays a draft until the user approves the work, then run `gh pr ready <PR>` (it asks). The first time you delegate in a repository, check whether its previews, CI and AI reviewers run on drafts. If they don't, ask the user to mark PRs ready as soon as they exist, since manual testing and AI review wait on them
 - If the project has PR previews, before manual testing have the user check that the commit hash in the preview comment matches the PR's head
 - The design session reads the AI reviewers' comments and shows the user the response plan and draft replies. When a fix is needed, delegate it to the worker with the same flow as 5
-  - **The design session first writes the comment bodies to a file (e.g. `.ai_logs/.../review-comments/pr<n>.md`) with `gh api` and hands that to the worker**. If the worker reads them with `gh api`, the user gets a permission prompt every time
+  - **The design session first writes the comment bodies to a file (e.g. `.ai_logs/.../review-comments/pr<n>.md`) with `gh api` and hands that to the worker**, so the worker acts only on the comments the response plan accepted
   - Have the worker write the reply drafts (not post them), and the design session compiles them into a single file to show the user. Fill in commit hashes after the push (the new hashes if the branch was rebuilt)
-  - At every permission prompt, check that the PR body and commits contain no keywords that auto-close issues (`closes`, `fixes`, `resolves`, ...)
   - If the project uses CodeRabbit: its "outside diff" and "nitpick" items are in the review body, not inline (`body` of `gh api .../pulls/<n>/reviews`). Reply with a single PR comment (`issues/<n>/comments`)
   - **Post replies with one command per reply, joined with `&&`** (in zsh, word splitting such as `for p in "a b"; set -- $p` doesn't work and everything fails). Write the body to a file and use `-F body=@<file>`
   - When adding fixes to the brief, write an "Addressing AI review" section at the end of it and tell the worker to read it
@@ -108,7 +109,7 @@ herdr agent wait <name> --until idle --until done --until blocked --timeout 3600
 Handle them as GitHub stacked PRs with `gh stack` (a GitHub CLI extension; see the `gh-stack` skill for usage). **The design session performs `gh stack` operations; workers do not** (they rewrite branches across worktrees).
 
 1. Create the upper layer's worktree from the lower PR's branch (`--base origin/<lower branch>`)
-2. The worker creates the PR as usual with `gh pr create --base <lower branch>` (body per the create-pr skill; don't use `gh stack submit`, which generates the title and body automatically)
+2. The worker creates the PR as usual with `gh pr create --draft --base <lower branch>` (body per the create-pr skill; don't use `gh stack submit`, which generates the title and body automatically)
 3. The design session assembles the stack in the main checkout. Always pass arguments so that no interactive screen opens. Use `gh stack link`, which works through the API only: it checks out no branches and creates no local tracking (verified on 2026-10-27 by linking two PRs into a stack):
    ```sh
    gh stack link <lower PR> <upper PR>   # assemble the GitHub stack
