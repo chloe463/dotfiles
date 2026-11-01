@@ -101,3 +101,21 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Run test
         run: bun test
+  test-create-worktree:
+    # The script targets bash 3.2 (macOS /bin/bash), so run on macOS too.
+    name: Test create-worktree (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Show bash version
+        run: /bin/bash --version | head -1
+      - name: Run test
+        # The test runs the script under test with the bash that runs the test itself,
+        # so using /bin/bash here means bash 3.2.57 on macOS (the shebang's `env bash`
+        # would pick whichever bash comes first on PATH).
+        run: /bin/bash ./claude/test_create_worktree.sh
