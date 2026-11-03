@@ -53,11 +53,6 @@ export PSQL_EDITOR='vim +"set syntax=sql" '
 export EDITOR=/usr/bin/vim
 export BUN_INSTALL="$HOME/.bun"
 
-# For ffi
-export LIBFFI_ROOT=$(brew --prefix libffi)
-export LDFLAGS="-L$LIBFFI_ROOT/lib $LDFLAGS"
-export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$LIBFFI_ROOT/lib/pkgconfig"
-
 ####################################################################################################
 # PATH Configuration
 ####################################################################################################
@@ -89,7 +84,6 @@ path_prepend "$HOME/bin"
 path_prepend "$HOME/scripts"
 
 # Development tools
-path_prepend "$LIBFFI_ROOT/bin"
 path_prepend "/opt/homebrew/opt/openjdk/bin"
 path_prepend "$HOME/.console-ninja/.bin"
 
