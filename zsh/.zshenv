@@ -7,5 +7,3 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 # zsh config (XDG compliant). zsh reads this .zshenv from $HOME, then loads the
 # remaining runcoms (.zprofile/.zshrc) from $ZDOTDIR.
 export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
-
-# . "$HOME/.cargo/env"

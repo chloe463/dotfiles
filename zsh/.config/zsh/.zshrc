@@ -80,11 +80,9 @@ path_append() {
 
 # Build PATH in priority order (first = highest priority)
 # User binaries (highest priority)
-path_prepend "$HOME/bin"
 path_prepend "$HOME/scripts"
 
 # Development tools
-path_prepend "/opt/homebrew/opt/openjdk/bin"
 path_prepend "$HOME/.console-ninja/.bin"
 
 # Additional tools (lower priority, appended)
@@ -215,7 +213,3 @@ function search_branch() {
 # Bind ctrl + b to search_branch
 zle -N search_branch
 bindkey '^B' search_branch
-
-# Load Angular CLI autocompletion.
-# Temporarily disabled due to ESM/CommonJS compatibility issue
-# command -v ng > /dev/null 2>&1 && source <(ng completion script)
