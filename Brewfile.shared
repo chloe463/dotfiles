@@ -2,6 +2,7 @@ tap "uzimaru0000/tap", trusted: true
 tap "yusukebe/tap", trusted: true
 brew "actionlint"
 brew "bat"
+brew "btop"
 brew "difftastic"
 brew "direnv"
 brew "eza"
