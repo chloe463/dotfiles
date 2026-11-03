@@ -22,12 +22,7 @@ vim.keymap.set('n', '*', '*Nzz', { silent = true });
 vim.keymap.set('n', 'ss', ':split<CR><C-w>w')
 vim.keymap.set('n', 'vs', ':vsplit<CR><C-w>w')
 
--- Reopen
--- vim.keymap.set('n', 'E', '<cmd>bufdo e!<cr>')
-
--- The following keymaps are from kickstart configuration
--- Keymaps for better default experience
--- See `:help vim.keymap.set()`
+-- <Space> is the leader, so don't move the cursor with it
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
 -- Remap for dealing with word wrap

@@ -43,28 +43,12 @@ vim.o.timeoutlen = 300
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
 
--- NOTE: You should make sure your terminal supports this
+-- 24-bit colors (the terminal has to support them)
 vim.o.termguicolors = true
 
 -- Rounded borders for floating windows (LSP hover, signature help, diagnostics, ...)
 vim.o.winborder = 'rounded'
 
--- cf. https://github.com/alacritty/alacritty/issues/5450#issuecomment-929797364
-vim.api.nvim_create_autocmd("ExitPre", {
-  group = vim.api.nvim_create_augroup("Exit", { clear = true }),
-  command = "set guicursor=a:ver90",
-  desc = "Set cursor back to beam when leaving Neovim."
-})
-
--- cf. https://neovim.discourse.group/t/a-lua-based-auto-refresh-buffers-when-they-change-on-disk-function/2482/5
 vim.o.autoread = true
-vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGained" }, {
-  command = "if mode() != 'c' | checktime | endif",
-  pattern = { "*" },
-})
-vim.api.nvim_create_autocmd("FileChangedShellPost", {
-  pattern = { "*" },
-  command = 'echo "File changed on disk. Buffer reloaded."',
-})
 
 vim.o.cursorline = true
