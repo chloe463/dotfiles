@@ -21,11 +21,6 @@ done
 # Compute the canonicalized name by finding the physical path 
 # for the directory we're in and appending the target file.
 BASE_DIR=`pwd -P`
-# PHYS_DIR=`pwd -P`
-# RESULT=$PHYS_DIR/$TARGET_FILE
-# echo $RESULT
-# echo $(dirname $RESULT)
-# BASE_DIR=$(dirname $RESULT)
 
 function install_sheldon_plugins()
 {
@@ -118,7 +113,7 @@ function install_homebrew()
 
   echo "brew bundle --file=Brewfile.shared"
   if brew bundle --file=Brewfile.shared; then
-    echo "Done. Run 'brew bundle --file=Brewfile.private' or 'brew bundle --file=Brewfile.work' to install more dependencies."
+    echo "Done."
   else
     echo "ERROR: 'brew bundle --file=Brewfile.shared' failed." >&2
     return 1
@@ -156,7 +151,6 @@ function install_global_npm_packages()
         git-delete-squashed \
         git-split-diffs \
         npkill \
-        # prettierd \
         yarn-deduplicate
   else
     echo 'Install yarn first!'

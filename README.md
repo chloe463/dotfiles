@@ -29,12 +29,6 @@ The bootstrap script will:
 git clone git@github.com:chloe463/dotfiles.git
 cd dotfiles
 
-# For private machine
-git checkout private
-
-# For work machine
-git checkout work
-
 # Run full setup
 ./up
 ```
@@ -69,7 +63,7 @@ STOW_VERBOSE=1 ./up dot
 
 ### Managing Dotfiles
 
-#### Adding Shared Configuration (All Machines)
+#### Adding Configuration
 
 ```bash
 # Create feature branch
@@ -84,47 +78,6 @@ git add .
 git commit -m "feat(zsh): add new alias"
 git push -u origin feature/add-config
 gh pr create
-
-# After PR merge, sync to machine branches
-sync-branches
-```
-
-#### Adding Machine-Specific Configuration
-
-```bash
-# Private machine only
-git checkout private
-echo 'brew "personal-tool"' >> Brewfile.private
-git commit -am "feat(brew): add personal tools"
-git push
-
-# Work machine only
-git checkout work
-echo 'brew "company-vpn"' >> Brewfile.work
-git commit -am "feat(brew): add company tools"
-git push
-```
-
-See [docs/MULTI_MACHINE_WORKFLOW.md](docs/MULTI_MACHINE_WORKFLOW.md) for detailed workflow guide.
-
-## Multi-Machine Support
-
-This repository uses a Git branching strategy to support multiple machines:
-
-- **main** - Shared configurations (requires PR)
-- **private** - Private machine specific configs
-- **work** - Work machine specific configs
-
-### Machine-Specific Files
-
-Use `Brewfile.private` and `Brewfile.work` to manage machine-specific packages:
-
-```bash
-# On private machine
-brew bundle --file=Brewfile.private
-
-# On work machine
-brew bundle --file=Brewfile.work
 ```
 
 ## Prerequisites
@@ -158,25 +111,10 @@ git-sync        # Runs ~/.local/bin/git-sync
 git sync        # Git alias (same script)
 ```
 
-### Branch Sync Script
-Sync main branch changes to machine branches:
-```bash
-sync-branches   # Runs ~/.local/bin/sync-branches
-```
-
 ### Brewfile Management
 ```bash
 # Install all shared packages
 brew bundle --file=Brewfile.shared
-
-# Private machine
-brew bundle --file=Brewfile.private
-
-# Work machine
-brew bundle --file=Brewfile.work
-
-# Update lock file
-brew bundle dump --force
 ```
 
 VS Code extensions are listed in `vscode-extensions.txt` and installed one at
