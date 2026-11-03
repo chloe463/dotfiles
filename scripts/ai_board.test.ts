@@ -3,9 +3,12 @@ import {
   classify,
   countUncheckedTestPlanItems,
   findPlanFile,
+  parseArgs,
   parsePlan,
   renderPlan,
   renderPullRequests,
+  searchQuery,
+  sinceDate,
   type PullRequest,
 } from './ai_board';
 
@@ -187,5 +190,54 @@ describe('renderPullRequests', () => {
 
   it('says so when there are no PRs', () => {
     expect(renderPullRequests([], 'main', [], 80)).toEqual(['オープンな PR はありません']);
+  });
+});
+
+describe('sinceDate', () => {
+  it('goes back the given number of days', () => {
+    expect(sinceDate(new Date('2026-11-03T12:00:00Z'), 7)).toBe('2026-10-27');
+  });
+
+  it('crosses a year boundary', () => {
+    expect(sinceDate(new Date('2026-01-03T00:00:00Z'), 7)).toBe('2025-12-27');
+  });
+});
+
+describe('searchQuery', () => {
+  it('asks only for my open PRs created since the date', () => {
+    expect(searchQuery('o', 'r', '2026-10-27')).toBe(
+      'repo:o/r is:pr is:open author:@me created:>=2026-10-27 sort:updated-desc',
+    );
+  });
+});
+
+describe('parseArgs', () => {
+  it('defaults to a week without watching', () => {
+    expect(parseArgs([])).toEqual({ days: 7 });
+  });
+
+  it('reads the number of days', () => {
+    expect(parseArgs(['--days', '14'])).toEqual({ days: 14 });
+    expect(parseArgs(['-d', '3'])).toEqual({ days: 3 });
+  });
+
+  it('watches with the default interval when none is given', () => {
+    expect(parseArgs(['--watch'])).toEqual({ days: 7, watch: 60 });
+  });
+
+  it('does not take the next flag as the interval', () => {
+    expect(parseArgs(['-w', '--days', '3'])).toEqual({ days: 3, watch: 60 });
+    expect(parseArgs(['--days', '3', '-w', '30'])).toEqual({ days: 3, watch: 30 });
+  });
+
+  it.each([
+    [['--days']],
+    [['--days', '0']],
+    [['--days', 'x']],
+    [['--watch', 'x']],
+    [['--watch', '0']],
+    [['--bogus']],
+  ])('rejects %p', (args) => {
+    expect(() => parseArgs(args)).toThrow();
   });
 });

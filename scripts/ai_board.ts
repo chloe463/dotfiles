@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-// Shows who has to act next on my open PRs, and how far the current plan has
+// Shows who has to act next on my recent open PRs, and how far the current plan has
 // progressed. Status is derived from GitHub on every run instead of being
 // written down anywhere, so it can't go stale. Only the mapping from tasks to
 // PRs is stored, in the plan's task table.
@@ -9,6 +9,7 @@ import { existsSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 
 const DEFAULT_INTERVAL_SECONDS = 60;
+const DEFAULT_DAYS = 7;
 const PROJECT_DIR = '.ai_logs/current';
 
 export type Ball = 'human' | 'ai' | 'waiting';
@@ -165,65 +166,84 @@ function graphql<T>(query: string): T {
   return JSON.parse(gh(['api', 'graphql', '-f', `query=${query}`])).data as T;
 }
 
+const PULL_REQUEST_FIELDS = `
+  number url title body headRefName baseRefName isDraft reviewDecision mergeable state
+  reviewRequests { totalCount }
+  reviewThreads(first: 100) { nodes { isResolved } }
+  commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
+`;
+
 interface PullRequestNode extends Omit<PullRequest, 'ciState' | 'unresolvedThreads' | 'pendingReviewRequests'> {
-  author: { login: string } | null;
+  state: 'OPEN' | 'CLOSED' | 'MERGED';
   reviewRequests: { totalCount: number };
   reviewThreads: { nodes: { isResolved: boolean }[] };
   commits: { nodes: { commit: { statusCheckRollup: { state: string } | null } }[] };
 }
 
-interface BoardData {
-  viewer: { login: string };
-  repository: {
-    defaultBranchRef: { name: string };
-    pullRequests: { nodes: PullRequestNode[] };
+function toPullRequest(node: PullRequestNode): PullRequest {
+  return {
+    number: node.number,
+    url: node.url,
+    title: node.title,
+    body: node.body,
+    headRefName: node.headRefName,
+    baseRefName: node.baseRefName,
+    isDraft: node.isDraft,
+    reviewDecision: node.reviewDecision,
+    mergeable: node.mergeable,
+    ciState: node.commits.nodes[0]?.commit.statusCheckRollup?.state ?? null,
+    unresolvedThreads: node.reviewThreads.nodes.filter((thread) => !thread.isResolved).length,
+    pendingReviewRequests: node.reviewRequests.totalCount,
   };
 }
 
-function fetchPullRequests(owner: string, name: string): { defaultBranch: string; prs: PullRequest[] } {
-  const data = graphql<BoardData>(`query {
-    viewer { login }
-    repository(owner: "${owner}", name: "${name}") {
-      defaultBranchRef { name }
-      pullRequests(states: OPEN, first: 100, orderBy: { field: UPDATED_AT, direction: DESC }) {
-        nodes {
-          number url title body headRefName baseRefName isDraft reviewDecision mergeable
-          author { login }
-          reviewRequests { totalCount }
-          reviewThreads(first: 100) { nodes { isResolved } }
-          commits(last: 1) { nodes { commit { statusCheckRollup { state } } } }
-        }
-      }
+// The date `days` days before `now`, as GitHub search's `created:>=` takes it.
+export function sinceDate(now: Date, days: number): string {
+  return new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+export function searchQuery(owner: string, name: string, since: string): string {
+  return `repo:${owner}/${name} is:pr is:open author:@me created:>=${since} sort:updated-desc`;
+}
+
+// Searching rather than listing the repository's PRs lets GitHub filter by
+// author and age, so other people's PRs can't push mine out of the first 100.
+function fetchPullRequests(owner: string, name: string, since: string): { defaultBranch: string; prs: PullRequest[] } {
+  const data = graphql<{
+    repository: { defaultBranchRef: { name: string } };
+    search: { nodes: PullRequestNode[] };
+  }>(`query {
+    repository(owner: "${owner}", name: "${name}") { defaultBranchRef { name } }
+    search(type: ISSUE, first: 100, query: "${searchQuery(owner, name, since)}") {
+      nodes { ... on PullRequest { ${PULL_REQUEST_FIELDS} } }
     }
   }`);
   return {
     defaultBranch: data.repository.defaultBranchRef.name,
-    prs: data.repository.pullRequests.nodes
-      .filter((node) => node.author?.login === data.viewer.login)
-      .map((node) => ({
-        number: node.number,
-        url: node.url,
-        title: node.title,
-        body: node.body,
-        headRefName: node.headRefName,
-        baseRefName: node.baseRefName,
-        isDraft: node.isDraft,
-        reviewDecision: node.reviewDecision,
-        mergeable: node.mergeable,
-        ciState: node.commits.nodes[0]?.commit.statusCheckRollup?.state ?? null,
-        unresolvedThreads: node.reviewThreads.nodes.filter((thread) => !thread.isResolved).length,
-        pendingReviewRequests: node.reviewRequests.totalCount,
-      })),
+    prs: data.search.nodes.map(toPullRequest),
   };
 }
 
-function fetchMerged(owner: string, name: string, numbers: number[]): Set<number> {
-  if (numbers.length === 0) return new Set();
-  const fields = numbers.map((number) => `pr${number}: pullRequest(number: ${number}) { number merged }`).join(' ');
-  const data = graphql<{ repository: Record<string, { number: number; merged: boolean }> }>(
+// PRs the plan names but the search didn't return: merged ones count towards
+// progress, and open ones are older than the window but still part of the
+// current work, so they go on the board too.
+function fetchPlanPullRequests(
+  owner: string,
+  name: string,
+  numbers: number[],
+): { merged: Set<number>; open: PullRequest[] } {
+  if (numbers.length === 0) return { merged: new Set(), open: [] };
+  const fields = numbers
+    .map((number) => `pr${number}: pullRequest(number: ${number}) { ${PULL_REQUEST_FIELDS} }`)
+    .join(' ');
+  const data = graphql<{ repository: Record<string, PullRequestNode | null> }>(
     `query { repository(owner: "${owner}", name: "${name}") { ${fields} } }`,
   );
-  return new Set(Object.values(data.repository).filter((pr) => pr.merged).map((pr) => pr.number));
+  const nodes = Object.values(data.repository).filter((node): node is PullRequestNode => node !== null);
+  return {
+    merged: new Set(nodes.filter((node) => node.state === 'MERGED').map((node) => node.number)),
+    open: nodes.filter((node) => node.state === 'OPEN').map(toPullRequest),
+  };
 }
 
 // `.ai_logs` lives in the main checkout, so resolve it from a worktree too.
@@ -233,19 +253,20 @@ function mainCheckout(): string {
   return dirname(resolve(result.stdout.toString().trim()));
 }
 
-function render(width: number): string {
+function render(width: number, days: number): string {
   const { owner, name } = JSON.parse(gh(['repo', 'view', '--json', 'owner,name'])) as {
     owner: { login: string };
     name: string;
   };
-  const { defaultBranch, prs } = fetchPullRequests(owner.login, name);
+  const { defaultBranch, prs: recent } = fetchPullRequests(owner.login, name, sinceDate(new Date(), days));
 
   const projectDir = join(mainCheckout(), PROJECT_DIR);
   const planFile = existsSync(projectDir) ? findPlanFile(readdirSync(projectDir)) : undefined;
   const tasks = planFile ? parsePlan(readFileSync(join(projectDir, planFile), 'utf8')) : [];
-  const open = new Set(prs.map((pr) => pr.number));
-  const others = [...new Set(tasks.flatMap((task) => task.prNumbers))].filter((number) => !open.has(number));
-  const merged = fetchMerged(owner.login, name, others);
+  const found = new Set(recent.map((pr) => pr.number));
+  const others = [...new Set(tasks.flatMap((task) => task.prNumbers))].filter((number) => !found.has(number));
+  const { merged, open } = fetchPlanPullRequests(owner.login, name, others);
+  const prs = [...recent, ...open];
 
   const lines = renderPullRequests(prs, defaultBranch, tasks, width);
   if (planFile) {
@@ -254,13 +275,43 @@ function render(width: number): string {
   return lines.join('\n');
 }
 
+export interface Options {
+  days: number;
+  watch?: number;
+}
+
+function positive(value: string | undefined, what: string): number {
+  const number = Number(value);
+  if (value === undefined || !Number.isFinite(number) || number <= 0) throw new Error(`invalid ${what}: ${value}`);
+  return number;
+}
+
+export function parseArgs(args: string[]): Options {
+  const options: Options = { days: DEFAULT_DAYS };
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--watch' || arg === '-w') {
+      // The interval is optional, so only take the next argument if it isn't a flag.
+      const next = args[i + 1];
+      options.watch = next !== undefined && !next.startsWith('-') ? positive(args[++i], 'interval') : DEFAULT_INTERVAL_SECONDS;
+    } else if (arg === '--days' || arg === '-d') {
+      options.days = positive(args[++i], 'days');
+    } else {
+      throw new Error(`unknown argument: ${arg}`);
+    }
+  }
+  return options;
+}
+
 function usage(): never {
   console.log(`ai-board - Show who has to act next on your open PRs and the current plan's progress.
 Usage:
-    ai-board [--watch [seconds]]
+    ai-board [--days days] [--watch [seconds]]
 Options:
+    --days, -d      show PRs created in the last ${DEFAULT_DAYS} days, or the given number of days
     --watch, -w     redraw every ${DEFAULT_INTERVAL_SECONDS} seconds, or the given number of seconds
     --help, -h      print this
+Open PRs the plan names are shown however old they are.
 The plan is read from plan.md or YYYYMMDD_plan.md in ${PROJECT_DIR} in the main checkout.`);
   process.exit(0);
 }
@@ -268,11 +319,17 @@ The plan is read from plan.md or YYYYMMDD_plan.md in ${PROJECT_DIR} in the main 
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes('--help') || args.includes('-h')) usage();
-  const watchIndex = args.findIndex((arg) => arg === '--watch' || arg === '-w');
+  let options: Options;
+  try {
+    options = parseArgs(args);
+  } catch (error) {
+    console.error(`ai-board: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
+  }
 
-  if (watchIndex === -1) {
+  if (options.watch === undefined) {
     try {
-      console.log(render(process.stdout.columns ?? 120));
+      console.log(render(process.stdout.columns ?? 120, options.days));
     } catch (error) {
       console.error(`ai-board: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
@@ -280,24 +337,19 @@ async function main() {
     return;
   }
 
-  const interval = Number(args[watchIndex + 1] ?? DEFAULT_INTERVAL_SECONDS);
-  if (!Number.isFinite(interval) || interval <= 0) {
-    console.error(`ai-board: invalid interval: ${args[watchIndex + 1]}`);
-    process.exit(1);
-  }
   // Keep the last good board when a fetch fails, so a network blip in a
   // long-lived pane doesn't hide everything.
   let board = '';
   while (true) {
     let error = '';
     try {
-      board = render(process.stdout.columns ?? 120);
+      board = render(process.stdout.columns ?? 120, options.days);
     } catch (caught) {
       error = `\n\n更新失敗: ${caught instanceof Error ? caught.message : String(caught)}`;
     }
     const time = new Date().toLocaleTimeString('ja-JP', { hour12: false });
     process.stdout.write(`\x1b[2J\x1b[H${board}${error}\n\n${time} 更新`);
-    await Bun.sleep(interval * 1000);
+    await Bun.sleep(options.watch * 1000);
   }
 }
 
