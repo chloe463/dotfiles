@@ -252,6 +252,17 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     expect(state).toEqual({ winborder: 'rounded', lspsaga: false, maps: { '<C-J>': 'callback', ' ld': 'callback' } });
   });
 
+  it('uses the Lua port of the nord colorscheme', () => {
+    const state = inspect<{ colors: string; lua: boolean; lualine: boolean }>(`
+      return {
+        colors = vim.g.colors_name,
+        lua = package.loaded['nord'] ~= nil,
+        lualine = pcall(require, 'lualine.themes.nord'),
+      }
+    `);
+    expect(state).toEqual({ colors: 'nord', lua: true, lualine: true });
+  });
+
   describe('LSP', () => {
     type Attached = {
       clients: string[];

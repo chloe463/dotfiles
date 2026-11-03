@@ -1,13 +1,12 @@
 -- Nord
--- https://www.nordtheme.com/docs/ports/vim
+-- https://github.com/gbprod/nord.nvim
 
 return {
-  'nordtheme/vim',
+  'gbprod/nord.nvim',
   lazy = false,
   priority = 1000,
-  opts = {},
-  config = function ()
+  config = function()
+    require('nord').setup({})
     vim.cmd.colorscheme 'nord'
   end,
 }
-
