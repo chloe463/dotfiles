@@ -82,4 +82,59 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
       expect({ ...m, mapped: m.rhs !== '' }).toEqual({ ...m, mapped: false });
     }
   });
+
+  describe('LSP', () => {
+    type Attached = {
+      clients: string[];
+      maps: Record<string, boolean>;
+      format: boolean;
+      missingFields: boolean;
+      snippetSupport: boolean;
+    };
+    let attached: Attached;
+
+    beforeAll(() => {
+      const file = join(root, 'attach.lua');
+      writeFileSync(file, 'local x = 1\n');
+      attached = inspect<Attached>(`
+        vim.cmd.edit(${JSON.stringify(file)})
+        vim.wait(20000, function() return #vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' }) > 0 end)
+        local maps = {}
+        for _, lhs in ipairs({ 'gd', 'gr', 'gI', ' ca', ' D', ' ds', ' ws', 'K', ' h', '<C-K>' }) do
+          maps[lhs] = vim.fn.maparg(lhs, 'n', false, true).buffer == 1
+        end
+        local client = vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' })[1]
+        local disabled = vim.tbl_get(client and client.config.settings or {}, 'Lua', 'diagnostics', 'disable') or {}
+        return {
+          clients = vim.tbl_map(function(c) return c.name end, vim.lsp.get_clients({ bufnr = 0 })),
+          maps = maps,
+          format = vim.api.nvim_buf_get_commands(0, {}).Format ~= nil,
+          missingFields = vim.tbl_contains(disabled, 'missing-fields'),
+          snippetSupport = vim.tbl_get(client and client.config.capabilities or {},
+            'textDocument', 'completion', 'completionItem', 'snippetSupport') == true,
+        }
+      `);
+    });
+
+    it('attaches lua_ls to Lua files', () => {
+      expect(attached.clients).toContain('lua_ls');
+    });
+
+    it('sets the buffer-local LSP keymaps and :Format on attach', () => {
+      expect(attached.maps).toEqual(Object.fromEntries(Object.keys(attached.maps).map((k) => [k, true])));
+      expect(attached.format).toBe(true);
+    });
+
+    it('passes the configured settings and the completion capabilities to the server', () => {
+      expect(attached.missingFields).toBe(true);
+      expect(attached.snippetSupport).toBe(true);
+    });
+
+    it('enables only one Ruby language server', () => {
+      const enabled = inspect<Record<string, boolean>>(`
+        return { ruby_lsp = vim.lsp.is_enabled('ruby_lsp'), solargraph = vim.lsp.is_enabled('solargraph') }
+      `);
+      expect(enabled).toEqual({ ruby_lsp: true, solargraph: false });
+    });
+  });
 });

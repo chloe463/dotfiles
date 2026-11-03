@@ -202,13 +202,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 
 -- LSP settings.
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
-  -- NOTE: Remember that lua is a real programming language, and as such it is possible
-  -- to define small helper and utility functions so you don't have to repeat yourself
-  -- many times.
-  --
-  -- In this case, we create a function that lets us more easily define mappings specific
-  -- for LSP related items. It sets the mode, buffer and description for us each time.
+local on_attach = function(bufnr)
   local nmap = function(keys, func, desc)
     if desc then
       desc = 'LSP: ' .. desc
@@ -246,60 +240,54 @@ local on_attach = function(_, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 end
 
--- Enable the following language servers
---  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
---
---  Add any additional override configuration in the following tables. They will be passed to
---  the `settings` field of the server config. You must look up that documentation yourself.
+vim.api.nvim_create_autocmd('LspAttach', {
+  group = vim.api.nvim_create_augroup('user_lsp_attach', { clear = true }),
+  callback = function(args)
+    on_attach(args.buf)
+  end,
+})
+
+-- Language servers to install with mason and enable. Each value is merged into the
+-- server's default config from nvim-lspconfig (see `:help vim.lsp.config()`).
 local servers = {
   cssls = {},
   graphql = {},
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
-  ts_ls= {},
+  ts_ls = {},
   eslint = {},
   jsonls = {},
-
   lua_ls = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-      -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-      diagnostics = { disable = { 'missing-fields' } },
+    settings = {
+      Lua = {
+        workspace = { checkThirdParty = false },
+        telemetry = { enable = false },
+        -- Ignore lua_ls's noisy `missing-fields` warnings
+        diagnostics = { disable = { 'missing-fields' } },
+      },
     },
   },
   ruby_lsp = {},
-  solargraph = {},
 }
 
 -- Setup neovim lua configuration
 require('neodev').setup()
 
--- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+-- nvim-cmp supports additional completion capabilities, so broadcast that to every server
+vim.lsp.config('*', {
+  capabilities = require('cmp_nvim_lsp').default_capabilities(),
+})
+for name, config in pairs(servers) do
+  vim.lsp.config(name, config)
+end
 
 -- Setup mason so it can manage external tooling
 require('mason').setup()
 
--- Ensure the servers above are installed
-local mason_lspconfig = require 'mason-lspconfig'
-
-mason_lspconfig.setup {
+-- Install the servers above and enable only them, so that servers installed in mason
+-- for other reasons (e.g. solargraph) are not started.
+require('mason-lspconfig').setup {
   ensure_installed = vim.tbl_keys(servers),
+  automatic_enable = vim.tbl_keys(servers),
 }
-
--- mason_lspconfig.setup_handlers {
---   function(server_name)
---     require('lspconfig')[server_name].setup {
---       capabilities = capabilities,
---       on_attach = on_attach,
---       settings = servers[server_name],
---     }
---   end,
--- }
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
