@@ -110,6 +110,23 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     expect(errors).toEqual({ ' t': [], ' wd': [], ' dd': [], gR: [] });
   });
 
+  it.skipIf(spawnSync('prettierd', ['--version'], { stdio: 'ignore' }).status !== 0)(
+    'formats TypeScript with prettierd on <leader>pf',
+    () => {
+      const file = join(root, 'format.ts');
+      writeFileSync(file, 'const  a={b:1}\n');
+      const lines = inspect<string[]>(`
+        vim.cmd.edit(${JSON.stringify(file)})
+        local before = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+        -- Type the keys: lazy.nvim's keys handler loads the plugin and replays them
+        vim.api.nvim_feedkeys(' pf', 'mx', false)
+        vim.wait(10000, function() return not vim.deep_equal(vim.api.nvim_buf_get_lines(0, 0, -1, false), before) end)
+        return vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      `);
+      expect(lines).toEqual(['const a = { b: 1 };']);
+    },
+  );
+
   describe('LSP', () => {
     type Attached = {
       clients: string[];
