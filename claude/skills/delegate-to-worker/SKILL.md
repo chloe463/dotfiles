@@ -26,7 +26,7 @@ The design session (this session) handles design, task briefs and diff review, a
   - Requester, date, background material, start conditions (e.g. a base PR), other tasks running in parallel
   - Goal, what is already decided (design conclusions), where to work (branch name and what to branch from)
   - Tests (TDD, following the project's test rules), verification (how to enumerate which tests to run)
-  - PR (base, key points for Why / What, "what this PR does not cover", manual test steps)
+  - PR (base, key points for Why / What, "what this PR does not cover", manual test steps). Remind the worker that commit messages and PR text must not mention `.ai_logs` paths (see "Visibility Boundaries" in the `ai-logs-workflow` skill)
   - A "## Result" section at the end (not started)
 - Manual test steps must include **the environment to verify** (if the project has PR previews: the preview, and **how to confirm the preview is running the target commit**) and, when URLs or navigation are involved, **how to stop or undo a navigation** (e.g. cancel a leave-confirmation, browser back)
 - Mark "(needs confirmation)" only on assumptions that haven't been verified against the code and behavior (i.e. that contain guesses)

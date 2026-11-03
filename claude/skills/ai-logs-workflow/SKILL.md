@@ -191,9 +191,11 @@ Files outside a project directory follow this hierarchical format:
 - Source code comments
 - Commit messages
 - Issue comments (GitHub/GitLab/etc.)
-- Pull request titles, descriptions, and review comments
+- Pull request titles, descriptions, review comments, and replies to review comments
 
-A reference like `// see .ai_logs/2026/02/20260208_api_refactoring.md` is meaningless to anyone else — the file doesn't exist outside this machine. If context, rationale, or a decision recorded in an `.ai_logs` document needs to reach other people, copy the relevant substance directly into the comment, commit message, or PR description as prose. Point at the reasoning, not at the file.
+A reference like `// see .ai_logs/2026/02/20260208_api_refactoring.md` is meaningless to anyone else — the file doesn't exist outside this machine. If context, rationale, or a decision recorded in an `.ai_logs` document needs to reach other people, copy the relevant substance directly into the comment, commit message, or PR description as prose.
+
+This applies no matter who writes the text: a worker implementing a task brief, or a reply drafted under `reviews/` and posted later. Text that stays on this machine is fine — a task brief may link the plan or a common rules file, and the plan's task table may list PR numbers.
 
 ## Best Practices
 
