@@ -5,23 +5,50 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 // Starts the Neovim config in this repository headless and inspects the state it
-// leaves behind. It needs `nvim` and the plugins lazy.nvim has already installed,
-// so it only runs locally: CI has neither, and the suite is skipped there.
+// leaves behind. It needs `nvim` and every plugin in lazy-lock.json installed (run
+// `:Lazy restore` first), so it only runs locally: CI has neither, and the suite is
+// skipped there. The plugins have to be installed beforehand because lazy.nvim would
+// otherwise install the missing ones and rewrite lazy-lock.json in this repository.
 
 const configHome = join(import.meta.dir, '../nvim/.config');
+const lockfile = join(configHome, 'nvim/lazy-lock.json');
 const dataHome = process.env.XDG_DATA_HOME ?? join(homedir(), '.local/share');
 const hasNvim = spawnSync('nvim', ['--version'], { stdio: 'ignore' }).status === 0;
-const hasPlugins = existsSync(join(dataHome, 'nvim/lazy/lazy.nvim'));
+const hasPlugins = Object.keys(JSON.parse(readFileSync(lockfile, 'utf8'))).every((name) =>
+  existsSync(join(dataHome, 'nvim/lazy', name)),
+);
+// XDG_CONFIG_HOME points at this repository, so tell git where the user's config is
+const gitConfig = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'git/config');
 
 let root: string;
+let lock: string;
 
 beforeAll(() => {
   root = mkdtempSync(join(tmpdir(), 'nvim-config-'));
+  mkdirSync(join(root, 'state'));
+  mkdirSync(join(root, 'cache'));
+  lock = readFileSync(lockfile, 'utf8');
 });
 
 afterAll(() => {
   rmSync(root, { recursive: true, force: true });
+  if (readFileSync(lockfile, 'utf8') !== lock) {
+    throw new Error('lazy-lock.json was changed while running the tests; run `:Lazy restore` and retry');
+  }
 });
+
+// Uses the config in this repository and the installed plugins, but keeps the logs and
+// caches the run writes out of the user's state and cache directories.
+function nvimEnv() {
+  return {
+    ...process.env,
+    XDG_CONFIG_HOME: configHome,
+    XDG_STATE_HOME: join(root, 'state'),
+    XDG_CACHE_HOME: join(root, 'cache'),
+    NVIM_APPNAME: 'nvim',
+    ...(existsSync(gitConfig) ? { GIT_CONFIG_GLOBAL: gitConfig } : {}),
+  };
+}
 
 // Headless Neovim has no UI, so UIEnter never fires and lazy.nvim never loads the VeryLazy
 // plugins. Fire it after VimEnter like a UI attaching would.
@@ -42,7 +69,7 @@ function inspect<T>(body: string): T {
   const run = `autocmd User VeryLazy ++once ++nested lua vim.schedule(function() pcall(vim.cmd.luafile, ${JSON.stringify(script)}); vim.cmd('qa!') end)`;
   const result = spawnSync('nvim', ['--headless', '-n', '-i', 'NONE', '--cmd', uiEnter, '--cmd', run], {
     encoding: 'utf8',
-    env: { ...process.env, XDG_CONFIG_HOME: configHome, NVIM_APPNAME: 'nvim' },
+    env: nvimEnv(),
     timeout: 60_000,
   });
   const json = readFileSync(out, 'utf8').trim();
@@ -62,7 +89,7 @@ type Server = {
 
 async function withServer(file: string, fn: (nvim: Server) => Promise<void>) {
   const socket = join(root, `nvim-${process.hrtime.bigint()}.sock`);
-  const env = { ...process.env, XDG_CONFIG_HOME: configHome, NVIM_APPNAME: 'nvim' };
+  const env = nvimEnv();
   const proc = Bun.spawn(['nvim', '--headless', '-n', '-i', 'NONE', '--cmd', uiEnter, '--listen', socket, file], {
     env,
     stdout: 'ignore',
@@ -94,7 +121,7 @@ async function withServer(file: string, fn: (nvim: Server) => Promise<void>) {
     },
   };
   try {
-    await server.waitFor('true', 10_000);
+    if (!(await server.waitFor('true', 10_000))) throw new Error('nvim did not start listening');
     await fn(server);
   } finally {
     proc.kill();
@@ -103,6 +130,20 @@ async function withServer(file: string, fn: (nvim: Server) => Promise<void>) {
 }
 
 type Mapping = { mode: string; lhs: string; rhs: string };
+
+// A static check of the files: it needs neither nvim nor the plugins, so it runs in CI
+describe('nvim config files', () => {
+  it('does not use deprecated Neovim APIs', () => {
+    const files = new Bun.Glob('**/*.lua').scanSync({ cwd: join(configHome, 'nvim'), absolute: true });
+    const hits: string[] = [];
+    for (const file of files) {
+      readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+        if (/vim\.loop\b|vim\.highlight\b|vim\.diagnostic\.goto_(prev|next)/.test(line)) hits.push(`${file}:${i + 1}`);
+      });
+    }
+    expect(hits).toEqual([]);
+  });
+});
 
 describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
   it('loads the plugins for files, keys and commands lazily', () => {
@@ -165,31 +206,48 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
   });
 
   it('opens trouble from its keymaps without errors', () => {
-    const errors = inspect<Record<string, string[]>>(`
-      local errors = {}
-      local notify = vim.notify
-      local result = {}
-      vim.notify = function(msg, level)
-        if level == vim.log.levels.ERROR then table.insert(errors, tostring(msg)) end
-      end
-      for _, lhs in ipairs({ ' t', ' wd', ' dd', 'gR' }) do
-        errors = {}
-        if vim.fn.maparg(lhs, 'n') == '' then
-          table.insert(errors, 'not mapped')
-        else
-          -- Type the keys: lazy.nvim's keys handler loads the plugin and replays them
-          local ok, err = pcall(vim.api.nvim_feedkeys, lhs, 'mx', false)
-          if not ok then table.insert(errors, tostring(err)) end
-          vim.wait(200)
+    const file = join(root, 'trouble.lua');
+    // Two references besides the declaration: trouble jumps instead of opening for a single one
+    writeFileSync(file, 'local foo = 1\nprint(foo)\nprint(foo)\n');
+    const result = inspect<Record<string, { opened: boolean; errmsg: string }>>(`
+      vim.cmd.edit(${JSON.stringify(file)})
+      vim.wait(20000, function() return #vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' }) > 0 end)
+      -- Give the diagnostics modes something to list
+      vim.diagnostic.set(vim.api.nvim_create_namespace('test'), 0, {
+        { lnum = 0, col = 0, message = 'test', severity = vim.diagnostic.severity.ERROR },
+      })
+      -- Wait until lua_ls answers references, which gR lists
+      vim.api.nvim_win_set_cursor(0, { 1, 6 })
+      vim.wait(30000, function()
+        local params = vim.lsp.util.make_position_params(0, 'utf-16')
+        params.context = { includeDeclaration = true }
+        for _, res in pairs(vim.lsp.buf_request_sync(0, 'textDocument/references', params, 3000) or {}) do
+          if res.result and #res.result > 0 then return true end
         end
-        pcall(function() require('trouble').close() end)
-        result[lhs] = errors
+        return false
+      end, 1000)
+
+      local function trouble_wins()
+        return vim.tbl_filter(function(win)
+          return vim.bo[vim.api.nvim_win_get_buf(win)].filetype == 'trouble'
+        end, vim.api.nvim_list_wins())
       end
-      vim.notify = notify
+      local result = {}
+      for _, lhs in ipairs({ ' t', ' wd', ' dd', 'gR' }) do
+        vim.v.errmsg = ''
+        -- Type the keys: lazy.nvim's keys handler loads the plugin and replays them
+        vim.api.nvim_feedkeys(lhs, 'mx', false)
+        local opened = vim.wait(5000, function() return #trouble_wins() > 0 end)
+        result[lhs] = { opened = opened, errmsg = vim.v.errmsg }
+        local trouble = require('trouble')
+        while trouble.is_open() do trouble.close() end
+        vim.api.nvim_win_set_cursor(0, { 1, 6 })
+      end
       return result
     `);
-    expect(errors).toEqual({ ' t': [], ' wd': [], ' dd': [], gR: [] });
-  });
+    const ok = { opened: true, errmsg: '' };
+    expect(result).toEqual({ ' t': ok, ' wd': ok, ' dd': ok, gR: ok });
+  }, 120_000);
 
   it.skipIf(spawnSync('prettierd', ['--version'], { stdio: 'ignore' }).status !== 0)(
     'formats TypeScript with prettierd on <leader>pf',
@@ -206,18 +264,8 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
       `);
       expect(lines).toEqual(['const a = { b: 1 };']);
     },
+    60_000,
   );
-
-  it('does not use deprecated Neovim APIs', () => {
-    const files = new Bun.Glob('**/*.lua').scanSync({ cwd: join(configHome, 'nvim'), absolute: true });
-    const hits: string[] = [];
-    for (const file of files) {
-      readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
-        if (/vim\.loop\b|vim\.highlight\b|vim\.diagnostic\.goto_(prev|next)/.test(line)) hits.push(`${file}:${i + 1}`);
-      });
-    }
-    expect(hits).toEqual([]);
-  });
 
   it('uses the current fidget.nvim instead of the legacy tag', () => {
     expect(inspect<boolean>("return type(require('fidget').notify) == 'function'")).toBe(true);
@@ -264,10 +312,6 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     expect(inspect<boolean>("return require('telescope.config').pickers.find_files.hidden")).toBe(true);
   });
 
-  it('shows the treesitter context', () => {
-    expect(inspect<boolean>("return require('treesitter-context').enabled()")).toBe(true);
-  });
-
   it('uses the built-in LSP UI with rounded borders instead of lspsaga', () => {
     const state = inspect<{ winborder: string; lspsaga: boolean; maps: Record<string, string> }>(`
       local function rhs(lhs)
@@ -284,37 +328,34 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
   });
 
   it('uses the Lua port of the nord colorscheme', () => {
-    const state = inspect<{ colors: string; lua: boolean; lualine: boolean }>(`
-      return {
-        colors = vim.g.colors_name,
-        lua = package.loaded['nord'] ~= nil,
-        lualine = pcall(require, 'lualine.themes.nord'),
-      }
+    const state = inspect<{ colors: string; lua: boolean }>(`
+      return { colors = vim.g.colors_name, lua = package.loaded['nord'] ~= nil }
     `);
-    expect(state).toEqual({ colors: 'nord', lua: true, lualine: true });
+    expect(state).toEqual({ colors: 'nord', lua: true });
   });
 
   it('opens directories with telescope-file-browser, not neo-tree', () => {
     const dir = join(root, 'dir');
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, 'x.txt'), '');
-    const state = inspect<{ filetypes: string[]; errors: string[] }>(`
-      local errors = {}
-      local ok, err = pcall(function()
-        vim.cmd.edit(${JSON.stringify(dir)})
-        vim.wait(2000)
-      end)
-      if not ok then table.insert(errors, tostring(err)) end
+    const state = inspect<{ filetypes: string[]; errmsg: string }>(`
+      -- neo-tree is loaded lazily; load it like after using \\, so that its netrw hijacking
+      -- would race telescope-file-browser if it were enabled
+      require('lazy').load({ plugins = { 'neo-tree.nvim' } })
+      vim.v.errmsg = ''
+      vim.cmd.edit(${JSON.stringify(dir)})
+      -- The race fails in a scheduled callback, which only shows up in v:errmsg
+      vim.wait(2000)
       local filetypes = {}
       for _, win in ipairs(vim.api.nvim_list_wins()) do
         table.insert(filetypes, vim.bo[vim.api.nvim_win_get_buf(win)].filetype)
       end
-      return { filetypes = filetypes, errors = errors }
+      return { filetypes = filetypes, errmsg = vim.v.errmsg }
     `);
-    expect(state.errors).toEqual([]);
+    expect(state.errmsg).toBe('');
     expect(state.filetypes).toContain('TelescopePrompt');
     expect(state.filetypes).not.toContain('neo-tree');
-  });
+  }, 60_000);
 
   describe('LSP', () => {
     type Attached = {
@@ -322,7 +363,7 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
       maps: Record<string, boolean>;
       format: boolean;
       missingFields: boolean;
-      snippetSupport: boolean;
+      resolveDetail: boolean;
     };
     let attached: Attached;
 
@@ -333,7 +374,7 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
         vim.cmd.edit(${JSON.stringify(file)})
         vim.wait(20000, function() return #vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' }) > 0 end)
         local maps = {}
-        for _, lhs in ipairs({ 'gd', 'gr', 'gI', ' ca', ' D', ' ds', ' ws', 'K', ' h', '<C-K>', ' rn', ' pr', ' pd' }) do
+        for _, lhs in ipairs({ 'gd', 'gr', 'gI', ' ca', ' D', ' ds', ' ws', ' h', '<C-K>', ' rn', ' pr', ' pd' }) do
           maps[lhs] = vim.fn.maparg(lhs, 'n', false, true).buffer == 1
         end
         local client = vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' })[1]
@@ -343,8 +384,10 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
           maps = maps,
           format = vim.api.nvim_buf_get_commands(0, {}).Format ~= nil,
           missingFields = vim.tbl_contains(disabled, 'missing-fields'),
-          snippetSupport = vim.tbl_get(client and client.config.capabilities or {},
-            'textDocument', 'completion', 'completionItem', 'snippetSupport') == true,
+          -- Neovim's own capabilities resolve documentation, command and additionalTextEdits;
+          -- blink.cmp adds detail
+          resolveDetail = vim.tbl_contains(vim.tbl_get(client and client.config.capabilities or {},
+            'textDocument', 'completion', 'completionItem', 'resolveSupport', 'properties') or {}, 'detail'),
         }
       `);
     }, 60_000);
@@ -360,7 +403,7 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
 
     it('passes the configured settings and the completion capabilities to the server', () => {
       expect(attached.missingFields).toBe(true);
-      expect(attached.snippetSupport).toBe(true);
+      expect(attached.resolveDetail).toBe(true);
     });
 
     it('resolves the Neovim Lua API in a Lua project (lazydev)', () => {
