@@ -263,6 +263,28 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     expect(state).toEqual({ colors: 'nord', lua: true, lualine: true });
   });
 
+  it('opens directories with telescope-file-browser, not neo-tree', () => {
+    const dir = join(root, 'dir');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'x.txt'), '');
+    const state = inspect<{ filetypes: string[]; errors: string[] }>(`
+      local errors = {}
+      local ok, err = pcall(function()
+        vim.cmd.edit(${JSON.stringify(dir)})
+        vim.wait(2000)
+      end)
+      if not ok then table.insert(errors, tostring(err)) end
+      local filetypes = {}
+      for _, win in ipairs(vim.api.nvim_list_wins()) do
+        table.insert(filetypes, vim.bo[vim.api.nvim_win_get_buf(win)].filetype)
+      end
+      return { filetypes = filetypes, errors = errors }
+    `);
+    expect(state.errors).toEqual([]);
+    expect(state.filetypes).toContain('TelescopePrompt');
+    expect(state.filetypes).not.toContain('neo-tree');
+  });
+
   describe('LSP', () => {
     type Attached = {
       clients: string[];
