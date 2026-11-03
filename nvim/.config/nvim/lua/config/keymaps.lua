@@ -22,12 +22,7 @@ vim.keymap.set('n', '*', '*Nzz', { silent = true });
 vim.keymap.set('n', 'ss', ':split<CR><C-w>w')
 vim.keymap.set('n', 'vs', ':vsplit<CR><C-w>w')
 
--- Reopen
--- vim.keymap.set('n', 'E', '<cmd>bufdo e!<cr>')
-
--- The following keymaps are from kickstart configuration
--- Keymaps for better default experience
--- See `:help vim.keymap.set()`
+-- <Space> is the leader, so don't move the cursor with it
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
 -- Remap for dealing with word wrap
@@ -35,9 +30,11 @@ vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = tr
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
 
 -- Diagnostic keymaps
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = "Go to previous diagnostic message" })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = "Go to next diagnostic message" })
+vim.keymap.set('n', '[d', function() vim.diagnostic.jump({ count = -1, float = true }) end, { desc = "Go to previous diagnostic message" })
+vim.keymap.set('n', ']d', function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Go to next diagnostic message" })
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float, { desc = "Open floating diagnostic message" })
+vim.keymap.set('n', '<C-j>', function() vim.diagnostic.jump({ count = 1, float = true }) end, { desc = "Go to next diagnostic message" })
+vim.keymap.set('n', '<leader>ld', vim.diagnostic.open_float, { desc = "Show [L]ine [D]iagnostics" })
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = "Open diagnostics list" })
 
 -- https://github.com/ThePrimeagen/init.lua/blob/master/lua/theprimeagen/remap.lua
