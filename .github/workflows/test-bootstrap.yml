@@ -75,4 +75,3 @@ jobs:
           echo "Note: Full end-to-end testing requires:"
           echo "  - SSH keys or HTTPS credentials for git clone"
           echo "  - A clean environment with dependencies (Homebrew, etc.)"
-          echo "  - Run './test-bootstrap.sh' locally with Docker for comprehensive testing"
