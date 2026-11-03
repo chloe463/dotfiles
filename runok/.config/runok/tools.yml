@@ -20,6 +20,46 @@ rules:
     tests:
       - ask: 'bun install'
       - ask: 'npm install lodash'
+  # Homebrew: installing anything new (a formula, a cask or a whole
+  # Brewfile) or adding a third-party tap is confirmed, so nothing gets
+  # installed on the machine without the user knowing. `brew bundle` with
+  # no subcommand (or with `install`) installs the Brewfile, so it is asked
+  # unless a read-only subcommand is given.
+  - ask: 'brew install|reinstall|tap *'
+    tests:
+      - ask: 'brew install btop'
+      - ask: 'brew install --cask visual-studio-code'
+      - ask: 'brew reinstall jq'
+      - ask: 'brew tap yusukebe/tap'
+      - ask: 'HOMEBREW_NO_AUTO_UPDATE=1 brew install btop'
+      - ask: 'bash -c "brew install btop"'
+  - ask: 'brew bundle *'
+    when: >-
+      !args.exists(a, a in ['check', 'list', 'dump'])
+    tests:
+      - ask: 'brew bundle'
+      - ask: 'brew bundle install'
+      - ask: 'brew bundle --file=Brewfile.shared'
+      - pass: 'brew bundle check --file=Brewfile.shared'
+      - pass: 'brew bundle list'
+      - pass: 'brew bundle dump --file=- --force'
+      - ask: 'brew bundle cleanup --force'
+      - ask: 'brew bundle cleanup'
+      - pass: 'brew list'
+      - pass: 'brew info btop'
+  # Upgrades can pull in new dependencies, and removals can take away apps
+  # the user still relies on (as `brew bundle cleanup` once did with
+  # Alacritty), so both are confirmed too.
+  - ask: 'brew upgrade|uninstall|remove|rm|autoremove|untap *'
+    tests:
+      - ask: 'brew upgrade'
+      - ask: 'brew upgrade --greedy'
+      - ask: 'brew uninstall jq'
+      - ask: 'brew rm jq'
+      - ask: 'brew autoremove'
+      - ask: 'brew untap yusukebe/tap'
+      - pass: 'brew outdated'
+
   # The tests and type checks workers run after every change.
   - allow: 'npm|yarn|pnpm|bun test *'
     tests:
