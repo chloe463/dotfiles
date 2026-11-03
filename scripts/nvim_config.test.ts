@@ -124,6 +124,16 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     expect(state.messages.trim()).toBe('');
   });
 
+  it('passes :checkhealth lazy without errors or warnings', () => {
+    const problems = inspect<string[]>(`
+      vim.cmd('checkhealth lazy')
+      return vim.tbl_filter(function(line)
+        return line:find('ERROR') ~= nil or line:find('WARNING') ~= nil
+      end, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+    `);
+    expect(problems).toEqual([]);
+  });
+
   it('uses <Space> as the leader', () => {
     expect(inspect<string>('return vim.g.mapleader')).toBe(' ');
     expect(inspect<string>('return vim.g.maplocalleader')).toBe(' ');

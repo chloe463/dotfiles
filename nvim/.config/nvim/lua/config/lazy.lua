@@ -13,4 +13,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- Every file in lua/plugins/ returns a list of plugin specs
-require('lazy').setup({ { import = 'plugins' } })
+require('lazy').setup({ { import = 'plugins' } }, {
+  -- No plugin needs luarocks; without this, :checkhealth warns that hererocks is not installed
+  rocks = { enabled = false },
+})
