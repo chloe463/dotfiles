@@ -23,21 +23,31 @@ afterAll(() => {
   rmSync(root, { recursive: true, force: true });
 });
 
+// Headless Neovim has no UI, so UIEnter never fires and lazy.nvim never loads the VeryLazy
+// plugins. Fire it after VimEnter like a UI attaching would.
+const uiEnter = 'autocmd VimEnter * ++once ++nested doautocmd UIEnter';
+
 // Runs `body` (Lua that returns a value) after the config has loaded and returns
-// that value decoded from JSON.
+// that value decoded from JSON. It runs once lazy.nvim has loaded the VeryLazy plugins,
+// which happens after VimEnter, so after any `-c` command.
 function inspect<T>(body: string): T {
   const script = join(root, 'inspect.lua');
   const out = join(root, 'out.json');
-  writeFileSync(script, `local value = (function()\n${body}\nend)()\nvim.fn.writefile({ vim.json.encode(value) }, ${JSON.stringify(out)})\n`);
+  writeFileSync(
+    script,
+    `local ok, value = pcall(function()\n${body}\nend)\n` +
+      `vim.fn.writefile({ ok and vim.json.encode(value) or ('ERROR: ' .. tostring(value)) }, ${JSON.stringify(out)})\n`,
+  );
   writeFileSync(out, '');
-  const result = spawnSync('nvim', ['--headless', '-i', 'NONE', '-c', `luafile ${script}`, '-c', 'qa!'], {
+  const run = `autocmd User VeryLazy ++once ++nested lua vim.schedule(function() pcall(vim.cmd.luafile, ${JSON.stringify(script)}); vim.cmd('qa!') end)`;
+  const result = spawnSync('nvim', ['--headless', '-n', '-i', 'NONE', '--cmd', uiEnter, '--cmd', run], {
     encoding: 'utf8',
     env: { ...process.env, XDG_CONFIG_HOME: configHome, NVIM_APPNAME: 'nvim' },
     timeout: 60_000,
   });
   const json = readFileSync(out, 'utf8').trim();
-  if (result.status !== 0 || json === '') {
-    throw new Error(`nvim failed (status ${result.status}):\n${result.stdout}${result.stderr}`);
+  if (result.status !== 0 || json === '' || json.startsWith('ERROR: ')) {
+    throw new Error(`nvim failed (status ${result.status}): ${json}\n${result.stdout}${result.stderr}`);
   }
   return JSON.parse(json) as T;
 }
@@ -53,7 +63,7 @@ type Server = {
 async function withServer(file: string, fn: (nvim: Server) => Promise<void>) {
   const socket = join(root, `nvim-${process.hrtime.bigint()}.sock`);
   const env = { ...process.env, XDG_CONFIG_HOME: configHome, NVIM_APPNAME: 'nvim' };
-  const proc = Bun.spawn(['nvim', '--headless', '-n', '-i', 'NONE', '--listen', socket, file], {
+  const proc = Bun.spawn(['nvim', '--headless', '-n', '-i', 'NONE', '--cmd', uiEnter, '--listen', socket, file], {
     env,
     stdout: 'ignore',
     stderr: 'ignore',
@@ -95,6 +105,17 @@ async function withServer(file: string, fn: (nvim: Server) => Promise<void>) {
 type Mapping = { mode: string; lhs: string; rhs: string };
 
 describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
+  it('loads the plugins for files, keys and commands lazily', () => {
+    const loaded = inspect<Record<string, boolean>>(`
+      local result = {}
+      for _, name in ipairs({ 'nvim-lspconfig', 'blink.cmp', 'gitsigns.nvim', 'neo-tree.nvim', 'trouble.nvim', 'conform.nvim' }) do
+        result[name] = require('lazy.core.config').plugins[name]._.loaded ~= nil
+      end
+      return result
+    `);
+    expect(loaded).toEqual(Object.fromEntries(Object.keys(loaded).map((k) => [k, false])));
+  });
+
   it('starts without errors', () => {
     const state = inspect<{ errmsg: string; messages: string }>(`
       return { errmsg = vim.v.errmsg, messages = vim.fn.execute('messages') }
@@ -143,11 +164,11 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
       end
       for _, lhs in ipairs({ ' t', ' wd', ' dd', 'gR' }) do
         errors = {}
-        local map = vim.fn.maparg(lhs, 'n', false, true)
-        if not map.callback then
+        if vim.fn.maparg(lhs, 'n') == '' then
           table.insert(errors, 'not mapped')
         else
-          local ok, err = pcall(map.callback)
+          -- Type the keys: lazy.nvim's keys handler loads the plugin and replays them
+          local ok, err = pcall(vim.api.nvim_feedkeys, lhs, 'mx', false)
           if not ok then table.insert(errors, tostring(err)) end
           vim.wait(200)
         end
@@ -378,7 +399,11 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     }, 120_000);
 
     it('enables only one Ruby language server', () => {
+      const file = join(root, 'a.rb');
+      writeFileSync(file, '');
       const enabled = inspect<Record<string, boolean>>(`
+        -- The servers are set up when the first file is opened
+        vim.cmd.edit(${JSON.stringify(file)})
         return { ruby_lsp = vim.lsp.is_enabled('ruby_lsp'), solargraph = vim.lsp.is_enabled('solargraph') }
       `);
       expect(enabled).toEqual({ ruby_lsp: true, solargraph: false });

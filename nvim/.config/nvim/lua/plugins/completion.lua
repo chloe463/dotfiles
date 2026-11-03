@@ -3,6 +3,7 @@ return {
   'saghen/blink.cmp',
   -- Use a release tag to download the prebuilt fuzzy matcher
   version = '1.*',
+  event = { 'InsertEnter', 'CmdlineEnter' },
   opts = {
     keymap = {
       preset = 'none',

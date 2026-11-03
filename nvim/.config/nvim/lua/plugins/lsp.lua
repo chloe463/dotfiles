@@ -61,6 +61,8 @@ end
 return {
   {
     'neovim/nvim-lspconfig',
+    -- Starts the servers when the first file is opened
+    event = { 'BufReadPre', 'BufNewFile' },
     dependencies = {
       'williamboman/mason.nvim',
       'williamboman/mason-lspconfig.nvim',
@@ -93,7 +95,7 @@ return {
   },
 
   -- LSP progress notifications
-  { 'j-hui/fidget.nvim', opts = {} },
+  { 'j-hui/fidget.nvim', event = 'LspAttach', opts = {} },
 
   -- Completion, annotations and signatures of the Neovim Lua API for lua_ls
   {
@@ -111,14 +113,17 @@ return {
   {
     'folke/trouble.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
+    cmd = 'Trouble',
+    keys = {
+      { '<leader>t', function() require('trouble').toggle({ mode = 'diagnostics' }) end, desc = '[T]rouble' },
+      { '<leader>wd', function() require('trouble').open({ mode = 'diagnostics' }) end, desc = '[W]orkspace [D]iagnostics' },
+      {
+        '<leader>dd',
+        function() require('trouble').open({ mode = 'diagnostics', filter = { buf = 0 } }) end,
+        desc = '[D]ocument [D]iagnostics',
+      },
+      { 'gR', function() require('trouble').open({ mode = 'lsp_references' }) end, desc = 'LSP References (Trouble)' },
+    },
     opts = {},
-    config = function(_, opts)
-      local trouble = require('trouble')
-      trouble.setup(opts)
-      vim.keymap.set('n', '<leader>t', function() trouble.toggle({ mode = 'diagnostics' }) end, { desc = '[T]rouble' })
-      vim.keymap.set('n', '<leader>wd', function() trouble.open({ mode = 'diagnostics' }) end, { desc = '[W]orkspace [D]iagnostics' })
-      vim.keymap.set('n', '<leader>dd', function() trouble.open({ mode = 'diagnostics', filter = { buf = 0 } }) end, { desc = '[D]ocument [D]iagnostics' })
-      vim.keymap.set('n', 'gR', function() trouble.open({ mode = 'lsp_references' }) end, { desc = 'LSP References (Trouble)' })
-    end,
   },
 }

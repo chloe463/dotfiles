@@ -9,6 +9,11 @@ return {
       'nvim-tree/nvim-web-devicons',
       'MunifTanjim/nui.nvim',
     },
+    cmd = 'Neotree',
+    keys = {
+      { '\\', '<cmd>Neotree toggle<cr>', desc = 'Toggle neo-tree' },
+      { '<C-\\>', '<cmd>Neotree focus<cr>', desc = 'Focus neo-tree' },
+    },
     opts = {
       filesystem = {
         -- telescope-file-browser opens directories (its hijack_netrw); two hijackers race and error
@@ -18,10 +23,5 @@ return {
         },
       },
     },
-    config = function(_, opts)
-      require('neo-tree').setup(opts)
-      vim.keymap.set('n', '\\', '<cmd>Neotree toggle<cr>', { desc = 'Toggle neo-tree' })
-      vim.keymap.set('n', '<C-\\>', '<cmd>Neotree focus<cr>', { desc = 'Focus neo-tree' })
-    end,
   },
 }

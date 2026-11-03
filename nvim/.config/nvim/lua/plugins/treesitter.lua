@@ -62,10 +62,10 @@ return {
   },
 
   -- Show the enclosing function, class, ... at the top of the window
-  { 'nvim-treesitter/nvim-treesitter-context' },
+  { 'nvim-treesitter/nvim-treesitter-context', event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' } },
 
   -- Auto close and rename HTML/JSX tags
-  { 'windwp/nvim-ts-autotag', opts = {} },
+  { 'windwp/nvim-ts-autotag', event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' }, opts = {} },
 
   {
     'JoosepAlviste/nvim-ts-context-commentstring',

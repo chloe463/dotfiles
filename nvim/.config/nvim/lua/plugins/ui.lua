@@ -12,6 +12,7 @@ return {
 
   {
     'nvim-lualine/lualine.nvim',
+    event = 'VeryLazy',
     opts = {
       options = {
         icons_enabled = true,
@@ -59,6 +60,7 @@ return {
 
   {
     'akinsho/bufferline.nvim',
+    event = 'VeryLazy',
     version = '*',
     dependencies = 'nvim-tree/nvim-web-devicons',
     opts = {
@@ -100,6 +102,7 @@ return {
   {
     'lukas-reineke/indent-blankline.nvim',
     main = 'ibl',
+    event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
     opts = {
       indent = {
         char = '┊',
@@ -111,11 +114,12 @@ return {
   },
 
   -- Pending keybinds
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim', event = 'VeryLazy', opts = {} },
 
   -- Highlight other uses of the word under the cursor
   {
     'RRethy/vim-illuminate',
+    event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
     config = function()
       require('illuminate').configure({ delay = 250 })
     end,
@@ -124,6 +128,7 @@ return {
   -- Highlight color codes
   {
     'NvChad/nvim-colorizer.lua',
+    event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
     opts = {
       filetypes = { '*' },
       options = {
@@ -136,6 +141,7 @@ return {
 
   {
     'folke/todo-comments.nvim',
+    event = { 'BufReadPost', 'BufNewFile', 'BufWritePre' },
     dependencies = { 'nvim-lua/plenary.nvim' },
     opts = {},
   },
