@@ -24,9 +24,6 @@ telescope.setup {
         ['<C-d>'] = false,
       },
     },
-    find_files = {
-      hidden = true,
-    },
     file_ignore_patterns = {
       "node_modules",
       ".git/",
@@ -41,6 +38,11 @@ telescope.setup {
       "--column",
       "--smart-case",
       "--hidden"
+    },
+  },
+  pickers = {
+    find_files = {
+      hidden = true,
     },
   },
   -- cf. https://github.com/craftzdog/dotfiles-public/blob/master/.config/nvim/after/plugin/telescope.rc.lua

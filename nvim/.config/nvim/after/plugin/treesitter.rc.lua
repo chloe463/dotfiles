@@ -1,8 +1,10 @@
 local status, treesitter = pcall(require, 'nvim-treesitter')
 if (not status) then return end
 
+-- markdown and markdown_inline are bundled with Neovim
 treesitter.install({
-  'c', 'cpp', 'css', 'go', 'graphql', 'lua', 'python', 'ruby', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim',
+  'bash', 'c', 'cpp', 'css', 'go', 'graphql', 'html', 'javascript', 'json', 'lua', 'python', 'ruby', 'rust',
+  'styled', 'tsx', 'typescript', 'vimdoc', 'vim', 'yaml',
 })
 
 -- nvim-treesitter main branch removed configs module; highlighting is now delegated to Neovim core.

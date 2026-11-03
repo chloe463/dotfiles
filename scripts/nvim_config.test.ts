@@ -162,6 +162,31 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     expect(state).toEqual({ jsx: '    {/* <span /> */}', ts: '// const b = 1;', commentNvim: false });
   });
 
+  it('highlights common filetypes with treesitter', () => {
+    const files = ['a.js', 'a.json', 'a.yaml', 'a.sh', 'a.html', 'a.ts', 'a.tsx', 'a.lua', 'a.rb'].map((name) => {
+      const file = join(root, name);
+      writeFileSync(file, '\n');
+      return file;
+    });
+    const highlighted = inspect<Record<string, boolean>>(`
+      local result = {}
+      for _, file in ipairs(vim.json.decode(${JSON.stringify(JSON.stringify(files))})) do
+        vim.cmd.edit(file)
+        result[vim.fn.fnamemodify(file, ':t')] = vim.treesitter.highlighter.active[vim.api.nvim_get_current_buf()] ~= nil
+      end
+      return result
+    `);
+    expect(highlighted).toEqual(Object.fromEntries(Object.keys(highlighted).map((k) => [k, true])));
+  });
+
+  it('includes hidden files in telescope find_files by default', () => {
+    expect(inspect<boolean>("return require('telescope.config').pickers.find_files.hidden")).toBe(true);
+  });
+
+  it('shows the treesitter context', () => {
+    expect(inspect<boolean>("return require('treesitter-context').enabled()")).toBe(true);
+  });
+
   describe('LSP', () => {
     type Attached = {
       clients: string[];
