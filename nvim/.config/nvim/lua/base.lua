@@ -46,6 +46,9 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 
+-- Rounded borders for floating windows (LSP hover, signature help, diagnostics, ...)
+vim.o.winborder = 'rounded'
+
 -- cf. https://github.com/alacritty/alacritty/issues/5450#issuecomment-929797364
 vim.api.nvim_create_autocmd("ExitPre", {
   group = vim.api.nvim_create_augroup("Exit", { clear = true }),

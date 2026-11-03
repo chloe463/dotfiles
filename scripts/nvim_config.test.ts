@@ -187,6 +187,21 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     expect(inspect<boolean>("return require('treesitter-context').enabled()")).toBe(true);
   });
 
+  it('uses the built-in LSP UI with rounded borders instead of lspsaga', () => {
+    const state = inspect<{ winborder: string; lspsaga: boolean; maps: Record<string, string> }>(`
+      local function rhs(lhs)
+        local m = vim.fn.maparg(lhs, 'n', false, true)
+        return m.rhs or (m.callback and 'callback') or ''
+      end
+      return {
+        winborder = vim.o.winborder,
+        lspsaga = vim.fn.exists(':Lspsaga') == 2,
+        maps = { ['<C-J>'] = rhs('<C-J>'), [' ld'] = rhs(' ld') },
+      }
+    `);
+    expect(state).toEqual({ winborder: 'rounded', lspsaga: false, maps: { '<C-J>': 'callback', ' ld': 'callback' } });
+  });
+
   describe('LSP', () => {
     type Attached = {
       clients: string[];
@@ -204,7 +219,7 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
         vim.cmd.edit(${JSON.stringify(file)})
         vim.wait(20000, function() return #vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' }) > 0 end)
         local maps = {}
-        for _, lhs in ipairs({ 'gd', 'gr', 'gI', ' ca', ' D', ' ds', ' ws', 'K', ' h', '<C-K>' }) do
+        for _, lhs in ipairs({ 'gd', 'gr', 'gI', ' ca', ' D', ' ds', ' ws', 'K', ' h', '<C-K>', ' rn', ' pr', ' pd' }) do
           maps[lhs] = vim.fn.maparg(lhs, 'n', false, true).buffer == 1
         end
         local client = vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' })[1]

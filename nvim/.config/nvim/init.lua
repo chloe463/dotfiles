@@ -212,19 +212,24 @@ local on_attach = function(bufnr)
     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
   end
 
-  -- nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+  local builtin = require('telescope.builtin')
+
+  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[N]ame')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
 
   nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
-  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+  nmap('gr', builtin.lsp_references, '[G]oto [R]eferences')
   nmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
   nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+  nmap('<leader>ds', builtin.lsp_document_symbols, '[D]ocument [S]ymbols')
+  nmap('<leader>ws', builtin.lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
-  -- See `:help K` for why this keymap
-  nmap('K', function() vim.lsp.buf.hover({ border = 'rounded' }) end, 'Hover Documentation')
-  nmap('<leader>h', function() vim.lsp.buf.hover({ border = 'rounded' }) end, '[H]over Documentation')
+  -- Peek the references and definitions in a telescope picker without jumping
+  nmap('<leader>pr', builtin.lsp_references, '[P]eek [R]eferences')
+  nmap('<leader>pd', function() builtin.lsp_definitions({ jump_type = 'never' }) end, '[P]eek [D]efinition')
+
+  -- `K` is mapped to hover by Neovim (see `:help lsp-defaults`)
+  nmap('<leader>h', vim.lsp.buf.hover, '[H]over Documentation')
   nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
 
   -- Lesser used LSP functionality
