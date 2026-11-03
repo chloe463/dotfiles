@@ -42,6 +42,56 @@ function inspect<T>(body: string): T {
   return JSON.parse(json) as T;
 }
 
+// Starts the config with `--listen` and drives it from outside like a user typing,
+// for behaviour that needs the event loop to run between keys (e.g. completion menus).
+type Server = {
+  send(keys: string): void;
+  lua<T>(expr: string): T;
+  waitFor(expr: string, timeout?: number): Promise<boolean>;
+};
+
+async function withServer(file: string, fn: (nvim: Server) => Promise<void>) {
+  const socket = join(root, `nvim-${process.hrtime.bigint()}.sock`);
+  const env = { ...process.env, XDG_CONFIG_HOME: configHome, NVIM_APPNAME: 'nvim' };
+  const proc = Bun.spawn(['nvim', '--headless', '-n', '-i', 'NONE', '--listen', socket, file], {
+    env,
+    stdout: 'ignore',
+    stderr: 'ignore',
+  });
+  const remote = (...args: string[]) =>
+    spawnSync('nvim', ['--server', socket, ...args], { encoding: 'utf8', env, timeout: 10_000 });
+  const lua = <T>(expr: string): T => {
+    const code = `vim.json.encode((function() return ${expr} end)())`.replaceAll("'", "''");
+    const out = remote('--remote-expr', `luaeval('${code}')`);
+    return JSON.parse(out.stdout.trim()) as T;
+  };
+  const server: Server = {
+    send: (keys) => {
+      remote('--remote-send', keys);
+    },
+    lua,
+    waitFor: async (expr, timeout = 30_000) => {
+      const deadline = Date.now() + timeout;
+      while (Date.now() < deadline) {
+        try {
+          if (lua<boolean>(expr)) return true;
+        } catch {
+          // The server is not listening yet
+        }
+        await Bun.sleep(200);
+      }
+      return false;
+    },
+  };
+  try {
+    await server.waitFor('true', 10_000);
+    await fn(server);
+  } finally {
+    proc.kill();
+    await proc.exited;
+  }
+}
+
 type Mapping = { mode: string; lhs: string; rhs: string };
 
 describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
@@ -273,6 +323,25 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
         return uri
       `);
       expect(uri).toContain('/lua/vim/_meta/api');
+    }, 120_000);
+
+    it('completes with blink.cmp and accepts the first item on <CR>', async () => {
+      const file = join(root, 'complete.lua');
+      writeFileSync(file, '');
+      await withServer(file, async (nvim) => {
+        await nvim.waitFor(`#vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' }) > 0`);
+        // lua_ls returns no items until it has loaded the workspace, so type again until the menu shows
+        let visible = false;
+        for (let i = 0; i < 10 && !visible; i++) {
+          nvim.send('<Esc>Slocal t = vim.api.nvim_buf_get_li');
+          visible = await nvim.waitFor(`require('blink.cmp').is_menu_visible()`, 3000);
+        }
+        expect(visible).toBe(true);
+        nvim.send('<CR>');
+        await nvim.waitFor(`vim.api.nvim_get_current_line() ~= 'local t = vim.api.nvim_buf_get_li'`, 5000);
+        expect(nvim.lua<string[]>(`vim.api.nvim_buf_get_lines(0, 0, -1, false)`)).toEqual(['local t = vim.api.nvim_buf_get_lines']);
+        expect(nvim.lua<boolean>(`package.loaded['cmp'] ~= nil`)).toBe(false);
+      });
     }, 120_000);
 
     it('enables only one Ruby language server', () => {

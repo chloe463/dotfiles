@@ -101,13 +101,6 @@ require('lazy').setup({
     },
   },
 
-  { -- Autocompletion
-    'hrsh7th/nvim-cmp',
-    dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
-  },
-  { 'hrsh7th/cmp-path' },
-  { 'hrsh7th/cmp-cmdline' },
-  { 'hrsh7th/cmp-buffer' },
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
@@ -274,9 +267,9 @@ local servers = {
   ruby_lsp = {},
 }
 
--- nvim-cmp supports additional completion capabilities, so broadcast that to every server
+-- blink.cmp supports additional completion capabilities, so broadcast that to every server
 vim.lsp.config('*', {
-  capabilities = require('cmp_nvim_lsp').default_capabilities(),
+  capabilities = require('blink.cmp').get_lsp_capabilities(),
 })
 for name, config in pairs(servers) do
   vim.lsp.config(name, config)
