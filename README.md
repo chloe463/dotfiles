@@ -140,7 +140,7 @@ brew bundle --file=Brewfile.work
 |---------|-------------|---------|
 | `alacritty`, `bat`, `gh`, `git`, `nvim`, `starship`, `zsh` | `$HOME` | Shell and tool configs |
 | `any-script-mcp` | `$HOME` | Claude Code MCP tool config (`~/.config/any-script-mcp/`) |
-| `claude` | `$HOME/.claude` | Claude Code settings, commands, skills |
+| `claude` | `$HOME/.claude` | Claude Code settings, hooks, skills |
 | `hunk` | `$HOME` | hunk diff viewer config (`~/.config/hunk/config.toml`) |
 | `vscode` | `~/Library/Application Support/Code/User` | VS Code settings |
 | `cursor` | `~/Library/Application Support/Cursor/User` | Cursor settings |
@@ -182,6 +182,28 @@ brew bundle dump --force
 VS Code extensions are listed in `vscode-extensions.txt` and installed one at
 a time by `./up brew` (not via `brew bundle`'s `vscode` entries, which install
 concurrently and race on `~/.vscode/extensions/` — see #172).
+
+Alacritty is not in `Brewfile.shared`: Homebrew disabled the `alacritty` cask
+on 2026-09-01 because it doesn't pass the Gatekeeper check. Install it from the
+[GitHub releases](https://github.com/alacritty/alacritty/releases) instead; the
+`alacritty` stow package still provides its config.
+
+runok is not in `Brewfile.shared` either. Claude Code's Bash permissions depend
+on it (`claude/scripts/pre-tool-use-proxy.sh` asks for confirmation on every
+Bash call while it's missing), so install it by hand:
+
+```bash
+brew tap fohte/tap
+brew trust --tap fohte/tap
+brew install --HEAD fohte/tap/runok
+```
+
+It's built from HEAD because the Claude Code integration (`runok hook`,
+`defaults.action: pass`) isn't in a release yet. It's kept out of the Brewfile
+because tapping `fohte/tap` fails Homebrew's tap validation (the formula exits
+on Intel macOS while loading), which breaks `brew bundle`. Since it isn't
+listed, `brew bundle cleanup --file=Brewfile.shared` reports runok as
+removable; don't pass `--force` without dropping it from the list.
 
 ## Troubleshooting
 

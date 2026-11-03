@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Splits the current herdr pane into the four-pane layout for working with a
+# manager session:
+#
+#   claude-main-session | plan-viewer
+#   --------------------+------------
+#   workspace-for-human | ai-board
+#
+# The plan viewer is `ai-plan`, which also explains in its pane if there is no
+# plan yet.
+set -euo pipefail
+
+if [[ "${HERDR_ENV:-}" != "1" ]]; then
+    echo "ai-layout: run this inside a herdr pane." >&2
+    exit 2
+fi
+
+main_pane="${HERDR_PANE_ID:?HERDR_PANE_ID is not set}"
+tab_id=$(herdr pane get "${main_pane}" | jq -r '.result.pane.tab_id')
+pane_count=$(herdr tab get "${tab_id}" | jq -r '.result.tab.pane_count')
+if [[ "${pane_count}" != "1" ]]; then
+    echo "ai-layout: this tab already has ${pane_count} panes. Run it in a tab with a single pane." >&2
+    exit 1
+fi
+
+split() {
+    herdr pane split "$1" --direction "$2" --cwd "${PWD}" --no-focus | jq -r '.result.pane.pane_id'
+}
+
+plan_pane=$(split "${main_pane}" right)
+human_pane=$(split "${main_pane}" down)
+board_pane=$(split "${plan_pane}" down)
+
+herdr pane rename "${main_pane}" "claude-main-session" > /dev/null
+herdr pane rename "${plan_pane}" "plan-viewer" > /dev/null
+herdr pane rename "${human_pane}" "workspace-for-human" > /dev/null
+herdr pane rename "${board_pane}" "ai-board" > /dev/null
+
+herdr pane run "${board_pane}" "ai-board --watch" > /dev/null
+herdr pane run "${plan_pane}" "ai-plan" > /dev/null

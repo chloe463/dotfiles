@@ -32,3 +32,6 @@ telepresence.log
 
 # GitHub CLI per-machine auth state
 **/.config/gh/hosts.yml
+
+# graphify artifacts
+graphify-out/
