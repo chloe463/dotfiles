@@ -1,6 +1,6 @@
 import { expect, describe, it, beforeAll, afterAll } from 'bun:test';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -127,6 +127,41 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     },
   );
 
+  it('does not use deprecated Neovim APIs', () => {
+    const files = new Bun.Glob('**/*.lua').scanSync({ cwd: join(configHome, 'nvim'), absolute: true });
+    const hits: string[] = [];
+    for (const file of files) {
+      readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+        if (/vim\.loop\b|vim\.highlight\b|vim\.diagnostic\.goto_(prev|next)/.test(line)) hits.push(`${file}:${i + 1}`);
+      });
+    }
+    expect(hits).toEqual([]);
+  });
+
+  it('uses the current fidget.nvim instead of the legacy tag', () => {
+    expect(inspect<boolean>("return type(require('fidget').notify) == 'function'")).toBe(true);
+  });
+
+  it('comments with the built-in gc, using the commentstring of the treesitter context', () => {
+    const file = join(root, 'comment.tsx');
+    writeFileSync(file, 'const a = (\n  <div>\n    <span />\n  </div>\n);\nconst b = 1;\n');
+    const state = inspect<{ jsx: string; ts: string; commentNvim: boolean }>(`
+      vim.cmd.edit(${JSON.stringify(file)})
+      -- Headless Neovim never redraws, so the highlighter has not parsed the buffer yet
+      vim.treesitter.get_parser(0):parse()
+      vim.api.nvim_win_set_cursor(0, { 3, 0 })
+      vim.api.nvim_feedkeys('gcc', 'mx', false)
+      vim.api.nvim_win_set_cursor(0, { 6, 0 })
+      vim.api.nvim_feedkeys('gcc', 'mx', false)
+      return {
+        jsx = vim.api.nvim_buf_get_lines(0, 2, 3, false)[1],
+        ts = vim.api.nvim_buf_get_lines(0, 5, 6, false)[1],
+        commentNvim = package.loaded['Comment'] ~= nil,
+      }
+    `);
+    expect(state).toEqual({ jsx: '    {/* <span /> */}', ts: '// const b = 1;', commentNvim: false });
+  });
+
   describe('LSP', () => {
     type Attached = {
       clients: string[];
@@ -158,7 +193,7 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
             'textDocument', 'completion', 'completionItem', 'snippetSupport') == true,
         }
       `);
-    });
+    }, 60_000);
 
     it('attaches lua_ls to Lua files', () => {
       expect(attached.clients).toContain('lua_ls');
@@ -173,6 +208,32 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
       expect(attached.missingFields).toBe(true);
       expect(attached.snippetSupport).toBe(true);
     });
+
+    it('resolves the Neovim Lua API in a Lua project (lazydev)', () => {
+      const project = join(root, 'lua-project');
+      mkdirSync(project, { recursive: true });
+      writeFileSync(join(project, 'stylua.toml'), ''); // a root marker of lua_ls
+      const file = join(project, 'init.lua');
+      writeFileSync(file, 'local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)\n');
+      const uri = inspect<string>(`
+        vim.cmd.edit(${JSON.stringify(file)})
+        vim.wait(20000, function() return #vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' }) > 0 end)
+        local uri = ''
+        -- lazydev hands the library to lua_ls after it has started, so retry until it resolves
+        vim.wait(30000, function()
+          local params = { textDocument = vim.lsp.util.make_text_document_params(0), position = { line = 0, character = 24 } }
+          for _, res in pairs(vim.lsp.buf_request_sync(0, 'textDocument/definition', params, 3000) or {}) do
+            if res.result and res.result[1] then
+              uri = res.result[1].targetUri or res.result[1].uri
+              return true
+            end
+          end
+          return false
+        end, 1000)
+        return uri
+      `);
+      expect(uri).toContain('/lua/vim/_meta/api');
+    }, 120_000);
 
     it('enables only one Ruby language server', () => {
       const enabled = inspect<Record<string, boolean>>(`
