@@ -20,6 +20,17 @@ rules:
     tests:
       - ask: 'bun install'
       - ask: 'npm install lodash'
+      - ask: 'npm install -g npkill'
+  # Aliases of the install above (`npm i`, `add`, yarn's global add).
+  - ask: 'npm i|add *'
+  - ask: 'yarn|pnpm|bun add *'
+  - ask: 'yarn global add *'
+    tests:
+      - ask: 'npm i lodash'
+      - ask: 'yarn add chalk'
+      - ask: 'pnpm add -D vitest'
+      - ask: 'bun add -g foo'
+      - ask: 'yarn global add npkill'
   # Homebrew: installing anything new (a formula, a cask or a whole
   # Brewfile) or adding a third-party tap is confirmed, so nothing gets
   # installed on the machine without the user knowing. `brew bundle` with
@@ -60,6 +71,28 @@ rules:
       - ask: 'brew untap yusukebe/tap'
       - pass: 'brew outdated'
 
+  # Other installers that put tools on the machine itself rather than in a
+  # project.
+  - ask: 'gem install|uninstall|update *'
+  - ask: 'cargo install|uninstall *'
+  - ask: 'go install *'
+  - ask: 'uv tool install|upgrade|uninstall *'
+  - ask: 'pipx install|reinstall|upgrade|upgrade-all|uninstall *'
+  - ask: 'pip|pip3 install|uninstall *'
+  - ask: 'mas install|purchase|uninstall *'
+    tests:
+      - ask: 'gem install rails'
+      - ask: 'gem update --system'
+      - ask: 'cargo install ripgrep'
+      - ask: 'go install golang.org/x/tools/gopls@latest'
+      - ask: 'uv tool install ruff'
+      - ask: 'pipx install black'
+      - ask: 'pip3 install requests'
+      - ask: 'mas install 497799835'
+      - pass: 'gem list'
+      - pass: 'cargo build'
+      - pass: 'uv tool list'
+      - pass: 'pip list'
   # The tests and type checks workers run after every change.
   - allow: 'npm|yarn|pnpm|bun test *'
     tests:
