@@ -84,7 +84,6 @@ return {
         vim.lsp.config(name, config)
       end
 
-      require('mason').setup()
       -- Install the servers above and enable only them, so that servers installed in mason
       -- for other reasons (e.g. solargraph) are not started.
       require('mason-lspconfig').setup({
@@ -92,6 +91,14 @@ return {
         automatic_enable = vim.tbl_keys(servers),
       })
     end,
+  },
+
+  -- Installs the language servers. Loaded by nvim-lspconfig on opening a file, or by its
+  -- commands before that (it has no plugin/ directory, so the commands come from setup())
+  {
+    'williamboman/mason.nvim',
+    cmd = { 'Mason', 'MasonInstall', 'MasonUninstall', 'MasonUninstallAll', 'MasonUpdate', 'MasonLog' },
+    opts = {},
   },
 
   -- LSP progress notifications

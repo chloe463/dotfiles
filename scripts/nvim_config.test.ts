@@ -157,6 +157,22 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     expect(loaded).toEqual(Object.fromEntries(Object.keys(loaded).map((k) => [k, false])));
   });
 
+  it('provides the mason and fugitive commands before a file is opened or VeryLazy fires', () => {
+    // `-c` commands run before VeryLazy, like `nvim +Git` or `nvim +Mason`
+    const out = join(root, 'commands.json');
+    const commands = ['Mason', 'MasonUninstall', 'Git', 'Gvdiffsplit'];
+    const lua =
+      `local exists = vim.tbl_map(function(c) return vim.fn.exists(':' .. c) == 2 end, vim.json.decode(${JSON.stringify(JSON.stringify(commands))})) ` +
+      `vim.fn.writefile({ vim.json.encode(exists) }, ${JSON.stringify(out)})`;
+    const result = spawnSync('nvim', ['--headless', '-n', '-i', 'NONE', '-c', `lua ${lua}`, '-c', 'qa!'], {
+      encoding: 'utf8',
+      env: nvimEnv(),
+      timeout: 60_000,
+    });
+    expect(result.status).toBe(0);
+    expect(JSON.parse(readFileSync(out, 'utf8'))).toEqual(commands.map(() => true));
+  });
+
   it('starts without errors', () => {
     const state = inspect<{ errmsg: string; messages: string }>(`
       return { errmsg = vim.v.errmsg, messages = vim.fn.execute('messages') }

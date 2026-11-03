@@ -1,5 +1,10 @@
 return {
-  { 'tpope/vim-fugitive', event = 'VeryLazy' },
+  -- Also loaded by its commands, so that `nvim +Git` works before VeryLazy
+  {
+    'tpope/vim-fugitive',
+    event = 'VeryLazy',
+    cmd = { 'G', 'Git', 'Gdiffsplit', 'Gvdiffsplit', 'Ghdiffsplit', 'Gread', 'Gwrite', 'Gedit', 'Gclog', 'GBrowse' },
+  },
   { 'tpope/vim-rhubarb', event = 'VeryLazy' },
 
   -- Git signs in the gutter, and utilities for managing changes
