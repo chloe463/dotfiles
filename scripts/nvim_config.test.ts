@@ -83,6 +83,33 @@ describe.skipIf(!hasNvim || !hasPlugins)('nvim config', () => {
     }
   });
 
+  it('opens trouble from its keymaps without errors', () => {
+    const errors = inspect<Record<string, string[]>>(`
+      local errors = {}
+      local notify = vim.notify
+      local result = {}
+      vim.notify = function(msg, level)
+        if level == vim.log.levels.ERROR then table.insert(errors, tostring(msg)) end
+      end
+      for _, lhs in ipairs({ ' t', ' wd', ' dd', 'gR' }) do
+        errors = {}
+        local map = vim.fn.maparg(lhs, 'n', false, true)
+        if not map.callback then
+          table.insert(errors, 'not mapped')
+        else
+          local ok, err = pcall(map.callback)
+          if not ok then table.insert(errors, tostring(err)) end
+          vim.wait(200)
+        end
+        pcall(function() require('trouble').close() end)
+        result[lhs] = errors
+      end
+      vim.notify = notify
+      return result
+    `);
+    expect(errors).toEqual({ ' t': [], ' wd': [], ' dd': [], gR: [] });
+  });
+
   describe('LSP', () => {
     type Attached = {
       clients: string[];
