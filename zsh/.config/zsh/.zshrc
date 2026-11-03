@@ -88,10 +88,6 @@ path_append() {
 path_prepend "$HOME/bin"
 path_prepend "$HOME/scripts"
 
-# Language version managers
-path_prepend "$GOENV_ROOT/bin"
-path_prepend "$HOME/go/1.19.0/bin"  # TODO: Make Go version dynamic
-
 # Development tools
 path_prepend "$LIBFFI_ROOT/bin"
 path_prepend "/opt/homebrew/opt/openjdk/bin"
@@ -130,9 +126,6 @@ eval "$(starship init zsh)"
 eval "$(rbenv init -)"
 eval "$(nodenv init -)"
 eval "$(direnv hook zsh)"
-
-export GOENV_ROOT="$HOME/.goenv"
-eval "$(goenv init -)"
 
 ####################################################################################################
 # Sheldon
