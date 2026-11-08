@@ -79,10 +79,16 @@ jobs:
           ./up stow
       - name: Verify test files are not linked
         run: |
-          # .stowrc ignores tests and claude/scripts are stowed with
-          # --no-folding, so no test file may be reachable from the targets,
-          # not even through a tree-folded directory (hence find -L).
-          exposed=$(find -L "$RUNNER_TEMP/stow-home" \( -name '*.test.ts' -o -name 'test_*.sh' \))
+          # .stowrc ignores tests and the claude and scripts packages are
+          # stowed with --no-folding, so no test file may be reachable from
+          # the targets, not even through a tree-folded directory (hence
+          # find -L). The patterns mirror .stowrc.
+          home="$RUNNER_TEMP/stow-home"
+          # Guard against a vacuous pass: the packages must have been linked.
+          for link in .claude/settings.json .config/zsh/.zshrc .local/bin/git-sync; do
+            test -L "$home/$link" || { echo "not linked: $home/$link"; exit 1; }
+          done
+          exposed=$(find -L "$home" \( -name '*.test.ts' -o -name 'test_*.sh' \))
           if [ -n "$exposed" ]; then
             echo "Test files reachable from stow targets:"
             echo "$exposed"

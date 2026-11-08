@@ -70,29 +70,36 @@ STOW_VERBOSE=1 ./up dot
 
 `./up doctor` reports what doesn't match the repo and exits 1 if anything fails:
 
-- Homebrew packages missing from `Brewfile.shared` (outdated ones are ignored)
-- VS Code extensions missing from `vscode-extensions.txt`
+- packages in `Brewfile.shared` that aren't installed (outdated ones are
+  ignored); fails if `brew` itself is missing
+- extensions in `vscode-extensions.txt` that aren't installed; fails if the
+  `code` command is missing, since VS Code is in `Brewfile.shared`
 - stow symlinks that aren't created yet, or conflicts (`stow -n` dry run).
   Cursor's links are skipped when Cursor isn't installed or its settings
   directory doesn't exist
 - test files reachable from the stow targets (see below)
 - macOS `defaults` that differ from `scripts/macos_defaults.ts` (apps that
-  aren't installed are skipped)
+  aren't installed are skipped; if the app lookup itself fails, it's reported
+  as a failure)
 
 Add a new macOS setting to `SETTINGS` in `scripts/macos_defaults.ts`; both
 `./up macos` and `./up doctor` pick it up.
 
 ### Test Files Are Not Linked
 
-Tests (`*.test.ts`, `test_*.sh`) are only run from the repo, so `.stowrc`
-tells stow to ignore them. `claude` and `scripts` have tests in
-subdirectories and are stowed with `--no-folding`; otherwise stow would link
-a whole directory such as `~/.claude/scripts` and the tests with it. As a
-result, a file added to those packages needs `./up dot` to be linked.
+Tests (`*.test.ts`, `test_*.sh`, at any depth) are only run from the repo,
+so `.stowrc` tells stow to ignore them. The packages that hold tests,
+`claude` and `scripts`, are stowed with `--no-folding`; otherwise stow could
+link a whole directory such as `~/.claude/scripts` and the tests with it.
+As a result, a file added to those packages needs `./up dot` to be linked.
 
-stow doesn't unstow files it ignores, so a machine stowed before `.stowrc`
-keeps its old links to test files. `./up doctor` lists them; remove them by
-hand once.
+A machine stowed before `.stowrc` existed needs a one-time cleanup, which
+`./up doctor` points out:
+
+- folded directories (e.g. `~/.claude/scripts` as a single link): `./up dot`
+  replaces them with real directories
+- links to test files: stow doesn't unstow files it ignores, so remove these
+  by hand
 
 ### Managing Dotfiles
 

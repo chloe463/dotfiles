@@ -26,9 +26,17 @@ describe('applyAll', () => {
   });
 
   it('skips apps that are not installed', async () => {
-    const runner = stub(() => ({ exitCode: 1 }));
+    const runner = stub(() => ({ exitCode: 1, stderr: 'execution error: Can’t get application "Cursor". (-1728)\n' }));
     const [outcome] = await applyAll([app], runner);
     expect(outcome.result).toBe('skipped');
+    expect(runner.calls.some(c => c[0] === 'defaults')).toBe(false);
+  });
+
+  it('fails instead of skipping when the app lookup fails', async () => {
+    const runner = stub(() => ({ exitCode: 1, stderr: 'No user interaction allowed. (-1713)\n' }));
+    const [outcome] = await applyAll([app], runner);
+    expect(outcome.result).toBe('failed');
+    expect(outcome.message).toContain('(-1713)');
     expect(runner.calls.some(c => c[0] === 'defaults')).toBe(false);
   });
 

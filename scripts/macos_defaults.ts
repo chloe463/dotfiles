@@ -2,7 +2,7 @@
 // macOS `defaults` settings this machine is expected to have. `./up macos`
 // writes them; `./up doctor` checks them.
 
-import { bundleIdOf, run, type Runner } from './lib/run';
+import { lookupApp, run, type AppLookup, type Runner } from './lib/run';
 
 export type DefaultValue = { type: 'bool'; value: boolean };
 
@@ -39,9 +39,9 @@ export function settingLabel(s: DefaultSetting): string {
   return `${'domain' in s ? s.domain : s.app} ${s.key}`;
 }
 
-// The domain to pass to `defaults`, or null when the app isn't installed.
-export async function resolveDomain(s: DefaultSetting, runner: Runner = run): Promise<string | null> {
-  return 'domain' in s ? s.domain : bundleIdOf(runner, s.app);
+// The domain to pass to `defaults` (as `id`), or why there is none.
+export async function resolveDomain(s: DefaultSetting, runner: Runner = run): Promise<AppLookup> {
+  return 'domain' in s ? { kind: 'installed', id: s.domain } : lookupApp(runner, s.app);
 }
 
 // `defaults read` prints booleans as 1/0.
@@ -59,11 +59,15 @@ export async function applyAll(settings: DefaultSetting[], runner: Runner = run)
   const outcomes: ApplyOutcome[] = [];
   for (const setting of settings) {
     const domain = await resolveDomain(setting, runner);
-    if (domain === null) {
+    if (domain.kind === 'missing') {
       outcomes.push({ setting, result: 'skipped', message: 'app not installed' });
       continue;
     }
-    const res = await runner(writeArgs(domain, setting));
+    if (domain.kind === 'error') {
+      outcomes.push({ setting, result: 'failed', message: domain.message });
+      continue;
+    }
+    const res = await runner(writeArgs(domain.id, setting));
     outcomes.push(
       res.exitCode === 0
         ? { setting, result: 'written' }

@@ -18,15 +18,19 @@ Stow targets (defined in `run_stow` in `up`):
 - `~/Library/Application Support/{Code,Cursor}/User`: `vscode`, `cursor`
 
 A new package must be added to `run_stow` and to `stowTargets` in
-`scripts/doctor.ts` (`doctor.test.ts` fails if they differ). If it holds runtime or machine-local files,
+`scripts/doctor.ts` (`doctor.test.ts` fails if the packages or `--no-folding` differ;
+it doesn't compare the `-t` targets). If it holds runtime or machine-local files,
 `mkdir -p` its config dir first so stow doesn't tree-fold the whole directory into the
 repo (see the comment in `run_stow`).
 
-Test files (`*.test.ts`, `test_*.sh`) stay in the repo: `.stowrc` ignores them, and
-`claude` and `scripts`, which have tests in subdirectories, are stowed with
-`--no-folding` so a folded directory link can't expose them. So a new file in those
-two packages needs `./up dot` before it shows up in the target (`./up doctor` reports
-it). Run tests from the repo (`bun test`, `bash claude/...`), never from a target.
+Test files (`*.test.ts`, `test_*.sh`, at any depth) stay in the repo: `.stowrc`
+ignores them. Its `--ignore` rules match the path relative to the package, not the
+basename. The packages that hold tests, `claude` and `scripts`, are stowed with
+`--no-folding` so a folded directory link can't expose them (`claude/scripts/` has
+tests; for `scripts`, whose tests are all top-level today, it's a safeguard). So a new
+file in those two packages needs `./up dot` before it shows up in the target
+(`./up doctor` reports it). Run tests from the repo (`bun test`, `bash claude/...`),
+never from a target.
 
 `bin/.local/bin/*` are thin bash wrappers that `exec bun ~/dotfiles/scripts/<name>.ts`;
 the logic lives in `scripts/`.
@@ -38,7 +42,7 @@ the logic lives in `scripts/`.
 ./up dot          # re-create symlinks only (STOW_VERBOSE=1 for more output)
 ./up brew         # brew bundle --file=Brewfile.shared + VS Code extensions
 ./up macos        # apply macOS defaults from scripts/macos_defaults.ts
-./up doctor       # read-only check: brew, VS Code extensions, stow links, defaults
+./up doctor       # read-only check: brew, VS Code extensions, stow links, exposed test files, defaults
 
 bun install
 bun typecheck                     # tsc over scripts/**/*.ts and claude/**/*.ts

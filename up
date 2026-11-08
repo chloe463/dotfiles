@@ -51,7 +51,10 @@ function run_stow()
         local xdg_config="${XDG_CONFIG_HOME:-$HOME/.config}"
         mkdir -p "$xdg_config/zsh" "$xdg_config/gh" "$xdg_config/alacritty" "$xdg_config/herdr" "$xdg_config/hunk" "$xdg_config/runok"
 
-        stow -R -vvv \
+        # -t "$HOME" explicitly: stow's default target is the parent of this
+        # repo, which is $HOME only when the repo lives at ~/dotfiles (and
+        # never in CI, which points $HOME at an empty directory).
+        stow -R -vvv -t "$HOME" \
           alacritty \
           any-script-mcp \
           bat \
@@ -79,10 +82,12 @@ function run_stow()
 
         # Test files are kept out of the targets by the --ignore rules in
         # .stowrc (read from the current directory, i.e. this repo). Ignoring
-        # isn't enough for packages with tests in subdirectories: tree-folding
-        # would link the whole directory (e.g. ~/.claude/scripts) and expose
-        # the tests through it, so those packages are stowed with
-        # --no-folding. New files in them need another `./up dot`.
+        # isn't enough once stow folds a directory into a single link: the
+        # tests inside it show through (claude/scripts has them, so
+        # ~/.claude/scripts would). The packages that hold tests, claude and
+        # scripts, are therefore stowed with --no-folding; for scripts, whose
+        # tests are all at the top level today, it keeps a future
+        # subdirectory safe. New files in them need another `./up dot`.
         stow -R -vvv --no-folding -t "$HOME/.claude" claude
 
         if [ ! -d $HOME/scripts ]; then
@@ -91,7 +96,7 @@ function run_stow()
         stow -R -vvv --no-folding -t "$HOME/scripts" scripts
 
         mkdir -p "$HOME/.local/bin"
-        if ! stow -R -vvv bin; then
+        if ! stow -R -vvv -t "$HOME" bin; then
             echo "ERROR: 'stow -R bin' failed." >&2
             echo "       Check for conflicting files in ~/.local/bin/ and remove them." >&2
             return 1

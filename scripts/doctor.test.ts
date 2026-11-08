@@ -33,6 +33,9 @@ function stub(responses: Responses): Runner & { calls: string[][]; cwds: (string
   return Object.assign(runner, { calls, cwds });
 }
 
+// What osascript prints for an app that isn't installed.
+const appMissing = { exitCode: 1, stderr: '0:9: execution error: Can’t get application "Cursor". (-1728)\n' };
+
 let root: string;
 beforeEach(() => {
   root = mkdtempSync(join(tmpdir(), 'doctor-'));
@@ -80,8 +83,8 @@ describe('checkVscodeExtensions', () => {
     });
   });
 
-  it('skips when the code command is missing', async () => {
-    expect((await checkVscodeExtensions(stub({}), root)).status).toBe('skip');
+  it('fails when the code command is missing, since VS Code is in the Brewfile', async () => {
+    expect((await checkVscodeExtensions(stub({}), root)).status).toBe('fail');
   });
 });
 
@@ -108,10 +111,17 @@ describe('checkStow', () => {
 
   describe('a target tied to an app', () => {
     it('skips without running stow when the app is not installed', async () => {
-      const runner = stub({ osascript: { exitCode: 1 }, stow: {} });
+      const runner = stub({ osascript: appMissing, stow: {} });
       const [result] = await checkStow(runner, '/repo', [{ target: root, packages: ['cursor'], app: 'Cursor' }]);
       expect(result).toMatchObject({ status: 'skip', details: ['Cursor is not installed'] });
       expect(runner.calls.map(c => c[0])).toEqual(['osascript']);
+    });
+
+    it('fails when the app lookup itself fails', async () => {
+      const runner = stub({ osascript: { exitCode: 1, stderr: 'execution error: An error of type -600 has occurred. (-600)\n' }, stow: {} });
+      const [result] = await checkStow(runner, '/repo', [{ target: root, packages: ['cursor'], app: 'Cursor' }]);
+      expect(result.status).toBe('fail');
+      expect(result.details?.[0]).toContain('(-600)');
     });
 
     it('skips when the target directory does not exist', async () => {
@@ -133,6 +143,13 @@ describe('checkStow', () => {
     const [result] = await checkStow(stub({ stow: { stderr } }), '/repo', [{ target: root, packages: ['claude'] }]);
     expect(result.status).toBe('fail');
     expect(result.details).toContain('not linked: LINK: skills/foo => ../../dotfiles/claude/skills/foo');
+  });
+
+  it('reports directories that are not created yet', async () => {
+    const stderr = `MKDIR: skills/foo\n${simulation}`;
+    const [result] = await checkStow(stub({ stow: { stderr } }), '/repo', [{ target: root, packages: ['claude'], noFolding: true }]);
+    expect(result.status).toBe('fail');
+    expect(result.details).toContain('not linked: MKDIR: skills/foo');
   });
 
   it('reports conflicts', async () => {
@@ -180,20 +197,33 @@ describe('stowTargets', () => {
 });
 
 describe('.stowrc', () => {
+  // Paths relative to a package, which is what stow matches --ignore against.
   const ignores = parseStowIgnores(readFileSync(join(import.meta.dir, '../.stowrc'), 'utf8'));
-  const ignored = (name: string) => ignores.some(r => r.test(name));
+  const ignored = (path: string) => ignores.some(r => r.test(path));
 
-  it.each(['doctor.test.ts', 'test_statusline.sh', 'test_create_worktree.sh'])('ignores %s', name => {
-    expect(ignored(name)).toBe(true);
+  it.each([
+    'doctor.test.ts',
+    'scripts/lib/shell.test.ts',
+    'test_statusline.sh',
+    'skills/x/test_y.sh',
+  ])('ignores %s', path => {
+    expect(ignored(path)).toBe(true);
   });
 
-  it.each(['doctor.ts', 'statusline.ts', 'create-worktree.sh', 'latest_test.sh'])('keeps %s', name => {
-    expect(ignored(name)).toBe(false);
+  it.each([
+    'doctor.ts',
+    'statusline.ts',
+    'skills/x/create-worktree.sh',
+    'latest_test.sh',
+    'skills/x/latest_test.sh',
+    'test_dir/run.sh',
+  ])('keeps %s', path => {
+    expect(ignored(path)).toBe(false);
   });
 });
 
 describe('findExposedFiles', () => {
-  const ignores = parseStowIgnores('--ignore=\\.test\\.ts\n--ignore=^test_.*\\.sh\n');
+  const ignores = parseStowIgnores('--ignore=\\.test\\.ts\n--ignore=(^|/)test_[^/]*\\.sh\n');
   let repo: string;
   let target: string;
 
@@ -202,7 +232,7 @@ describe('findExposedFiles', () => {
     target = join(root, 'target');
     mkdirSync(join(repo, 'pkg/scripts'), { recursive: true });
     mkdirSync(target);
-    for (const f of ['a.ts', 'a.test.ts', 'test_a.sh', 'scripts/b.ts', 'scripts/b.test.ts']) {
+    for (const f of ['a.ts', 'a.test.ts', 'test_a.sh', 'scripts/b.ts', 'scripts/b.test.ts', 'scripts/test_b.sh']) {
       writeFileSync(join(repo, 'pkg', f), '');
     }
   });
@@ -227,12 +257,34 @@ describe('findExposedFiles', () => {
 
   it('reports ignored files reachable through a folded directory', () => {
     symlinkSync(join(repo, 'pkg/scripts'), join(target, 'scripts'));
-    expect(find()).toEqual([{ path: join(target, 'scripts/b.test.ts'), linked: false }]);
+    expect(find()).toEqual([
+      { path: join(target, 'scripts/b.test.ts'), linked: false },
+      { path: join(target, 'scripts/test_b.sh'), linked: false },
+    ]);
+  });
+
+  it('matches the rules against the path in the package, like stow', () => {
+    const rootOnly = parseStowIgnores('--ignore=^test_.*\\.sh\n');
+    mkdirSync(join(target, 'scripts'));
+    symlinkSync(join(repo, 'pkg/test_a.sh'), join(target, 'test_a.sh'));
+    symlinkSync(join(repo, 'pkg/scripts/test_b.sh'), join(target, 'scripts/test_b.sh'));
+    // stow links scripts/test_b.sh despite this rule, so it isn't "exposed".
+    expect(findExposedFiles(repo, [{ target, packages: ['pkg'] }], rootOnly)).toEqual([
+      { path: join(target, 'test_a.sh'), linked: true },
+    ]);
   });
 
   it('ignores a file of the same name that is not a link into the repo', () => {
     writeFileSync(join(target, 'a.test.ts'), '');
     expect(find()).toEqual([]);
+  });
+
+  it('fails when .stowrc has no ignore rules', () => {
+    writeFileSync(join(repo, '.stowrc'), "--ignore '\\.test\\.ts'\n");
+    expect(checkExposedFiles(repo, [{ target, packages: ['pkg'] }])).toMatchObject({
+      status: 'fail',
+      details: ['no --ignore=<regex> rules found in .stowrc'],
+    });
   });
 
   it('fails the check with a hint for each case', () => {
@@ -261,8 +313,14 @@ describe('checkDefault', () => {
   });
 
   it('fails when the key is unset', async () => {
-    const result = await checkDefault(stub({ 'defaults read -g K': { exitCode: 1, stderr: 'does not exist' } }), global);
+    const stderr = 'The domain/default pair of (kCFPreferencesAnyApplication, K) does not exist\n';
+    const result = await checkDefault(stub({ 'defaults read -g K': { exitCode: 1, stderr } }), global);
     expect(result.details?.[0]).toContain('got (unset)');
+  });
+
+  it('shows the error when defaults read fails for another reason', async () => {
+    const result = await checkDefault(stub({ 'defaults read -g K': { exitCode: 1, stderr: 'boom\n' } }), global);
+    expect(result).toMatchObject({ status: 'fail', details: ['boom'] });
   });
 
   it('reads the bundle id resolved from the app name', async () => {
@@ -272,8 +330,13 @@ describe('checkDefault', () => {
   });
 
   it('skips when the app is not installed', async () => {
-    const runner = stub({ osascript: { exitCode: 1, stderr: "Can't get application" } });
+    const runner = stub({ osascript: appMissing });
     expect((await checkDefault(runner, app)).status).toBe('skip');
     expect(runner.calls).toHaveLength(1);
+  });
+
+  it('fails when the app lookup itself fails', async () => {
+    const runner = stub({ osascript: { exitCode: 1, stderr: 'No user interaction allowed. (-1713)\n' } });
+    expect((await checkDefault(runner, app)).status).toBe('fail');
   });
 });
