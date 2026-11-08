@@ -157,6 +157,18 @@ function install_global_npm_packages()
   fi
 }
 
+# The doctor and macOS defaults scripts are TypeScript run by bun, which is
+# installed separately from Homebrew (https://bun.sh).
+function run_bun_script()
+{
+  if ! type bun > /dev/null 2>&1; then
+    echo "ERROR: bun is not installed. Install it with: curl -fsSL https://bun.sh/install | bash" >&2
+    return 1
+  fi
+  (cd "$BASE_DIR" && bun install --frozen-lockfile > /dev/null) || return 1
+  bun "$BASE_DIR/scripts/$1"
+}
+
 function main()
 {
     case $1 in
@@ -171,6 +183,12 @@ function main()
             ;;
         "npm" | "yarn")
             install_global_npm_packages
+            ;;
+        "macos")
+            run_bun_script macos_defaults.ts
+            ;;
+        "doctor")
+            run_bun_script doctor.ts
             ;;
         *)
             install_homebrew

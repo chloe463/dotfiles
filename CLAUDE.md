@@ -17,7 +17,8 @@ Stow targets (defined in `run_stow` in `up`):
 - `~/scripts`: `scripts`
 - `~/Library/Application Support/{Code,Cursor}/User`: `vscode`, `cursor`
 
-A new package must be added to `run_stow`. If it holds runtime or machine-local files,
+A new package must be added to `run_stow` and to `stowTargets` in
+`scripts/doctor.ts` (`doctor.test.ts` fails if they differ). If it holds runtime or machine-local files,
 `mkdir -p` its config dir first so stow doesn't tree-fold the whole directory into the
 repo (see the comment in `run_stow`).
 
@@ -30,6 +31,8 @@ the logic lives in `scripts/`.
 ./up              # full setup: brew + sheldon + stow + yarn globals
 ./up dot          # re-create symlinks only (STOW_VERBOSE=1 for more output)
 ./up brew         # brew bundle --file=Brewfile.shared + VS Code extensions
+./up macos        # apply macOS defaults from scripts/macos_defaults.ts
+./up doctor       # read-only check: brew, VS Code extensions, stow links, defaults
 
 bun install
 bun typecheck                     # tsc over scripts/**/*.ts and claude/**/*.ts

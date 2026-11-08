@@ -56,10 +56,28 @@ cd dotfiles
 ./up dot       # Create symlinks only
 ./up sheldon   # Install Zsh plugins
 ./up npm       # Install global npm packages
+./up macos     # Apply macOS defaults (scripts/macos_defaults.ts)
+./up doctor    # Check packages, symlinks and macOS defaults (read-only)
 
 # Debug mode (verbose stow output)
 STOW_VERBOSE=1 ./up dot
 ```
+
+`macos` and `doctor` run with [bun](https://bun.sh), which isn't installed by
+`./up`. `./up macos` isn't part of the full setup; run it once after `./up`.
+
+### Checking the Setup
+
+`./up doctor` reports what doesn't match the repo and exits 1 if anything fails:
+
+- Homebrew packages missing from `Brewfile.shared` (outdated ones are ignored)
+- VS Code extensions missing from `vscode-extensions.txt`
+- stow symlinks that aren't created yet, or conflicts (`stow -n` dry run)
+- macOS `defaults` that differ from `scripts/macos_defaults.ts` (apps that
+  aren't installed are skipped)
+
+Add a new macOS setting to `SETTINGS` in `scripts/macos_defaults.ts`; both
+`./up macos` and `./up doctor` pick it up.
 
 ### Managing Dotfiles
 
