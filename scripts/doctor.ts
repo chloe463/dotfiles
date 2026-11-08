@@ -144,7 +144,8 @@ export function findExposedFiles(repo: string, targets: StowTarget[], ignores: R
     for (const pkg of packages) {
       const root = join(repo, pkg);
       if (!existsSync(root)) continue;
-      for (const rel of readdirSync(root, { recursive: true }) as string[]) {
+      // Sorted because readdir order depends on the filesystem (unordered on Linux).
+      for (const rel of (readdirSync(root, { recursive: true }) as string[]).sort()) {
         if (!ignores.some(r => r.test(basename(rel)))) continue;
         const dest = join(target, rel);
         try {
