@@ -1,5 +1,4 @@
 angular.ng-template
-anysphere.remote-containers
 apollographql.vscode-apollo
 arcticicestudio.nord-visual-studio-code
 astro-build.astro-vscode
@@ -7,19 +6,14 @@ biomejs.biome
 bradlc.vscode-tailwindcss
 chakrounanas.turbo-console-log
 dbaeumer.vscode-eslint
-denoland.vscode-deno
 eamodio.gitlens
 esbenp.prettier-vscode
 eseom.nunjucks-template
-figma.figma-vscode-extension
 formulahendry.auto-rename-tag
 github.vscode-github-actions
 graphql.vscode-graphql
 graphql.vscode-graphql-syntax
-jock.svg
 kaiwood.endwise
-karunamurti.haml
-ms-vsliveshare.vsliveshare
 orta.vscode-twoslash-queries
 pkief.material-icon-theme
 prisma.prisma
@@ -29,11 +23,8 @@ styled-components.vscode-styled-components
 stylelint.vscode-stylelint
 tamasfe.even-better-toml
 vscodevim.vim
-vsls-contrib.codetour
 vue.volar
 wallabyjs.console-ninja
 wayou.vscode-todo-highlight
 wmaurer.change-case
 yoavbls.pretty-ts-errors
-zainchen.json
-zxh404.vscode-proto3
