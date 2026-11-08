@@ -22,6 +22,12 @@ A new package must be added to `run_stow` and to `stowTargets` in
 `mkdir -p` its config dir first so stow doesn't tree-fold the whole directory into the
 repo (see the comment in `run_stow`).
 
+Test files (`*.test.ts`, `test_*.sh`) stay in the repo: `.stowrc` ignores them, and
+`claude` and `scripts`, which have tests in subdirectories, are stowed with
+`--no-folding` so a folded directory link can't expose them. So a new file in those
+two packages needs `./up dot` before it shows up in the target (`./up doctor` reports
+it). Run tests from the repo (`bun test`, `bash claude/...`), never from a target.
+
 `bin/.local/bin/*` are thin bash wrappers that `exec bun ~/dotfiles/scripts/<name>.ts`;
 the logic lives in `scripts/`.
 

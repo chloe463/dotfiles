@@ -1,25 +1,36 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { checkBrew, checkDefault, checkStow, checkVscodeExtensions, stowTargets } from './doctor';
+import {
+  checkBrew,
+  checkDefault,
+  checkExposedFiles,
+  checkStow,
+  checkVscodeExtensions,
+  findExposedFiles,
+  parseStowIgnores,
+  stowTargets,
+} from './doctor';
 import type { RunResult, Runner } from './lib/run';
 import type { DefaultSetting } from './macos_defaults';
 
 type Responses = Record<string, Partial<RunResult>>;
 
 // Answers by the command's first words; anything unlisted behaves as not installed.
-function stub(responses: Responses): Runner & { calls: string[][] } {
+function stub(responses: Responses): Runner & { calls: string[][]; cwds: (string | undefined)[] } {
   const calls: string[][] = [];
-  const runner = async (cmd: string[]) => {
+  const cwds: (string | undefined)[] = [];
+  const runner = async (cmd: string[], opts?: { cwd?: string }) => {
     calls.push(cmd);
+    cwds.push(opts?.cwd);
     const key = Object.keys(responses)
       .sort((a, b) => b.length - a.length)
       .find(k => cmd.join(' ').startsWith(k));
     if (key === undefined) return { exitCode: 127, stdout: '', stderr: '' };
     return { exitCode: 0, stdout: '', stderr: '', ...responses[key] };
   };
-  return Object.assign(runner, { calls });
+  return Object.assign(runner, { calls, cwds });
 }
 
 let root: string;
@@ -82,10 +93,39 @@ describe('checkStow', () => {
     expect(result.status).toBe('ok');
   });
 
-  it('runs a dry run against the repo and target', async () => {
+  it('runs a dry run in the repo so stow reads .stowrc', async () => {
     const runner = stub({ stow: {} });
     await checkStow(runner, '/repo', [{ target: root, packages: ['zsh', 'git'] }]);
     expect(runner.calls[0]).toEqual(['stow', '-n', '-v', '-d', '/repo', '-t', root, 'zsh', 'git']);
+    expect(runner.cwds[0]).toBe('/repo');
+  });
+
+  it('passes --no-folding for packages stowed without folding', async () => {
+    const runner = stub({ stow: {} });
+    await checkStow(runner, '/repo', [{ target: root, packages: ['claude'], noFolding: true }]);
+    expect(runner.calls[0]).toEqual(['stow', '-n', '-v', '--no-folding', '-d', '/repo', '-t', root, 'claude']);
+  });
+
+  describe('a target tied to an app', () => {
+    it('skips without running stow when the app is not installed', async () => {
+      const runner = stub({ osascript: { exitCode: 1 }, stow: {} });
+      const [result] = await checkStow(runner, '/repo', [{ target: root, packages: ['cursor'], app: 'Cursor' }]);
+      expect(result).toMatchObject({ status: 'skip', details: ['Cursor is not installed'] });
+      expect(runner.calls.map(c => c[0])).toEqual(['osascript']);
+    });
+
+    it('skips when the target directory does not exist', async () => {
+      const runner = stub({ osascript: { stdout: 'com.todesktop.abc\n' }, stow: {} });
+      const [result] = await checkStow(runner, '/repo', [{ target: join(root, 'missing'), packages: ['cursor'], app: 'Cursor' }]);
+      expect(result).toMatchObject({ status: 'skip', details: ['target directory does not exist'] });
+    });
+
+    it('checks the links when the app is installed and the target exists', async () => {
+      const stderr = 'LINK: settings.json => ../dotfiles/cursor/settings.json\n';
+      const runner = stub({ osascript: { stdout: 'com.todesktop.abc\n' }, stow: { stderr } });
+      const [result] = await checkStow(runner, '/repo', [{ target: root, packages: ['cursor'], app: 'Cursor' }]);
+      expect(result.status).toBe('fail');
+    });
   });
 
   it('reports links that are not created yet', async () => {
@@ -116,16 +156,93 @@ describe('checkStow', () => {
 });
 
 describe('stowTargets', () => {
-  // Collects every package that run_stow in `up` passes to `stow -R`.
-  function packagesInUp(): string[] {
+  // The `stow -R` calls in run_stow in `up`, as packages and --no-folding.
+  function stowCallsInUp(): { packages: string[]; noFolding: boolean }[] {
     const up = readFileSync(join(import.meta.dir, '../up'), 'utf8').replace(/\\\n\s*/g, ' ');
     const body = up.slice(up.indexOf('function run_stow'), up.indexOf('function install_homebrew'));
-    return [...body.matchAll(/stow -R -vvv (?:-t "[^"]+" )?([\w -]+)/g)].flatMap(m => m[1].trim().split(/\s+/));
+    return [...body.matchAll(/^\s*(?:if ! )?stow -R ([^;\n]+?)(?:;|$)/gm)].map(([, args]) => {
+      const words: string[] = args.match(/"[^"]*"|\S+/g) ?? [];
+      const packages = words.filter((w, i) => !w.startsWith('-') && words[i - 1] !== '-t');
+      return { packages, noFolding: words.includes('--no-folding') };
+    });
   }
 
-  it('lists the same packages as run_stow in up', () => {
-    const packages = stowTargets('/home').flatMap(t => t.packages);
-    expect(packages.sort()).toEqual(packagesInUp().sort());
+  it('matches the stow calls in run_stow in up', () => {
+    const fromUp = stowCallsInUp();
+    expect(fromUp.length).toBeGreaterThan(0);
+    const sort = (calls: { packages: string[]; noFolding: boolean }[]) =>
+      calls.map(c => `${[...c.packages].sort().join(' ')}${c.noFolding ? ' --no-folding' : ''}`).sort();
+    // run_stow stows bin in a call of its own; doctor checks it with the other $HOME packages.
+    const merged = fromUp.filter(c => !c.packages.includes('bin'));
+    merged[merged.findIndex(c => c.packages.includes('zsh'))].packages.push('bin');
+    expect(sort(stowTargets('/home').map(t => ({ packages: t.packages, noFolding: !!t.noFolding })))).toEqual(sort(merged));
+  });
+});
+
+describe('.stowrc', () => {
+  const ignores = parseStowIgnores(readFileSync(join(import.meta.dir, '../.stowrc'), 'utf8'));
+  const ignored = (name: string) => ignores.some(r => r.test(name));
+
+  it.each(['doctor.test.ts', 'test_statusline.sh', 'test_create_worktree.sh'])('ignores %s', name => {
+    expect(ignored(name)).toBe(true);
+  });
+
+  it.each(['doctor.ts', 'statusline.ts', 'create-worktree.sh', 'latest_test.sh'])('keeps %s', name => {
+    expect(ignored(name)).toBe(false);
+  });
+});
+
+describe('findExposedFiles', () => {
+  const ignores = parseStowIgnores('--ignore=\\.test\\.ts\n--ignore=^test_.*\\.sh\n');
+  let repo: string;
+  let target: string;
+
+  beforeEach(() => {
+    repo = join(root, 'repo');
+    target = join(root, 'target');
+    mkdirSync(join(repo, 'pkg/scripts'), { recursive: true });
+    mkdirSync(target);
+    for (const f of ['a.ts', 'a.test.ts', 'test_a.sh', 'scripts/b.ts', 'scripts/b.test.ts']) {
+      writeFileSync(join(repo, 'pkg', f), '');
+    }
+  });
+
+  const find = () => findExposedFiles(repo, [{ target, packages: ['pkg'] }], ignores);
+
+  it('reports nothing when only regular files are linked', () => {
+    symlinkSync(join(repo, 'pkg/a.ts'), join(target, 'a.ts'));
+    mkdirSync(join(target, 'scripts'));
+    symlinkSync(join(repo, 'pkg/scripts/b.ts'), join(target, 'scripts/b.ts'));
+    expect(find()).toEqual([]);
+  });
+
+  it('reports links to ignored files left from before .stowrc', () => {
+    symlinkSync(join(repo, 'pkg/a.test.ts'), join(target, 'a.test.ts'));
+    symlinkSync(join(repo, 'pkg/test_a.sh'), join(target, 'test_a.sh'));
+    expect(find()).toEqual([
+      { path: join(target, 'a.test.ts'), linked: true },
+      { path: join(target, 'test_a.sh'), linked: true },
+    ]);
+  });
+
+  it('reports ignored files reachable through a folded directory', () => {
+    symlinkSync(join(repo, 'pkg/scripts'), join(target, 'scripts'));
+    expect(find()).toEqual([{ path: join(target, 'scripts/b.test.ts'), linked: false }]);
+  });
+
+  it('ignores a file of the same name that is not a link into the repo', () => {
+    writeFileSync(join(target, 'a.test.ts'), '');
+    expect(find()).toEqual([]);
+  });
+
+  it('fails the check with a hint for each case', () => {
+    writeFileSync(join(repo, '.stowrc'), '--ignore=\\.test\\.ts\n');
+    symlinkSync(join(repo, 'pkg/a.test.ts'), join(target, 'a.test.ts'));
+    symlinkSync(join(repo, 'pkg/scripts'), join(target, 'scripts'));
+    const result = checkExposedFiles(repo, [{ target, packages: ['pkg'] }]);
+    expect(result.status).toBe('fail');
+    expect(result.details).toContain('stow no longer manages these links; remove them by hand');
+    expect(result.details).toContain('run ./up dot to unfold the directories');
   });
 });
 

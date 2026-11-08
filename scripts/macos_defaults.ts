@@ -2,7 +2,7 @@
 // macOS `defaults` settings this machine is expected to have. `./up macos`
 // writes them; `./up doctor` checks them.
 
-import { run, type Runner } from './lib/run';
+import { bundleIdOf, run, type Runner } from './lib/run';
 
 export type DefaultValue = { type: 'bool'; value: boolean };
 
@@ -41,10 +41,7 @@ export function settingLabel(s: DefaultSetting): string {
 
 // The domain to pass to `defaults`, or null when the app isn't installed.
 export async function resolveDomain(s: DefaultSetting, runner: Runner = run): Promise<string | null> {
-  if ('domain' in s) return s.domain;
-  const res = await runner(['osascript', '-e', `id of app "${s.app}"`]);
-  const id = res.stdout.trim();
-  return res.exitCode === 0 && id ? id : null;
+  return 'domain' in s ? s.domain : bundleIdOf(runner, s.app);
 }
 
 // `defaults read` prints booleans as 1/0.

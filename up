@@ -76,12 +76,19 @@ function run_stow()
 
         stow -R -vvv -t "$vscode_user" vscode
         stow -R -vvv -t "$cursor_user" cursor
-        stow -R -vvv -t "$HOME/.claude" claude
+
+        # Test files are kept out of the targets by the --ignore rules in
+        # .stowrc (read from the current directory, i.e. this repo). Ignoring
+        # isn't enough for packages with tests in subdirectories: tree-folding
+        # would link the whole directory (e.g. ~/.claude/scripts) and expose
+        # the tests through it, so those packages are stowed with
+        # --no-folding. New files in them need another `./up dot`.
+        stow -R -vvv --no-folding -t "$HOME/.claude" claude
 
         if [ ! -d $HOME/scripts ]; then
             mkdir $HOME/scripts
         fi
-        stow -R -vvv -t "$HOME/scripts" scripts
+        stow -R -vvv --no-folding -t "$HOME/scripts" scripts
 
         mkdir -p "$HOME/.local/bin"
         if ! stow -R -vvv bin; then

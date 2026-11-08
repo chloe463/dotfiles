@@ -77,6 +77,17 @@ jobs:
           export HOME="$RUNNER_TEMP/stow-home"
           mkdir -p "$HOME"
           ./up stow
+      - name: Verify test files are not linked
+        run: |
+          # .stowrc ignores tests and claude/scripts are stowed with
+          # --no-folding, so no test file may be reachable from the targets,
+          # not even through a tree-folded directory (hence find -L).
+          exposed=$(find -L "$RUNNER_TEMP/stow-home" \( -name '*.test.ts' -o -name 'test_*.sh' \))
+          if [ -n "$exposed" ]; then
+            echo "Test files reachable from stow targets:"
+            echo "$exposed"
+            exit 1
+          fi
   typecheck:
     name: TypeScript type check
     runs-on: ubuntu-latest

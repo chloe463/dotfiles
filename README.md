@@ -72,12 +72,27 @@ STOW_VERBOSE=1 ./up dot
 
 - Homebrew packages missing from `Brewfile.shared` (outdated ones are ignored)
 - VS Code extensions missing from `vscode-extensions.txt`
-- stow symlinks that aren't created yet, or conflicts (`stow -n` dry run)
+- stow symlinks that aren't created yet, or conflicts (`stow -n` dry run).
+  Cursor's links are skipped when Cursor isn't installed or its settings
+  directory doesn't exist
+- test files reachable from the stow targets (see below)
 - macOS `defaults` that differ from `scripts/macos_defaults.ts` (apps that
   aren't installed are skipped)
 
 Add a new macOS setting to `SETTINGS` in `scripts/macos_defaults.ts`; both
 `./up macos` and `./up doctor` pick it up.
+
+### Test Files Are Not Linked
+
+Tests (`*.test.ts`, `test_*.sh`) are only run from the repo, so `.stowrc`
+tells stow to ignore them. `claude` and `scripts` have tests in
+subdirectories and are stowed with `--no-folding`; otherwise stow would link
+a whole directory such as `~/.claude/scripts` and the tests with it. As a
+result, a file added to those packages needs `./up dot` to be linked.
+
+stow doesn't unstow files it ignores, so a machine stowed before `.stowrc`
+keeps its old links to test files. `./up doctor` lists them; remove them by
+hand once.
 
 ### Managing Dotfiles
 

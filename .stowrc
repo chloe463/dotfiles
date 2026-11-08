@@ -1,0 +1,2 @@
+--ignore=\.test\.ts
+--ignore=^test_.*\.sh
