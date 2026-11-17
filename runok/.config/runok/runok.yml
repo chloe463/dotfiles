@@ -44,6 +44,116 @@ rules:
   - deny: 'chown root:* *'
     message: 'Changing ownership to root is not allowed.'
 
+  # Credentials: the `Read(...)` denies in claude/settings.json only cover the
+  # Read tool, so `cat` / `grep` through Bash would still read these files.
+  # Keep the paths below in step with that list. `*secret*` / `*password*`
+  # are left out on purpose: they would also stop ordinary searches such as
+  # `grep -rn password src`.
+  # The `.config/zsh` directory itself only counts under the home directory, so
+  # `zsh/.config/zsh` in this repo is fine.
+  # shortcut: a relative `.config/zsh` is not caught when the cwd is the home directory, upgrade with fs.cwd if that form is ever used.
+  - deny: '*'
+    when: >-
+      args.exists(a,
+        a.matches('(^|/)(\\.?credentials\\.zsh|\\.env[^/]*|id_rsa[^/]*|[^/]*\\.(pem|key|p12|keystore|jks)|credentials\\.json|[^/]*-key\\.json|serviceAccountKey\\.json)$')
+        || a.matches('^(~|\\$HOME|\\$\\{HOME\\}|/Users/[^/]+|/home/[^/]+)/\\.config/zsh/?$')
+        || a.matches('(^|/)\\.config/(gcloud|sops)(/|$)')
+        || a.matches('(^|/)\\.(ssh|gnupg|aws|azure)(/|$)'))
+    message: 'Reading credential files is not allowed, even through Bash. Ask the user.'
+    tests:
+      - deny: 'cat ~/.config/zsh/credentials.zsh'
+      - deny: 'grep -rn NPM_TOKEN ~/.zshrc ~/.config/zsh'
+      - deny: 'grep -rn NPM_TOKEN /Users/x/.config/zsh/'
+      - deny: 'grep -rn TOKEN $HOME/.config/zsh'
+      - deny: 'head -3 .env.local'
+      - deny: 'sed -n 1p ~/.ssh/config'
+      - deny: 'bash -c "cat ~/.config/zsh/credentials.zsh"'
+      - deny: 'cat server.pem'
+      - deny: 'cat ~/.aws/credentials'
+      - deny: 'ls ~/.config/gcloud/'
+      - allow: 'cat ~/.config/zsh/.zshrc'
+      - allow: 'ls zsh/.config/zsh'
+      - allow: 'grep -rn foo zsh/.config/zsh'
+      - allow: 'ls ~/.config'
+      - allow: 'cat README.md'
+      - allow: 'grep -rn foo src'
+  # A recursive search over the home directory or ~/.config reaches the files
+  # above without naming them. The flag check also matches a short cluster
+  # such as `-rn`, and `--color`-style long flags that merely contain an `r`
+  # (harmless: a search aimed at the home directory is only asked about).
+  # `-d recurse` / `--directories=recurse` are not covered.
+  - ask: 'grep|egrep|fgrep *'
+    when: >-
+      flags.exists(f, f.matches('^[A-Za-z0-9]*[rR][A-Za-z0-9]*$|^(dereference-)?recursive$'))
+      && args.exists(a, a.matches('^(~|\\$HOME|\\$\\{HOME\\}|/Users/[^/]+)(/|/\\.config/?)?$'))
+    message: 'A recursive search over the home directory can read credential files. Narrow the path.'
+  # rg and ag search recursively by default.
+  - ask: 'rg|ag *'
+    when: >-
+      args.exists(a, a.matches('^(~|\\$HOME|\\$\\{HOME\\}|/Users/[^/]+)(/|/\\.config/?)?$'))
+    message: 'A recursive search over the home directory can read credential files. Narrow the path.'
+    tests:
+      - ask: 'grep -rn TOKEN ~/.config'
+      - ask: 'grep -rn TOKEN ~/.config/'
+      - ask: 'grep -rn TOKEN $HOME'
+      - ask: 'grep -R TOKEN ${HOME}/'
+      - ask: 'grep --recursive TOKEN ~'
+      - ask: 'egrep -rn TOKEN /Users/x'
+      - ask: 'rg TOKEN ~'
+      - ask: 'ag TOKEN ~/'
+      - allow: 'rg foo ~/dotfiles'
+      - allow: 'rg foo ~/.config/nvim'
+      - allow: 'grep -rn foo ~/dotfiles'
+      - allow: 'grep TOKEN ~/.zshrc'
+      - allow: 'grep TOKEN ~'
+  # A glob under the real ~/.config/zsh/ expands to credentials.zsh only after
+  # runok has judged the command. Paths that do not start at the home
+  # directory (`zsh/.config/zsh/*` inside this repo) are fine.
+  - deny: '*'
+    when: >-
+      args.exists(a, a.matches('^(~|\\$HOME|\\$\\{HOME\\}|/Users/[^/]+|/home/[^/]+)/\\.config/zsh/.*[*?\\[]'))
+    message: 'A glob under ~/.config/zsh/ can expand to credentials.zsh. Name the file you need instead.'
+    tests:
+      - deny: 'cat ~/.config/zsh/*'
+      - deny: 'cat ~/.config/zsh/cred*'
+      - deny: 'cat $HOME/.config/zsh/c?edentials.zsh'
+      - deny: 'cat ${HOME}/.config/zsh/[c]*'
+      - deny: 'cat /Users/x/.config/zsh/*'
+      - deny: 'cat /home/x/.config/zsh/*'
+      - allow: 'cat ~/.config/zsh/.zshrc'
+      - allow: 'grep foo zsh/.config/zsh/*'
+  # Printing a secret variable needs no file read. A name counts when TOKEN,
+  # KEY, SECRET, PASSWORD or PASSWD is a whole `_`-separated word of it, so
+  # `$NPM_TOKEN` and `${API_KEY}` match but `$MONKEY` and `$key` do not.
+  # Checking that a variable is set (`test -n`, `${#VAR}`) stays allowed.
+  - deny: 'echo|printf *'
+    when: >-
+      args.exists(a, a.matches('\\$\\{?([A-Za-z0-9]*_)*(TOKEN|KEY|SECRET|PASSWORD|PASSWD)(_[A-Za-z0-9]*)*([^A-Za-z0-9_]|$)'))
+    message: 'Printing secret environment variables is not allowed. To check one is set, use `test -n "$VAR"`.'
+  - deny: 'printenv *'
+    when: >-
+      args.exists(a, a.matches('^([A-Za-z0-9]*_)*(TOKEN|KEY|SECRET|PASSWORD|PASSWD)(_[A-Za-z0-9]*)*$'))
+    message: 'Printing secret environment variables is not allowed. To check one is set, use `test -n "$VAR"`.'
+  # Bare `printenv` / `env` dump every variable. `env FOO=1 ls` runs a command.
+  - ask: 'printenv'
+  - ask: 'env'
+    tests:
+      - deny: 'echo $NPM_TOKEN'
+      - deny: "printf '%s' \"${API_KEY}\""
+      - deny: 'echo "token: ${GITHUB_TOKEN}"'
+      - deny: 'echo $DB_PASSWD'
+      - deny: 'printenv NPM_TOKEN'
+      - ask: 'printenv'
+      - ask: 'env'
+      - allow: 'echo ${#NPM_TOKEN}'
+      - allow: 'test -n "$NPM_TOKEN"'
+      - allow: '[ -n "$NPM_TOKEN" ]'
+      - allow: 'echo $HOME'
+      - allow: 'echo $MONKEY'
+      - allow: 'echo $TOKENIZER'
+      - allow: 'printenv HOME'
+      - allow: 'env FOO=1 ls'
+
   # Network access: confirm before fetching arbitrary URLs
   - ask: 'curl *'
   - ask: 'wget *'
