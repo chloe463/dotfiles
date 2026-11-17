@@ -16,17 +16,58 @@ rules:
     message: 'Removing dependencies is not allowed. Ask the user first.'
     tests:
       - deny: 'bun remove chalk'
+  # An install is confirmed only when it adds a package (a non-flag argument
+  # after the subcommand) or installs globally. A bare install just restores
+  # what the manifest and lockfile already list, and branch switches and
+  # rebases need it every time. `args` includes the subcommand itself, hence
+  # `size(args) > 1`. `ask` outranks `allow`, so the allow rules below only
+  # have to cover the install forms and this rule carves out the exceptions.
+  # shortcut: a flag's value (`--cwd packages/x`) looks like a package name and
+  # is asked, and `-gf` is not seen as `-g`; fix if either gets in the way.
   - ask: 'npm|yarn|pnpm|bun install *'
+    when: >-
+      size(args) > 1 || 'g' in flags || 'global' in flags ||
+      ('location' in flags && flags.location == 'global')
     tests:
-      - ask: 'bun install'
+      - allow: 'yarn'
+      - allow: 'yarn install'
+      - allow: 'yarn install --frozen-lockfile'
+      - allow: 'yarn install --immutable'
+      - allow: 'npm install'
+      - allow: 'pnpm install'
+      - allow: 'pnpm install --frozen-lockfile'
+      - allow: 'bun install'
+      - allow: 'bun install --frozen-lockfile'
+      - allow: 'npm install --location=project'
+      - allow: 'cd app && yarn install'
+      - ask: 'yarn install lodash'
+      - ask: 'yarn install --frozen-lockfile lodash'
+      - ask: 'pnpm install lodash'
       - ask: 'npm install lodash'
       - ask: 'npm install -g npkill'
-  # Aliases of the install above (`npm i`, `add`, yarn's global add).
+      - ask: 'npm install --global foo'
+      - ask: 'npm install --location=global foo'
+      - ask: 'bun install -g foo'
+      - pass: 'yarn run build'
+      - pass: 'npm ci'
+  # Bare `yarn` is `yarn install`.
+  - allow: 'yarn'
+  - allow: 'npm|yarn|pnpm|bun install *'
+  # Aliases of the install above (`npm i`, `add`) are judged the same way.
+  # `yarn|pnpm|bun add` and yarn's global add are always asked.
   - ask: 'npm i|add *'
+    when: >-
+      size(args) > 1 || 'g' in flags || 'global' in flags ||
+      ('location' in flags && flags.location == 'global')
+  - allow: 'npm i|add *'
   - ask: 'yarn|pnpm|bun add *'
   - ask: 'yarn global add *'
     tests:
+      - allow: 'npm i'
+      - allow: 'npm add'
       - ask: 'npm i lodash'
+      - ask: 'npm add lodash'
+      - ask: 'npm i -g foo'
       - ask: 'yarn add chalk'
       - ask: 'pnpm add -D vitest'
       - ask: 'bun add -g foo'
