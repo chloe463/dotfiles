@@ -105,6 +105,7 @@ Explain the motivation and context for this change:
 3. **Verify branch state**
    - Check if branch is pushed: `git status`
    - Push if needed: `git push -u origin <branch-name>`
+   - Run the push as its own Bash call; do not chain it with `gh pr create` using `&&`. A single approval that covers several outward-facing actions is hard to judge and may be denied
 
 4. **Draft PR content**
    - Create title based on the dominant change type
@@ -112,7 +113,9 @@ Explain the motivation and context for this change:
    - Ensure all sections are filled appropriately
 
 5. **Create PR**
-   - Use `gh pr create --title "..." --body "..."`
+   - Write the description to a Markdown file in the scratchpad directory (the temporary directory the session specifies)
+   - Run `gh pr create --title "..." --body-file <path>` as its own Bash call, after the push has finished
+   - Do not pass the body inline with `--body "$(cat <<'EOF' ...)"`; the file can be reviewed and reused with `gh pr edit --body-file <path>`
    - Add reviewers if configured
    - Set base branch if not default
 
