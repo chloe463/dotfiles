@@ -145,10 +145,27 @@
   },
   "enabledPlugins": {
     "example-skills@anthropic-agent-skills": false,
-    "pr-review-toolkit@claude-plugins-official": true
+    "pr-review-toolkit@claude-plugins-official": true,
+    "ponytail@ponytail": true
+  },
+  "extraKnownMarketplaces": {
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
+    }
   },
   "language": "Japanese",
   "effortLevel": "xhigh",
+  "pluginConfigs": {
+    "ponytail@ponytail": {
+      "options": {
+        "ledger": true,
+        "sendNames": true
+      }
+    }
+  },
   "autoUpdatesChannel": "latest",
   "tui": "fullscreen",
   "prefersReducedMotion": true,
