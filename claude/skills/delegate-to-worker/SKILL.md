@@ -18,7 +18,8 @@ The design session (this session) handles design, task briefs and diff review, a
 
 ## 1. Write the task brief
 
-- **Before investigating, bring your local checkout up to date**: `git fetch origin main`, then `git merge --ff-only origin/main` if the working tree is clean. If it isn't clean, inspect origin/main with `git show origin/main:<path>` or `git grep <pattern> origin/main`. This avoids missing changes from a PR that was just merged
+- **Before investigating, bring your local checkout up to date**, but only when the main checkout is on the default branch and clean. Gate and update in **one** command so a non-default branch stops it: `test "$(git branch --show-current)" = main && test -z "$(git status --porcelain)" && git merge --ff-only origin/main` after `git fetch origin main` (if the user has a sync alias such as `git sync` that switches to main, use it in place of the merge, still behind the same gate). **Never switch the user's branch** (2026-11-16: running the sync without the gate switched the user's in-progress branch to main). If the gate fails, inspect origin/main with `git show origin/main:<path>` or `git grep <pattern> origin/main`. This avoids missing changes from a PR that was just merged
+- Creating a worktree alone does not need this: `create-worktree.sh --base origin/main` fetches by itself
 
 - Location: `.ai_logs/projects/<project>/tasks/YYYYMMDD_<id>-<topic>.md` (see "Project layout" in the `ai-logs-workflow` skill). Projects started before that layout keep `.ai_logs/YYYY/MM/YYYYMMDD_<project>_task-<id>-<topic>.md`
 - If a common rules file exists (e.g. `.ai_logs/YYYY/MM/tools/worker-common-rules.md`), **link it with "must read" instead of copying its contents**. If there isn't one, propose creating it
@@ -26,9 +27,13 @@ The design session (this session) handles design, task briefs and diff review, a
   - Requester, date, background material, start conditions (e.g. a base PR), other tasks running in parallel
   - Goal, what is already decided (design conclusions), where to work (branch name and what to branch from)
   - Tests (TDD, following the project's test rules), verification (how to enumerate which tests to run)
+  - When the brief prescribes what a test should check, first make sure the project's rules don't list that kind of test as one not to write (e.g. a rule against asserting that a library writes the value it was given). Otherwise the worker writes it and review removes it
+  - When the change touches a component shared by several pages, decide in the brief where shared types and constants live: somewhere that belongs to no single page (e.g. a shared constants file), not one page's module
+  - When the brief has the worker add a step to CI, decide in the brief which job runs it and what that step needs (e.g. build output such as a compiled `lib`): don't let the worker pick the job. A typecheck step the worker put in a job with no build step failed on unresolved imports
   - PR (base, key points for Why / What, "what this PR does not cover", manual test steps). Remind the worker that commit messages and PR text must not mention `.ai_logs` paths (see "Visibility Boundaries" in the `ai-logs-workflow` skill)
   - A "## Result" section at the end (not started)
 - Manual test steps must include **the environment to verify** (if the project has PR previews: the preview, and **how to confirm the preview is running the target commit**) and, when URLs or navigation are involved, **how to stop or undo a navigation** (e.g. cancel a leave-confirmation, browser back)
+- When the brief has the worker run a temporary experiment that rewrites tracked files and then restores them (e.g. simulating a version bump), prescribe how to restore: copy the files aside first, or undo with Edit. Never write `git checkout -- .`, which also discards the worker's own uncommitted changes (2026-11-10)
 - Mark "(needs confirmation)" only on assumptions that haven't been verified against the code and behavior (i.e. that contain guesses)
 - **Don't write about tools or practices you don't know from imagination** (e.g. how to build a stacked PR). Ask the user first
 - Once written, show it to the user and proceed only after getting their OK
@@ -104,7 +109,9 @@ herdr agent wait <name> --until idle --until done --until blocked --timeout 3600
 - **Self-review with the project's PR review skill** (if the repository has one): the user runs it in the design session, never in the worker, because the worker wrote the code. Point it at the PR and the worker's worktree
   - Triage stays in the design session. Once it is decided which findings to fix, write them to a file (e.g. `.ai_logs/.../review-comments/pr<n>-self-review.md`), add an "Addressing self-review" section at the end of the brief, and delegate with the same flow as 5. The worker gets instructions only from the design session, as with AI reviews, so it has no reason to suspect them
   - When the worker reports the commit hashes, have the skill re-review the fixes in the same design session, so the review context carries over
+- **Moving commits out of a PR you are closing** (cherry-pick onto a new branch from main): before resolving, check how the shared components those commits touch changed on main since the old branch was cut (`git log <old base>..origin/main -- <file>`). A new caller on main can make the old resolution force dummy values onto it (2026-11-06)
 - **Bringing a PR that has drifted from main up to date** (e.g. approved, before merge): have the worker run `git fetch origin` → `git merge origin/main` (don't rebase: no force push is needed and approvals stay. Verified on 2026-10-30 with two approved PRs)
+  - **Right after the PR's base PR is merged, check first whether GitHub already rebased the branch**: compare `gh pr view <PR> --json headRefOid` with the worker's `git rev-parse HEAD`. If they differ, have the worker align with `git reset --hard origin/<branch>` instead of merging (after making sure only the links are uncommitted, and with the user's confirmation). On 2026-11-06, GitHub's stacked PR rebased the branch server-side while the worker was merging main, and the histories diverged
   - First check for conflicts with `git merge-tree --write-tree --name-only origin/main origin/<branch>`
   - **If there are conflicts, stop once they're resolved (before the merge commit) and have the worker report how they were resolved**. The design session decides on the intent when both changes collide (e.g. whether to block a button added on main using this PR's mechanism)
   - Then have the worker run typecheck and the tests for the files changed in the PR and the tests that import them, write the results to a file, and only then push
