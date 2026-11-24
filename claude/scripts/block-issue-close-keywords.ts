@@ -5,54 +5,14 @@
 // Closing issues is left to the user, and runok only sees the command line,
 // so this also reads the files and here-documents passed via -F/--body-file.
 
-import { readFileSync, mkdirSync, appendFileSync } from "node:fs";
-import { homedir, userInfo } from "node:os";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { isValidBashData, runGuard } from "./lib/hook";
 import { expandHome, parseGit, resolveCommands, splitCommands } from "./lib/shell";
-
-const LOG_DIR = `${homedir()}/.claude/logs`;
-const LOG_FILE = `${LOG_DIR}/${userInfo().username}-hook-block-issue-close-keywords.log`;
 
 // GitHub's closing keywords followed by `#123` or `owner/repo#123`
 // https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue
 const CLOSING_REFERENCE = /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\b:?\s+(?:[\w.-]+\/[\w.-]+)?#\d+/i;
-
-// Hook stderr is discarded, so errors go to a log file instead
-function writeLog(message: string) {
-  const timestamp = new Date().toISOString();
-  try {
-    mkdirSync(LOG_DIR, { recursive: true });
-    appendFileSync(LOG_FILE, `${timestamp} ${message}\n`);
-  } catch {
-    // Nothing else can surface the failure
-  }
-}
-
-// Only the fields this script actually reads from the hook payload
-// See the full input schema https://code.claude.com/docs/ja/hooks#pretooluse-input
-interface PreToolUseData {
-  hook_event_name: "PreToolUse";
-  tool_name: string;
-  tool_input: { command: string };
-  cwd: string;
-}
-
-export function isValidPreToolUseData(input: unknown): input is PreToolUseData {
-  if (typeof input !== "object" || input === null || Array.isArray(input)) {
-    return false;
-  }
-  const obj = input as Record<string, unknown>;
-  if (obj.hook_event_name !== "PreToolUse" || obj.tool_name !== "Bash") {
-    return false;
-  }
-  if (typeof obj.cwd !== "string") return false;
-  const toolInput = obj.tool_input;
-  return (
-    typeof toolInput === "object" &&
-    toolInput !== null &&
-    typeof (toolInput as Record<string, unknown>).command === "string"
-  );
-}
 
 export function findClosingReference(text: string): string | null {
   return text.match(CLOSING_REFERENCE)?.[0] ?? null;
@@ -177,56 +137,13 @@ export function findClosingCommand(
   return null;
 }
 
-async function main() {
-  let input: string;
-  try {
-    input = await Bun.stdin.text();
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] failed to read stdin: ${msg}`);
-    process.exit(1);
-  }
-
-  let data: unknown;
-  try {
-    data = JSON.parse(input);
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] failed to parse JSON: ${msg}`);
-    process.exit(1);
-  }
-
-  if (!isValidPreToolUseData(data)) {
-    writeLog("[error] unexpected hook input");
-    process.exit(1);
-  }
-
-  // Cheap pre-filter: this hook runs on every Bash call
-  const { command } = data.tool_input;
-  if (!/\b(?:commit|pr)\b/.test(command)) {
-    process.exit(0);
-  }
-
-  const reason = findClosingCommand(command, data.cwd);
-  if (!reason) {
-    process.exit(0);
-  }
-
-  writeLog(`[deny] ${command}`);
-  const output = {
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "deny",
-      permissionDecisionReason: reason,
-    },
-  };
-  process.stdout.write(JSON.stringify(output));
-}
-
 if (import.meta.main) {
-  main().catch((error) => {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] unexpected error: ${msg}`);
-    process.exit(1);
-  });
+  await runGuard(
+    "block-issue-close-keywords",
+    isValidBashData,
+    ({ tool_input: { command }, cwd }) =>
+      // Cheap pre-filter: this hook runs on every Bash call
+      /\b(?:commit|pr)\b/.test(command) ? findClosingCommand(command, cwd) : null,
+    (data) => data.tool_input.command,
+  );
 }

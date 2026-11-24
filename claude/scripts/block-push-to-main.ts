@@ -6,52 +6,10 @@
 // `git push -u origin HEAD`) while main/master is checked out.
 
 import { execFileSync } from "node:child_process";
-import { mkdirSync, appendFileSync } from "node:fs";
-import { homedir, userInfo } from "node:os";
+import { isValidBashData, runGuard } from "./lib/hook";
 import { parseGit, resolveCommands } from "./lib/shell";
 
-const LOG_DIR = `${homedir()}/.claude/logs`;
-const LOG_FILE = `${LOG_DIR}/${userInfo().username}-hook-block-push-to-main.log`;
-
 const PROTECTED_BRANCHES = ["main", "master"];
-
-// Hook stderr is discarded, so errors go to a log file instead. The exit status
-// tells pre-tool-use-proxy.sh that this guard couldn't evaluate the tool call.
-function writeLog(message: string) {
-  const timestamp = new Date().toISOString();
-  try {
-    mkdirSync(LOG_DIR, { recursive: true });
-    appendFileSync(LOG_FILE, `${timestamp} ${message}\n`);
-  } catch {
-    // Nothing else can surface the failure
-  }
-}
-
-// Only the fields this script actually reads from the hook payload
-// See the full input schema https://code.claude.com/docs/ja/hooks#pretooluse-input
-interface PreToolUseData {
-  hook_event_name: "PreToolUse";
-  tool_name: string;
-  tool_input: { command: string };
-  cwd: string;
-}
-
-export function isValidPreToolUseData(input: unknown): input is PreToolUseData {
-  if (typeof input !== "object" || input === null || Array.isArray(input)) {
-    return false;
-  }
-  const obj = input as Record<string, unknown>;
-  if (obj.hook_event_name !== "PreToolUse" || obj.tool_name !== "Bash") {
-    return false;
-  }
-  if (typeof obj.cwd !== "string") return false;
-  const toolInput = obj.tool_input;
-  return (
-    typeof toolInput === "object" &&
-    toolInput !== null &&
-    typeof (toolInput as Record<string, unknown>).command === "string"
-  );
-}
 
 const PUSH_OPTIONS_WITH_VALUE = new Set([
   "--repo",
@@ -144,55 +102,13 @@ function currentBranchOf(dir: string): string {
   }
 }
 
-async function main() {
-  let input: string;
-  try {
-    input = await Bun.stdin.text();
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] failed to read stdin: ${msg}`);
-    process.exit(1);
-  }
-
-  let data: unknown;
-  try {
-    data = JSON.parse(input);
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] failed to parse JSON: ${msg}`);
-    process.exit(1);
-  }
-
-  if (!isValidPreToolUseData(data)) {
-    writeLog("[error] unexpected hook input");
-    process.exit(1);
-  }
-
-  // Cheap pre-filter: this hook runs on every Bash call
-  if (!/\bgit\b/.test(data.tool_input.command) || !/\bpush\b/.test(data.tool_input.command)) {
-    process.exit(0);
-  }
-
-  const reason = findProtectedPush(data.tool_input.command, data.cwd, currentBranchOf);
-  if (!reason) {
-    process.exit(0);
-  }
-
-  writeLog(`[deny] ${data.tool_input.command}`);
-  const output = {
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "deny",
-      permissionDecisionReason: reason,
-    },
-  };
-  process.stdout.write(JSON.stringify(output));
-}
-
 if (import.meta.main) {
-  main().catch((error) => {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] unexpected error: ${msg}`);
-    process.exit(1);
-  });
+  await runGuard(
+    "block-push-to-main",
+    isValidBashData,
+    ({ tool_input: { command }, cwd }) =>
+      // Cheap pre-filter: this hook runs on every Bash call
+      /\bgit\b/.test(command) && /\bpush\b/.test(command) ? findProtectedPush(command, cwd, currentBranchOf) : null,
+    (data) => data.tool_input.command,
+  );
 }
