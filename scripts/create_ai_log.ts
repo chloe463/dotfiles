@@ -27,11 +27,17 @@ if (!existsSync(logDirPath)) {
   mkdirSync(logDirPath, { recursive: true });
 }
 
-console.log(
-  `Creating log file: ${join(logDirPath, `${date}_${title.replace(/ /g, "_")}.md`)}`,
-);
+const logFilePath = join(logDirPath, `${date}_${title.replace(/ /g, "_")}.md`);
+console.log(`Creating log file: ${logFilePath}`);
 
-writeFileSync(join(logDirPath, `${date}_${title.replace(/ /g, "_")}.md`), "");
+// "wx" fails instead of truncating, so an existing log is never wiped.
+try {
+  writeFileSync(logFilePath, "", { flag: "wx" });
+} catch (error) {
+  if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+  console.error(`Error: ${logFilePath} already exists.`);
+  process.exit(1);
+}
 
 console.log("Log file created successfully.");
 process.exit(0);

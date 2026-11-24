@@ -77,7 +77,7 @@ describe("parseMessageCommand", () => {
   });
   it("ignores other commands", () => {
     expect(parseMessageCommand(["git", "log", "-m"], "/r")).toBeNull();
-    expect(parseMessageCommand(["gh", "pr", "edit", "-b", "Fixes #1"], "/r")).toBeNull();
+    expect(parseMessageCommand(["gh", "pr", "view", "-b", "Fixes #1"], "/r")).toBeNull();
     expect(parseMessageCommand(["echo", "git", "commit"], "/r")).toBeNull();
   });
 });
@@ -92,6 +92,8 @@ describe("findClosingCommand", () => {
     "git commit -F - <<'EOF'\nfeat: x\n\nCloses #6\nEOF",
     "cat <<EOF | git commit -F -\nfixes #7\nEOF",
     "gh pr create --title t --body-file - <<< 'Fixes #8'",
+    'gh pr edit 5 --body "Fixes #10"',
+    "gh pr edit -F - <<< 'Closes #11'",
     'git add . && git commit -m "Fixes #9" && git push',
   ])("denies %p", (command) => {
     expect(findClosingCommand(command, "/r", noFiles)).not.toBeNull();
