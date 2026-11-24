@@ -74,10 +74,13 @@ rules:
   - ask: 'git [-C *] push * :*'
     tests:
       - ask: 'git push origin :feature'
-  - ask: 'git [-C *] push --mirror|--prune *'
+  # --all/--branches push every local branch, main/master included.
+  - ask: 'git [-C *] push --mirror|--prune|--all|--branches *'
     tests:
       - ask: 'git push --mirror origin'
       - ask: 'git push --prune origin'
+      - ask: 'git push --all origin'
+      - ask: 'git push origin --branches'
 
   # ── Everyday operations ──
   - allow: 'git [-C *] add *'
