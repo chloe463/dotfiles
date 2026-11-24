@@ -129,7 +129,7 @@ export function parseMessageCommand(words: string[], cwd: string): MessageComman
   while (words[i] === "-R" || words[i] === "--repo" || words[i]?.startsWith("--repo=")) {
     i += words[i].startsWith("--repo=") ? 1 : 2;
   }
-  if (words[i] !== "pr" || (words[i + 1] !== "create" && words[i + 1] !== "new")) return null;
+  if (words[i] !== "pr" || !["create", "new", "edit"].includes(words[i + 1])) return null;
   return { label: "pull request body", dir: cwd, sources: messageSources(words.slice(i + 2), GH_PR_CREATE_FLAGS) };
 }
 
