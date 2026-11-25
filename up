@@ -3,24 +3,10 @@
 set -eux
 set -o pipefail
 
-# emulate GNU readlink's "readlink -f" behavior on Mac
-# http://stackoverflow.com/questions/1055671/how-can-i-get-the-behavior-of-gnus-readlink-f-on-a-mac
-TARGET_FILE=$0
-
-cd `dirname $TARGET_FILE`
-TARGET_FILE=`basename $TARGET_FILE`
-
-# Iterate down a (possible) chain of symlinks
-while [ -L "$TARGET_FILE" ]
-do
-    TARGET_FILE=`readlink $TARGET_FILE`
-    cd `dirname $TARGET_FILE`
-    TARGET_FILE=`basename $TARGET_FILE`
-done
-
-# Compute the canonicalized name by finding the physical path 
-# for the directory we're in and appending the target file.
-BASE_DIR=`pwd -P`
+# cd to the real location of this script (`:A` resolves symlinks), since
+# stow reads .stowrc and the package directories from the current directory.
+cd "${0:A:h}"
+BASE_DIR=$PWD
 
 function install_sheldon_plugins()
 {
@@ -90,9 +76,7 @@ function run_stow()
         # subdirectory safe. New files in them need another `./up dot`.
         stow -R -vvv --no-folding -t "$HOME/.claude" claude
 
-        if [ ! -d $HOME/scripts ]; then
-            mkdir $HOME/scripts
-        fi
+        mkdir -p "$HOME/scripts"
         stow -R -vvv --no-folding -t "$HOME/scripts" scripts
 
         mkdir -p "$HOME/.local/bin"
