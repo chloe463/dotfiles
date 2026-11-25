@@ -6,27 +6,12 @@
 // and files outside any repository are left alone.
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, appendFileSync, realpathSync } from "node:fs";
-import { homedir, userInfo } from "node:os";
+import { existsSync, realpathSync } from "node:fs";
 import { dirname, join, basename } from "node:path";
-
-const LOG_DIR = `${homedir()}/.claude/logs`;
-const LOG_FILE = `${LOG_DIR}/${userInfo().username}-hook-block-edit-on-main.log`;
+import { runGuard } from "./lib/hook";
 
 const PROTECTED_BRANCHES = ["main", "master"];
 const EDIT_TOOLS = ["Edit", "Write", "MultiEdit", "NotebookEdit"];
-
-// Hook stderr is discarded, so errors go to a log file instead. The exit status
-// tells pre-tool-use-proxy.sh that this guard couldn't evaluate the tool call.
-function writeLog(message: string) {
-  const timestamp = new Date().toISOString();
-  try {
-    mkdirSync(LOG_DIR, { recursive: true });
-    appendFileSync(LOG_FILE, `${timestamp} ${message}\n`);
-  } catch {
-    // Nothing else can surface the failure
-  }
-}
 
 // Only the fields this script actually reads from the hook payload
 // See the full input schema https://code.claude.com/docs/ja/hooks#pretooluse-input
@@ -104,55 +89,14 @@ const gitLookup: GitLookup = {
   },
 };
 
-async function main() {
-  let input: string;
-  try {
-    input = await Bun.stdin.text();
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] failed to read stdin: ${msg}`);
-    process.exit(1);
-  }
-
-  let data: unknown;
-  try {
-    data = JSON.parse(input);
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] failed to parse JSON: ${msg}`);
-    process.exit(1);
-  }
-
-  if (!isValidPreToolUseData(data)) {
-    writeLog("[error] unexpected hook input");
-    process.exit(1);
-  }
-
-  const path = targetPath(data);
-  if (!path) {
-    process.exit(0);
-  }
-
-  const reason = findProtectedEdit(resolveTarget(path), gitLookup);
-  if (!reason) {
-    process.exit(0);
-  }
-
-  writeLog(`[deny] ${data.tool_name} ${path}`);
-  const output = {
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "deny",
-      permissionDecisionReason: reason,
-    },
-  };
-  process.stdout.write(JSON.stringify(output));
-}
-
 if (import.meta.main) {
-  main().catch((error) => {
-    const msg = error instanceof Error ? error.message : String(error);
-    writeLog(`[error] unexpected error: ${msg}`);
-    process.exit(1);
-  });
+  await runGuard(
+    "block-edit-on-main",
+    isValidPreToolUseData,
+    (data) => {
+      const path = targetPath(data);
+      return path ? findProtectedEdit(resolveTarget(path), gitLookup) : null;
+    },
+    (data) => `${data.tool_name} ${targetPath(data)}`,
+  );
 }

@@ -5,10 +5,10 @@ import { tmpdir, userInfo } from "node:os";
 import { join } from "node:path";
 import {
   findProtectedPush,
-  isValidPreToolUseData,
   parseGitPush,
   pushDestinations,
 } from "./block-push-to-main";
+import { isValidBashData as isValidPreToolUseData } from "./lib/hook";
 
 const onBranch = (branch: string) => () => branch;
 
