@@ -121,8 +121,9 @@ try {
   const output = await $`git branch --merged`.text();
   mergedBranches = output
     .split('\n')
-    .filter(b => !b.includes('*'))
-    .map(b => b.replace(/^[+* ]+/, '').trim())
+    // `*` is the current branch, `+` one checked out in another worktree
+    .filter(b => !/^[*+]/.test(b))
+    .map(b => b.trim())
     .filter(b => b && b !== 'main' && b !== 'master');
 } catch (error) {
   process.stderr.write(`git-sync: 'git branch --merged' failed: ${stderrOf(error)}\n`);
